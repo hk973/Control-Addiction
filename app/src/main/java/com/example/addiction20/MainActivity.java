@@ -4,20 +4,25 @@ import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CODE_OVERLAY_PERMISSION = 100;
+    private static final int REQUEST_CODE_NOTIFICATION_PERMISSION = 100;
     private static final int REQUEST_CODE_USAGE_PERMISSION = 101;
 
-    private Button overlayPermissionButton;
+    private Button notificationPermissionButton;
     private Button usagePermissionButton;
     private Button setLauncherButton;
     private View dot1, dot2, dot3;
@@ -27,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        overlayPermissionButton = findViewById(R.id.overlayPermissionButton);
+        notificationPermissionButton = findViewById(R.id.notificationPermissionButton);
         usagePermissionButton = findViewById(R.id.usagePermissionButton);
         setLauncherButton = findViewById(R.id.setLauncherButton);
 
@@ -37,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
         dot3 = findViewById(R.id.dot3);
 
         // Initial dot setup based on granted permissions
-        if (isOverlayPermissionGranted()) {
-            overlayPermissionButton.setVisibility(View.GONE);
+        if (isNotificationPermissionGranted()) {
+            notificationPermissionButton.setVisibility(View.GONE);
             usagePermissionButton.setVisibility(View.VISIBLE);
             setDotIndicator(2); // Move dot to second position
         } else {
@@ -51,10 +56,10 @@ public class MainActivity extends AppCompatActivity {
             setDotIndicator(3); // Move dot to third position
         }
 
-        overlayPermissionButton.setOnClickListener(new View.OnClickListener() {
+        notificationPermissionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                requestOverlayPermission();
+                requestNotificationPermission();
             }
         });
 
@@ -79,19 +84,24 @@ public class MainActivity extends AppCompatActivity {
         dot3.setBackgroundResource(step == 3 ? R.drawable.dot_selected : R.drawable.dot_unselected);
     }
 
-    private void requestOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, REQUEST_CODE_OVERLAY_PERMISSION);
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13 and above
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // Request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+                        REQUEST_CODE_NOTIFICATION_PERMISSION);
             } else {
+                // Permission already granted
                 usagePermissionButton.setVisibility(View.VISIBLE);
-                overlayPermissionButton.setVisibility(View.GONE);
+                notificationPermissionButton.setVisibility(View.GONE);
                 setDotIndicator(2);
             }
         } else {
+            // For older versions, skip the notification permission
             usagePermissionButton.setVisibility(View.VISIBLE);
-            overlayPermissionButton.setVisibility(View.GONE);
+            notificationPermissionButton.setVisibility(View.GONE);
             setDotIndicator(2);
         }
     }
@@ -113,8 +123,9 @@ public class MainActivity extends AppCompatActivity {
         finishAffinity();
     }
 
-    private boolean isOverlayPermissionGranted() {
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this);
+    private boolean isNotificationPermissionGranted() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean isUsagePermissionGranted() {
@@ -130,10 +141,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case REQUEST_CODE_OVERLAY_PERMISSION:
-                if (isOverlayPermissionGranted()) {
+            case REQUEST_CODE_NOTIFICATION_PERMISSION:
+                if (isNotificationPermissionGranted()) {
                     usagePermissionButton.setVisibility(View.VISIBLE);
-                    overlayPermissionButton.setVisibility(View.GONE);
+                    notificationPermissionButton.setVisibility(View.GONE);
                     setDotIndicator(2);
                 }
                 break;
@@ -147,5 +158,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_NOTIFICATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                usagePermissionButton.setVisibility(View.VISIBLE);
+                notificationPermissionButton.setVisibility(View.GONE);
+                setDotIndicator(2);
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

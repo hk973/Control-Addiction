@@ -1,66 +1,48 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    android:padding="16dp">
+    android:gravity="center">
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <View
+        android:id="@+id/dot1"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/dot_unselected" />
 
-    <!-- Button for Display Over Other Apps Permission -->
+    <View
+        android:id="@+id/dot2"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/dot_unselected" />
+
+    <View
+        android:id="@+id/dot3"
+        android:layout_width="10dp"
+        android:layout_height="10dp"
+        android:background="@drawable/dot_unselected" />
+</LinearLayout>
     <Button
-        android:id="@+id/overlayPermissionButton"
+        android:id="@+id/notificationPermissionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Request Overlay Permission" />
+        android:text="Request Notification Permission" />
 
-    <!-- Button for Usage Access Permission -->
     <Button
         android:id="@+id/usagePermissionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Request Usage Access Permission"
-        android:visibility="gone" /> <!-- Initially hidden -->
+        android:text="Request Usage Permission"
+        android:visibility="gone" />
 
-    <!-- Button to Set as Home Launcher -->
     <Button
         android:id="@+id/setLauncherButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set as Home Launcher"
-        android:visibility="gone" /> <!-- Initially hidden -->
-
-    <!-- Dot Indicators for Permission Steps -->
-    <LinearLayout
-        android:id="@+id/dotIndicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp">
-
-        <!-- Dot 1 -->
-        <View
-            android:id="@+id/dot1"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="@drawable/dot_unselected"
-            android:layout_margin="5dp" />
-
-        <!-- Dot 2 -->
-        <View
-            android:id="@+id/dot2"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="@drawable/dot_unselected"
-            android:layout_margin="5dp" />
-
-        <!-- Dot 3 -->
-        <View
-            android:id="@+id/dot3"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:background="@drawable/dot_unselected"
-            android:layout_margin="5dp" />
-    </LinearLayout>
+        android:text="Set Home Launcher Permission"
+        android:visibility="gone" />
 
 </LinearLayout>
