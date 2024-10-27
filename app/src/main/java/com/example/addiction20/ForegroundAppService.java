@@ -137,6 +137,8 @@ public class ForegroundAppService extends Service {
                     "Foreground Service Channel",
                     NotificationManager.IMPORTANCE_DEFAULT
             );
+            serviceChannel.setSound(null, null);  // Explicitly set sound to null to mute
+            serviceChannel.setDescription("This channel is used by the ForegroundAppService");
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
@@ -152,6 +154,7 @@ public class ForegroundAppService extends Service {
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(notification.contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setSilent(true)
                 .build();
 
         startForeground(1, updatedNotification); // Update the existing notification

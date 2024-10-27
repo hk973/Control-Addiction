@@ -2,8 +2,6 @@ package com.example.addiction20;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,13 +16,27 @@ public class PopupActivity extends AppCompatActivity {
         builder.setTitle("App Usage Alert")
                 .setMessage("You cannot use this app as it is not in the approved list.")
                 .setCancelable(false) // Prevent dismissal by tapping outside
-                .setPositiveButton("OK", (dialog, which) -> {
-                    dialog.dismiss();
-                    // Optionally, close this activity when the user acknowledges
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Action for "Yes" button: go to homepage
+                    Intent intent = new Intent(PopupActivity.this, MainActivity2.class);
+                    startActivity(intent);
                     finish();
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    // Action for "No" button: run custom() function
+                    custom();
+                    dialog.dismiss();
                 });
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    // Define the custom function
+    private void custom() {
+        // Add your custom code here
+        Intent intent = new Intent(PopupActivity.this, addactivity.class);
+        startActivity(intent);
+
     }
 }
