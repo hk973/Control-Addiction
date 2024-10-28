@@ -150,7 +150,7 @@ public class ForegroundAppService extends Service {
         Notification updatedNotification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Monitoring Apps")
                 .setContentText("Monitoring selected apps. Time remaining: " + timeLimit + " seconds")
-                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setSmallIcon(R.drawable.app)
                 .setContentIntent(notification.contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setSilent(true)
