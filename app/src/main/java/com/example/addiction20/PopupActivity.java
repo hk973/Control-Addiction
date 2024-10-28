@@ -16,17 +16,13 @@ public class PopupActivity extends AppCompatActivity {
         builder.setTitle("App Usage Alert")
                 .setMessage("You cannot use this app as it is not in the approved list.")
                 .setCancelable(false) // Prevent dismissal by tapping outside
-                .setPositiveButton("Yes", (dialog, which) -> {
+                .setPositiveButton("ok", (dialog, which) -> {
                     // Action for "Yes" button: go to homepage
                     Intent intent = new Intent(PopupActivity.this, MainActivity2.class);
                     startActivity(intent);
                     finish();
-                })
-                .setNegativeButton("No", (dialog, which) -> {
-                    // Action for "No" button: run custom() function
-                    custom();
-                    dialog.dismiss();
                 });
+
 
         AlertDialog dialog = builder.create();
         dialog.show();

@@ -1,11 +1,15 @@
 package com.example.addiction20;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,20 +42,43 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         AppItem_Dataclass appItem = appList.get(position);
         holder.textView.setText(appItem.getName());
 
-        // Change background color based on selection
-        holder.itemView.setBackgroundColor(selectedApps.contains(appItem.getPackageName())
-                ? 0xFFADD8E6 : 0xFFFFFFFF); // Light blue for selected, white for others
+        int selectedColor = holder.itemView.getContext().getResources().getColor(R.color.background_selected);
+        int unselectedColor = holder.itemView.getContext().getResources().getColor(
+                isDarkMode(holder.itemView.getContext()) ? R.color.background_unselected_dark : R.color.background_unselected_light
+        );
 
+        // Change background color based on selection
+        holder.itemView.setBackgroundColor(selectedApps.contains(appItem.getPackageName()) ? selectedColor : unselectedColor);
+
+        // OnClickListener for selecting/deselecting the app
         holder.itemView.setOnClickListener(v -> {
             if (selectedApps.contains(appItem.getPackageName())) {
                 selectedApps.remove(appItem.getPackageName());
-                holder.itemView.setBackgroundColor(0xFFFFFFFF); // White
+                holder.itemView.setBackgroundColor(unselectedColor);
             } else {
                 selectedApps.add(appItem.getPackageName());
-                holder.itemView.setBackgroundColor(0xFFADD8E6); // Light blue
+                holder.itemView.setBackgroundColor(selectedColor);
             }
         });
+
+        // OnLongClickListener to open the app
+        holder.itemView.setOnLongClickListener(v -> {
+            Context context = holder.itemView.getContext();
+            Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(appItem.getPackageName());
+            if (launchIntent != null) {
+                context.startActivity(launchIntent);
+            } else {
+                Toast.makeText(context, "Unable to open app", Toast.LENGTH_SHORT).show();
+            }
+            return true; // Indicate that the long-click event is handled
+        });
     }
+
+    private boolean isDarkMode(Context context) {
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
 
     @Override
     public int getItemCount() {

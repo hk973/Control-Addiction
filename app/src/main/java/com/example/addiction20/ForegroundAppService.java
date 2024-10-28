@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.os.IBinder;
@@ -51,7 +50,7 @@ public class ForegroundAppService extends Service {
 
         // Initialize the list of allowed apps
         allowedApps = new ArrayList<>();
-        allowedApps.add("com.android.settings"); // Add Settings app
+//        allowedApps.add("com.android.settings"); // Add Settings app
         allowedApps.add("com.android.systemui"); // Add System UI app
         allowedApps.add("android"); // Add Android system apps
         // Add any other system apps you want to allow
@@ -175,6 +174,7 @@ public class ForegroundAppService extends Service {
                 }
                 if (!sortedMap.isEmpty()) {
                     String packageName = sortedMap.get(sortedMap.lastKey()).getPackageName();
+                    Log.e("test300",packageName);
                     return packageName; // Return the package name of the foreground app
                 }
             }
@@ -185,6 +185,7 @@ public class ForegroundAppService extends Service {
                 List<ActivityManager.RunningAppProcessInfo> runningProcesses = activityManager.getRunningAppProcesses();
                 for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
                     if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        Log.e("test300",processInfo.processName);
                         return processInfo.processName;
                     }
                 }
@@ -217,7 +218,11 @@ public class ForegroundAppService extends Service {
                 boolean isAllowed = allowedApps.contains(foregroundApp);
                 boolean isSelected = selectedApps.contains(foregroundApp);
                 boolean isApp = isValidApplication(foregroundApp); // Check if it is a valid app
-
+                Log.e("test300",isAllowed+" "+isSelected+" "+isApp);
+                String package_i_want_tobe_app="com.android.settings";
+                if(foregroundApp.equals(package_i_want_tobe_app)){
+                    isApp=true;
+                }
                 // If the app is neither in the selected apps nor in the allowed apps, show the popup
                 if (!isAllowed && !isSelected && isApp) {
                     // Get the app name from the package name

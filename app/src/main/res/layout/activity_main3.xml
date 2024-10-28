@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:hint="Search apps"
         android:padding="8dp"
-        android:background="@android:drawable/edit_text"
         android:drawableLeft="@android:drawable/ic_menu_search"
         android:inputType="text" />
 

@@ -3,12 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
     <!-- Permissions for Overlay and Usage Access -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+<!-- critical permissions-->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -53,8 +55,9 @@
 
         <service
             android:name=".ForegroundAppService"
-            android:foregroundServiceType="location"
-            tools:ignore="ForegroundServicePermission" />
+            android:foregroundServiceType="dataSync"
+         />
+
     </application>
 
 </manifest>

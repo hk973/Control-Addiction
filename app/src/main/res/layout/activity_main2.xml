@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:hint="Search Apps"
         android:padding="10dp"
-        android:background="@android:drawable/editbox_background" />
+       />
 
     <!-- RecyclerView for displaying apps -->
     <androidx.recyclerview.widget.RecyclerView
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:hint="enter number of second"
+            android:hint="Enter number of second"
             android:inputType="number"/>
         <Button
             android:id="@+id/buttonProceed"
