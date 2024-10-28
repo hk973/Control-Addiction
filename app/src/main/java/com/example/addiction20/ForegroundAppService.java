@@ -149,7 +149,7 @@ public class ForegroundAppService extends Service {
     private void updateNotification(Notification notification) {
         Notification updatedNotification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Monitoring Apps")
-                .setContentText("Monitoring selected apps. Time remaining: " + timeLimit + " seconds")
+                .setContentText("Monitoring selected apps. Time remaining: " + formatTime(timeLimit))
                 .setSmallIcon(R.drawable.app)
                 .setContentIntent(notification.contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -256,6 +256,13 @@ public class ForegroundAppService extends Service {
         } catch (NameNotFoundException e) {
             return false; // Not a valid application
         }
+    }
+    public  String formatTime(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 }
 

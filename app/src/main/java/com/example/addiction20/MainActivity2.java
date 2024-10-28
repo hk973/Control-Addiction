@@ -47,7 +47,7 @@ public class MainActivity2 extends AppCompatActivity {
 
             if (isValidInput(timeInput)) {
                 SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(this);
-                sharedPrefHelper.writeData(selectedApps, Integer.parseInt(timeInput), true);
+                sharedPrefHelper.writeData(selectedApps, Integer.parseInt(timeInput)*60, true);
 
                 // Start MainActivity3
                 Intent intent = new Intent(MainActivity2.this, MainActivity3.class);
@@ -57,6 +57,7 @@ public class MainActivity2 extends AppCompatActivity {
                 Toast.makeText(this, "Please enter a valid time and select at least one app", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         // Search functionality
         searchBar.addTextChangedListener(new TextWatcher() {
@@ -99,6 +100,7 @@ public class MainActivity2 extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(appAdapter);
     }
+
 
 
 
