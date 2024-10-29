@@ -1,4 +1,4 @@
-package com.example.addiction20;
+package com.genzopia.addiction;
 
 import android.content.Context;
 
