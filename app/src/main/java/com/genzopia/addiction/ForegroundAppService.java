@@ -218,11 +218,15 @@ public class ForegroundAppService extends Service {
                 boolean isAllowed = allowedApps.contains(foregroundApp);
                 boolean isSelected = selectedApps.contains(foregroundApp);
                 boolean isApp = isValidApplication(foregroundApp); // Check if it is a valid app
-                Log.e("test300",isAllowed+" "+isSelected+" "+isApp);
                 String package_i_want_tobe_app="com.android.settings";
-                if(foregroundApp.equals(package_i_want_tobe_app)){
+                String i_want="com.android.vending";
+                String youtube="com.google.android.youtube";
+                String chrome="com.android.chrome";
+                if(foregroundApp.equals(package_i_want_tobe_app)||foregroundApp.equals(i_want)||foregroundApp.equals(youtube)||foregroundApp.equals(chrome)){
                     isApp=true;
                 }
+                Log.e("test300",isAllowed+" "+isSelected+" "+isApp);
+
                 // If the app is neither in the selected apps nor in the allowed apps, show the popup
                 if (!isAllowed && !isSelected && isApp) {
                     // Get the app name from the package name
