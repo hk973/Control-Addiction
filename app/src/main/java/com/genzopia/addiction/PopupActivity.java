@@ -27,12 +27,4 @@ public class PopupActivity extends AppCompatActivity {
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
-    // Define the custom function
-    private void custom() {
-        // Add your custom code here
-        Intent intent = new Intent(PopupActivity.this, addactivity.class);
-        startActivity(intent);
-
-    }
 }
