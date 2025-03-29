@@ -19,14 +19,33 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/titleTextView"
+            <!-- Inside the LinearLayout in AppBarLayout -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Select Apps"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/black"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp">
+
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Select Apps"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
+
+                <ImageView
+                    android:id="@+id/settingsButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_settings"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"

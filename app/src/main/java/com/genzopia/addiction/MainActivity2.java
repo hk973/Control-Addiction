@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -59,6 +60,13 @@ public class MainActivity2 extends AppCompatActivity {
 
         WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(window, window.getDecorView());
         windowInsetsController.setAppearanceLightStatusBars(!isSystemDarkMode);
+
+        // Add this in onCreate() after initializing views
+        ImageView settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(v -> {
+            Intent settingsIntent = new Intent(MainActivity2.this, SettingsActivity.class);
+            startActivity(settingsIntent);
+        });
 
         // Initialize views first
         AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
@@ -111,6 +119,8 @@ public class MainActivity2 extends AppCompatActivity {
         NumberPicker daysPicker = dialogView.findViewById(R.id.daysPicker);
         NumberPicker hoursPicker = dialogView.findViewById(R.id.hoursPicker);
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
+        Button buttonSet = dialogView.findViewById(R.id.buttonSet);
+        Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
 
         // Setup NumberPickers
         daysPicker.setMinValue(0);
@@ -125,23 +135,26 @@ public class MainActivity2 extends AppCompatActivity {
         minutesPicker.setMaxValue(59);
         minutesPicker.setValue(selectedMinutes);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, com.google.android.material.R.style.ThemeOverlay_Material3_Dialog_Alert);
-        AlertDialog dialog = builder.setView(dialogView)
-                .setPositiveButton("Set", (d, which) -> {
-                    selectedDays = daysPicker.getValue();
-                    selectedHours = hoursPicker.getValue();
-                    selectedMinutes = minutesPicker.getValue();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dialog = builder.setView(dialogView).create();
 
-                    if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
-                        Toast.makeText(this, "Please set a time limit", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        // Set button click listeners
+        buttonSet.setOnClickListener(v -> {
+            selectedDays = daysPicker.getValue();
+            selectedHours = hoursPicker.getValue();
+            selectedMinutes = minutesPicker.getValue();
 
-                    isTimeSet = true;
-                    updateTimeDisplay();
-                })
-                .setNegativeButton("Cancel", null)
-                .create();
+            if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
+                Toast.makeText(this, "Please set a time limit", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            isTimeSet = true;
+            updateTimeDisplay();
+            dialog.dismiss();
+        });
+
+        buttonCancel.setOnClickListener(v -> dialog.dismiss());
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -203,7 +216,7 @@ public class MainActivity2 extends AppCompatActivity {
             }
         }
 
-        appAdapter = new AppAdapter(appItems, selectedApps);
+        appAdapter = new AppAdapter(appItems, selectedApps, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(appAdapter);
     }
@@ -233,6 +246,7 @@ public class MainActivity2 extends AppCompatActivity {
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }
