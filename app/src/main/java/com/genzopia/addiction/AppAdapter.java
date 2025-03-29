@@ -21,13 +21,15 @@ import java.util.List;
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> implements Filterable {
 
     private List<AppItem_Dataclass> appList;
-    private List<AppItem_Dataclass> appListFull; // For storing the full list of apps for filtering
+    private List<AppItem_Dataclass> appListFull;
     private ArrayList<String> selectedApps;
+    private SharedPrefHelper sharedPrefHelper;
 
-    public AppAdapter(List<AppItem_Dataclass> appList, ArrayList<String> selectedApps) {
+    public AppAdapter(List<AppItem_Dataclass> appList, ArrayList<String> selectedApps, Context context) {
         this.appList = appList;
-        this.appListFull = new ArrayList<>(appList); // Copy of full list for filtering
+        this.appListFull = new ArrayList<>(appList);
         this.selectedApps = selectedApps;
+        this.sharedPrefHelper = new SharedPrefHelper(context);
     }
 
     @NonNull
@@ -48,31 +50,50 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
                 isDarkMode(holder.itemView.getContext()) ? R.color.background_unselected_dark : R.color.background_unselected_light
         );
 
-        // Change background color based on selection
         holder.itemView.setBackgroundColor(selectedApps.contains(appItem.getPackageName()) ? selectedColor : unselectedColor);
 
-        // OnClickListener for selecting/deselecting the app
-        holder.itemView.setOnClickListener(v -> {
-            if (selectedApps.contains(appItem.getPackageName())) {
-                selectedApps.remove(appItem.getPackageName());
-                holder.itemView.setBackgroundColor(unselectedColor);
-            } else {
-                selectedApps.add(appItem.getPackageName());
-                holder.itemView.setBackgroundColor(selectedColor);
-            }
-        });
+        // Clear previous listeners
+        holder.itemView.setOnClickListener(null);
+        holder.itemView.setOnLongClickListener(null);
 
-        // OnLongClickListener to open the app
-        holder.itemView.setOnLongClickListener(v -> {
-            Context context = holder.itemView.getContext();
-            Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(appItem.getPackageName());
-            if (launchIntent != null) {
-                context.startActivity(launchIntent);
-            } else {
-                Toast.makeText(context, "Unable to open app", Toast.LENGTH_SHORT).show();
-            }
-            return true; // Indicate that the long-click event is handled
-        });
+        boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
+
+        if (isClickToOpen) {
+            // Click to open app
+            holder.itemView.setOnClickListener(v -> launchApp(holder.itemView.getContext(), appItem.getPackageName()));
+            // Long press to select
+            holder.itemView.setOnLongClickListener(v -> {
+                toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor);
+                return true;
+            });
+        } else {
+            // Click to select
+            holder.itemView.setOnClickListener(v -> toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor));
+            // Long press to open app
+            holder.itemView.setOnLongClickListener(v -> {
+                launchApp(holder.itemView.getContext(), appItem.getPackageName());
+                return true;
+            });
+        }
+    }
+
+    private void toggleSelection(View itemView, String packageName, int selectedColor, int unselectedColor) {
+        if (selectedApps.contains(packageName)) {
+            selectedApps.remove(packageName);
+            itemView.setBackgroundColor(unselectedColor);
+        } else {
+            selectedApps.add(packageName);
+            itemView.setBackgroundColor(selectedColor);
+        }
+    }
+
+    private void launchApp(Context context, String packageName) {
+        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+        if (launchIntent != null) {
+            context.startActivity(launchIntent);
+        } else {
+            Toast.makeText(context, "Unable to open app", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private boolean isDarkMode(Context context) {

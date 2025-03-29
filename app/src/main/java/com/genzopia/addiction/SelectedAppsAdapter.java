@@ -13,35 +13,52 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class SelectedAppsAdapter extends RecyclerView.Adapter<SelectedAppsAdapter.ViewHolder> {
-
-    private final Context context; // Context to launch apps
-    private ArrayList<String> selectedAppNames; // Current list of app names to display
-    private ArrayList<String> selectedAppPackages; // Current list of package names to display (filtered)
-    private final ArrayList<String> fullAppNames; // Full list of all app names (for filtering)
-    private final ArrayList<String> fullAppPackages; // Full list of all package names (for filtering)
+    private final Context context;
+    private ArrayList<String> selectedAppNames;
+    private ArrayList<String> selectedAppPackages;
+    private final ArrayList<String> fullAppNames;
+    private final ArrayList<String> fullAppPackages;
+    private final SharedPrefHelper sharedPrefHelper;
 
     public SelectedAppsAdapter(Context context, ArrayList<String> selectedAppNames, ArrayList<String> selectedAppPackages) {
         this.context = context;
         this.selectedAppNames = new ArrayList<>(selectedAppNames);
-        this.fullAppNames = new ArrayList<>(selectedAppNames); // Keep a full copy for filtering
+        this.fullAppNames = new ArrayList<>(selectedAppNames);
         this.selectedAppPackages = new ArrayList<>(selectedAppPackages);
-        this.fullAppPackages = new ArrayList<>(selectedAppPackages); // Keep a full copy of package names
+        this.fullAppPackages = new ArrayList<>(selectedAppPackages);
+        this.sharedPrefHelper = new SharedPrefHelper(context);
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_selected_app, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(android.R.layout.simple_list_item_1, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String appName = selectedAppNames.get(position);
+        String packageName = selectedAppPackages.get(position);
         holder.appNameTextView.setText(appName);
 
-        // Set click listener to launch the app
-        holder.itemView.setOnClickListener(v -> launchApp(selectedAppPackages.get(position)));
+        // Clear previous listeners
+        holder.itemView.setOnClickListener(null);
+        holder.itemView.setOnLongClickListener(null);
+
+        boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
+
+        if (isClickToOpen) {
+            // Click to open app
+            holder.itemView.setOnClickListener(v -> launchApp(packageName));
+        } else {
+            // Long press to open app
+            holder.itemView.setOnLongClickListener(v -> {
+                launchApp(packageName);
+                return true;
+            });
+        }
     }
 
     @Override
@@ -83,7 +100,7 @@ public class SelectedAppsAdapter extends RecyclerView.Adapter<SelectedAppsAdapte
 
         ViewHolder(View itemView) {
             super(itemView);
-            appNameTextView = itemView.findViewById(R.id.appNameTextView);
+            appNameTextView = itemView.findViewById(android.R.id.text1);
         }
     }
 }

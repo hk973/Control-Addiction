@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="NumberPickerStyle">
+        <item name="android:textColorPrimary">?android:attr/textColorPrimary</item>
+        <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
+    </style>
+
+    <style name="SearchBarStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeColor">@color/search_box_stroke</item>
+        <item name="hintTextColor">?attr/colorPrimary</item>
+        <item name="android:textColorHint">?android:textColorSecondary</item>
+    </style>
+
+</resources>

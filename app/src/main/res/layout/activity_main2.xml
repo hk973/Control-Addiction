@@ -1,50 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@color/white">
 
-    <!-- Search Bar -->
-    <EditText
-        android:id="@+id/searchBar"
+    <!-- Title with Search Bar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search Apps"
-        android:padding="10dp"
-       />
+        android:elevation="4dp">
 
-    <!-- RecyclerView for displaying apps -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Inside the LinearLayout in AppBarLayout -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp">
+
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Select Apps"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"/>
+
+                <ImageView
+                    android:id="@+id/settingsButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_settings"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/searchBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Search Apps"
+                    android:drawableStart="@android:drawable/ic_menu_search"
+                    android:drawablePadding="8dp"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- RecyclerView with white background -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:paddingTop="10dp" />
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:background="@color/white" />
 
-
-    <!-- Button to go to MainActivity3 with selected apps -->
-
-
+    <!-- Bottom Action Button with white background -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <EditText
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:hint="Enter number of minute"
-            android:inputType="number"/>
-        <Button
-            android:id="@+id/buttonProceed"
-            android:layout_width="wrap_content"
+        android:background="@color/white"
+        android:padding="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSetTime"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Proceed" />
-
-
-
+            android:text="Set Time"
+            android:padding="12dp"
+            android:textSize="16sp"
+            app:cornerRadius="8dp"/>
     </LinearLayout>
-
 </LinearLayout>

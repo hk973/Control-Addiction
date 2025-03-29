@@ -1,20 +1,33 @@
 package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,55 +36,162 @@ public class MainActivity2 extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private EditText searchBar;
-    private Button buttonProceed;
+    private MaterialButton buttonSetTime;
     private AppAdapter appAdapter;
     private ArrayList<String> selectedApps = new ArrayList<>();
-    private EditText time;
+    private boolean isTimeSet = false;
+    private int selectedDays = 0;
+    private int selectedHours = 0;
+    private int selectedMinutes = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-        // Initialize views
+        Window window = getWindow();
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isSystemDarkMode = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
+
+        int statusBarColor = isSystemDarkMode ? getResources().getColor(R.color.black, getTheme())
+                : getResources().getColor(R.color.white, getTheme());
+
+        window.setStatusBarColor(statusBarColor);
+
+        WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(window, window.getDecorView());
+        windowInsetsController.setAppearanceLightStatusBars(!isSystemDarkMode);
+
+        // Add this in onCreate() after initializing views
+        ImageView settingsButton = findViewById(R.id.settingsButton);
+        settingsButton.setOnClickListener(v -> {
+            Intent settingsIntent = new Intent(MainActivity2.this, SettingsActivity.class);
+            startActivity(settingsIntent);
+        });
+
+        // Initialize views first
+        AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
+        TextView titleTextView = findViewById(R.id.titleTextView);
         searchBar = findViewById(R.id.searchBar);
-        recyclerView = findViewById(R.id.recyclerView);
-        time = findViewById(R.id.time);
-        buttonProceed = findViewById(R.id.buttonProceed);
+        recyclerView = findViewById(R.id.recyclerView); // Use class field, don't create local variable
+        buttonSetTime = findViewById(R.id.buttonSetTime);
+        LinearLayout buttonContainer = (LinearLayout) buttonSetTime.getParent();
+
+        // Then apply theme and load apps
+        applyTheme(appBarLayout, titleTextView, recyclerView, buttonContainer);
         loadApps();
         checksp();
 
-        // Proceed button to go to MainActivity3
-        buttonProceed.setOnClickListener(v -> {
-            String timeInput = time.getText().toString().trim();
-
-            if (isValidInput(timeInput)) {
-                SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(this);
-                sharedPrefHelper.writeData(selectedApps, Integer.parseInt(timeInput)*60, true);
-
-                // Start MainActivity3
-                Intent intent = new Intent(MainActivity2.this, MainActivity3.class);
-                startActivity(intent);
-                finish();
+        buttonSetTime.setOnClickListener(view -> {
+            if (!isTimeSet) {
+                showTimePickerDialog();
             } else {
-                Toast.makeText(this, "Please enter a valid time and select at least one app", Toast.LENGTH_SHORT).show();
+                proceedWithSelectedTime();
             }
         });
 
-
-        // Search functionality
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                appAdapter.getFilter().filter(charSequence);
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                appAdapter.getFilter().filter(s);
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {}
+            public void afterTextChanged(Editable s) {}
         });
+    }
+
+    private void updateTimeDisplay() {
+        String timeText = "";
+        if (selectedDays > 0) timeText += selectedDays + "d ";
+        if (selectedHours > 0) timeText += selectedHours + "h ";
+        if (selectedMinutes > 0) timeText += selectedMinutes + "m";
+
+        if (!timeText.isEmpty()) {
+            buttonSetTime.setText("Lock Apps (" + timeText.trim() + ")");
+        }
+    }
+
+    private void showTimePickerDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_time_picker, null);
+        NumberPicker daysPicker = dialogView.findViewById(R.id.daysPicker);
+        NumberPicker hoursPicker = dialogView.findViewById(R.id.hoursPicker);
+        NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
+        Button buttonSet = dialogView.findViewById(R.id.buttonSet);
+        Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
+
+        // Setup NumberPickers
+        daysPicker.setMinValue(0);
+        daysPicker.setMaxValue(30);
+        daysPicker.setValue(selectedDays);
+
+        hoursPicker.setMinValue(0);
+        hoursPicker.setMaxValue(23);
+        hoursPicker.setValue(selectedHours);
+
+        minutesPicker.setMinValue(0);
+        minutesPicker.setMaxValue(59);
+        minutesPicker.setValue(selectedMinutes);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog dialog = builder.setView(dialogView).create();
+
+        // Set button click listeners
+        buttonSet.setOnClickListener(v -> {
+            selectedDays = daysPicker.getValue();
+            selectedHours = hoursPicker.getValue();
+            selectedMinutes = minutesPicker.getValue();
+
+            if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
+                Toast.makeText(this, "Please set a time limit", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            isTimeSet = true;
+            updateTimeDisplay();
+            dialog.dismiss();
+        });
+
+        buttonCancel.setOnClickListener(v -> dialog.dismiss());
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        dialog.show();
+    }
+
+    private void applyTheme(AppBarLayout appBarLayout, TextView titleTextView,
+                            RecyclerView recyclerView, View buttonContainer) {
+        // Check if the device is in dark mode
+        boolean isDarkMode = (getResources().getConfiguration().uiMode &
+                Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+
+        if (isDarkMode) {
+            // Apply dark theme
+            int darkColor = ContextCompat.getColor(this, android.R.color.black);
+            int textColor = ContextCompat.getColor(this, android.R.color.white);
+
+            appBarLayout.setBackgroundColor(darkColor);
+            recyclerView.setBackgroundColor(darkColor);
+            buttonContainer.setBackgroundColor(darkColor);
+            titleTextView.setTextColor(textColor);
+
+            // You might want to update other UI elements like search hint color, etc.
+
+        } else {
+            // Apply light theme
+            int lightColor = ContextCompat.getColor(this, android.R.color.white);
+            int textColor = ContextCompat.getColor(this, android.R.color.black);
+
+            appBarLayout.setBackgroundColor(lightColor);
+            recyclerView.setBackgroundColor(lightColor);
+            buttonContainer.setBackgroundColor(lightColor);
+            titleTextView.setTextColor(textColor);
+        }
     }
 
     private void checksp() {
@@ -96,9 +216,24 @@ public class MainActivity2 extends AppCompatActivity {
             }
         }
 
-        appAdapter = new AppAdapter(appItems, selectedApps);
+        appAdapter = new AppAdapter(appItems, selectedApps, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(appAdapter);
+    }
+
+    private void proceedWithSelectedTime() {
+        if (selectedApps.isEmpty()) {
+            Toast.makeText(this, "Please select at least one app", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        int totalMinutes = (selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes;
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(this);
+        sharedPrefHelper.writeData(selectedApps, totalMinutes, true);
+
+        Intent intent = new Intent(MainActivity2.this, MainActivity3.class);
+        startActivity(intent);
+        finish();
     }
 
 
@@ -111,6 +246,7 @@ public class MainActivity2 extends AppCompatActivity {
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-
+        super.onBackPressed();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 }

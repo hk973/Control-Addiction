@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginHorizontal="24dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?android:attr/colorBackground">
+
+        <!-- Number Pickers Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <NumberPicker
+                    android:id="@+id/daysPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:descendantFocusability="blocksDescendants"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Days"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <NumberPicker
+                    android:id="@+id/hoursPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:descendantFocusability="blocksDescendants"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hours"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <NumberPicker
+                    android:id="@+id/minutesPicker"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:descendantFocusability="blocksDescendants"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Minutes"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Buttons Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <Button
+                android:id="@+id/buttonMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set as a Mode"
+                android:layout_marginEnd="18dp"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+            <Button
+                android:id="@+id/buttonCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+            <Button
+                android:id="@+id/buttonSet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
