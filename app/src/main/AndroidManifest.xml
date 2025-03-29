@@ -55,6 +55,61 @@
             android:name=".ForegroundAppService"
             android:foregroundServiceType="dataSync"
          />
+        <service
+            android:name=".MyTileService"
+            android:exported="true"
+            android:label="Mode 1"
+            android:icon="@drawable/dot_selected"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".MyTileService2"
+            android:exported="true"
+            android:label="Mode 2"
+            android:icon="@drawable/dot_selected"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".MyTileService3"
+            android:exported="true"
+            android:label="Mode 3"
+            android:icon="@drawable/dot_selected"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".MyTileService4"
+            android:exported="true"
+            android:label="Mode 4"
+            android:icon="@drawable/dot_selected"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".MyTileService5"
+            android:exported="true"
+            android:label="Mode 5"
+            android:icon="@drawable/dot_selected"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
 
     </application>
 
