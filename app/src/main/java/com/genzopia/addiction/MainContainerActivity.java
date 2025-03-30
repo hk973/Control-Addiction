@@ -2,6 +2,7 @@ package com.genzopia.addiction;
 
 
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
@@ -20,10 +21,11 @@ public class MainContainerActivity extends AppCompatActivity {
         viewPager.setUserInputEnabled(true);
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
         if (viewPager.getCurrentItem() == 0) {
-            super.onBackPressed();
+
         } else {
             viewPager.setCurrentItem(0);
         }
@@ -44,4 +46,5 @@ public class MainContainerActivity extends AppCompatActivity {
             return 2;
         }
     }
+
 }

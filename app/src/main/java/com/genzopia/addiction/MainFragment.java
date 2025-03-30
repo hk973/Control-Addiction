@@ -240,4 +240,5 @@ public class MainFragment extends Fragment {
     private boolean isValidInput(String timeInput) {
         return !TextUtils.isEmpty(timeInput) && !timeInput.equals("0") && !selectedApps.isEmpty();
     }
+
 }
