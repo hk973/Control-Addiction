@@ -229,7 +229,7 @@ public class MainFragment extends Fragment {
             return;
         }
 
-        int totalMinutes = (selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes;
+        int totalMinutes = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes)*60;
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
         sharedPrefHelper.writeData(selectedApps, totalMinutes, true);
 
