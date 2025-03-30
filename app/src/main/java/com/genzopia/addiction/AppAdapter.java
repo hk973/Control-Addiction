@@ -3,6 +3,7 @@ package com.genzopia.addiction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +11,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,25 +54,33 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         holder.itemView.setOnClickListener(null);
         holder.itemView.setOnLongClickListener(null);
 
-        boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
 
-        if (isClickToOpen) {
-            // Click to open app
-            holder.itemView.setOnClickListener(v -> launchApp(holder.itemView.getContext(), appItem.getPackageName()));
-            // Long press to select
-            holder.itemView.setOnLongClickListener(v -> {
+        holder.itemView.setOnClickListener(v -> {
+            boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
+            if(isClickToOpen) {
+                Log.e("test111", String.valueOf(isClickToOpen));
+                launchApp(holder.itemView.getContext(), appItem.getPackageName());
+            }else {
+                toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor);
+            }
+        });
+        holder.itemView.setOnLongClickListener(v -> {
+            boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
+            if(isClickToOpen){
+                Log.e("test111", String.valueOf(isClickToOpen));
                 toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor);
                 return true;
-            });
-        } else {
-            // Click to select
-            holder.itemView.setOnClickListener(v -> toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor));
-            // Long press to open app
-            holder.itemView.setOnLongClickListener(v -> {
+
+            }else{
+                Log.e("test111", String.valueOf(isClickToOpen));
                 launchApp(holder.itemView.getContext(), appItem.getPackageName());
                 return true;
-            });
-        }
+            }
+
+        });
+
+
+
     }
 
     private void toggleSelection(View itemView, String packageName, int selectedColor, int unselectedColor) {

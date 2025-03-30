@@ -189,4 +189,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
         }
     }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+
+    }
 }
