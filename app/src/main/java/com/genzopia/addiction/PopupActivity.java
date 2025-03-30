@@ -18,7 +18,7 @@ public class PopupActivity extends AppCompatActivity {
                 .setCancelable(false) // Prevent dismissal by tapping outside
                 .setPositiveButton("ok", (dialog, which) -> {
                     // Action for "Yes" button: go to homepage
-                    Intent intent = new Intent(PopupActivity.this, MainActivity2.class);
+                    Intent intent = new Intent(PopupActivity.this, MainFragment.class);
                     startActivity(intent);
                     finish();
                 });

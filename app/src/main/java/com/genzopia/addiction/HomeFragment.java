@@ -1,0 +1,53 @@
+package com.genzopia.addiction;
+
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ImageButton;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.Fragment;
+
+public class HomeFragment extends Fragment {
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_home, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setupStatusBar();
+        setupShortcuts();
+    }
+
+    private void setupStatusBar() {
+        Window window = requireActivity().getWindow();
+        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean isSystemDarkMode = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
+
+        int statusBarColor = isSystemDarkMode ?
+                ContextCompat.getColor(requireContext(), R.color.black) :
+                ContextCompat.getColor(requireContext(), R.color.white);
+
+        window.setStatusBarColor(statusBarColor);
+
+        WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(
+                window, window.getDecorView());
+        windowInsetsController.setAppearanceLightStatusBars(!isSystemDarkMode);
+    }
+
+    private void setupShortcuts() {
+        ImageButton phoneButton = requireView().findViewById(R.id.phoneButton);
+        ImageButton cameraButton = requireView().findViewById(R.id.cameraButton);
+
+        phoneButton.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_DIAL)));
+        cameraButton.setOnClickListener(v -> startActivity(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
+    }
+}

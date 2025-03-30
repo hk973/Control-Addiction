@@ -41,6 +41,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.gson) // Add Gson here
+    implementation ("androidx.viewpager2:viewpager2:1.0.0")
 
 
 }

@@ -107,7 +107,7 @@ public class MainActivity3 extends AppCompatActivity {
         Log.e("status", String.valueOf(status));
         if(!status){
             Log.e("onresumestatus","1");
-            Intent intent =new Intent(this,MainActivity2.class);
+            Intent intent =new Intent(this, MainFragment.class);
             startActivity(intent);
         }
 
@@ -123,7 +123,7 @@ public class MainActivity3 extends AppCompatActivity {
         Log.e("status", String.valueOf(status));
         if(!status){
             Log.e("onpausestatus","1");
-            Intent intent =new Intent(this,MainActivity2.class);
+            Intent intent =new Intent(this, MainFragment.class);
             startActivity(intent);
         }
     }
