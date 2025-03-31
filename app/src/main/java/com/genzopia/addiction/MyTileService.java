@@ -1,36 +1,43 @@
 package com.genzopia.addiction;
 
-
-
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Icon;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MyTileService extends TileService {
 
     private static final String PREFS_NAME = "TilePrefs";
     private static final String KEY_TILE_NAME = "TileName";
     private static final String KEY_TILE_ICON = "TileIcon";
+    private static final String KEY_TILE_STATE = "TileState";
 
     @Override
     public void onStartListening() {
         super.onStartListening();
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
-        // Load stored tile name and icon
+        // Load stored tile state
+        int savedState = prefs.getInt(KEY_TILE_STATE, Tile.STATE_INACTIVE);
         String tileName = prefs.getString(KEY_TILE_NAME, "Mode 1");
         String iconPath = prefs.getString(KEY_TILE_ICON, null);
 
         Tile tile = getQsTile();
         tile.setLabel(tileName);
-        tile.setState(Tile.STATE_ACTIVE);
+        tile.setState(savedState);
 
-        // If an icon is selected, update it dynamically
+        // Update icon
         if (iconPath != null) {
             Icon icon = Icon.createWithContentUri(iconPath);
             tile.setIcon(icon);
@@ -44,18 +51,78 @@ public class MyTileService extends TileService {
     @Override
     public void onClick() {
         super.onClick();
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        final Tile tile = getQsTile();
+        if (tile == null) return;
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-        );
+        // Set tile to active state immediately
+        tile.setState(Tile.STATE_ACTIVE);
+        tile.updateTile();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startActivityAndCollapse(pendingIntent);
-        }
+        // Save active state
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putInt(KEY_TILE_STATE, Tile.STATE_ACTIVE).apply();
+
+        // Start async operation
+        new Thread(() -> {
+            // Simulate async work (replace with your actual task)
+            try {
+
+                start_mode();
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // Update UI on main thread
+            new Handler(Looper.getMainLooper()).post(() -> {
+                Tile updatedTile = getQsTile();
+                if (updatedTile != null) {
+                    // Set tile to inactive state
+                    updatedTile.setState(Tile.STATE_INACTIVE);
+                    updatedTile.updateTile();
+
+                    // Save inactive state
+                    SharedPreferences prefs1 = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                    prefs1.edit().putInt(KEY_TILE_STATE, Tile.STATE_INACTIVE).apply();
+                }
+            });
+        }).start();
+    }
+    // Method to save data to SharedPreferences
+    public  void savePreferences_mode(Context context,
+                                       ArrayList<String> selectedAppMode,
+                                       int secMode) {
+        SharedPreferences sharedPref = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        // Convert ArrayList to Set
+        Set<String> set = new HashSet<>(selectedAppMode);
+
+        // Save both values
+        editor.putStringSet("selected_app_mode", set);
+        editor.putInt("sec_mode", secMode);
+
+        editor.apply();
+    }
+
+    // Method to retrieve and use the saved data
+    public void start_mode() {
+        // Retrieve from SharedPreferences
+        SharedPreferences sharedPref = getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+        Set<String> set = sharedPref.getStringSet("selected_app_mode", new HashSet<String>());
+        ArrayList<String> savedApps = new ArrayList<>(set);
+        int savedSecMode = sharedPref.getInt("sec_mode", 0);
+        Log.e("test222",String.valueOf(savedSecMode));
+
+        // If you still need to use SharedPrefHelper (though not clear why since we already have the values)
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getBaseContext());
+        sharedPrefHelper.writeData(savedApps, savedSecMode, true);
+
+        // Start activity with the retrieved values
+        Intent intent = new Intent(this, MainActivity3.class);
+        intent.putStringArrayListExtra("SELECTED_APPS", savedApps);  // Pass as intent extra
+        intent.putExtra("SEC_MODE", savedSecMode);                  // Pass as intent extra
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }

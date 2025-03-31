@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -43,9 +45,9 @@ public class MainFragment extends Fragment {
     private AppAdapter appAdapter;
     private ArrayList<String> selectedApps = new ArrayList<>();
     private boolean isTimeSet = false;
-    private int selectedDays = 0;
-    private int selectedHours = 0;
-    private int selectedMinutes = 0;
+    int selectedDays = 0;
+     int selectedHours = 0;
+     int selectedMinutes = 0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,8 +83,8 @@ public class MainFragment extends Fragment {
     private void initializeViews() {
         // Initialize views using fragment's view
         ImageView settingsButton = requireView().findViewById(R.id.settingsButton);
-        settingsButton.setOnClickListener(v ->
-                startActivity(new Intent(requireActivity(), SettingsActivity.class)));
+        settingsButton.setOnClickListener(v ->{
+                startActivity(new Intent(requireActivity(), SettingsActivity.class));});
 
         AppBarLayout appBarLayout = requireView().findViewById(R.id.appBarLayout);
         TextView titleTextView = requireView().findViewById(R.id.titleTextView);
@@ -131,6 +133,7 @@ public class MainFragment extends Fragment {
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
         Button buttonSet = dialogView.findViewById(R.id.buttonSet);
         Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
+        Button buttonmode=dialogView.findViewById(R.id.buttonMode);
 
         daysPicker.setMinValue(0);
         daysPicker.setMaxValue(30);
@@ -160,6 +163,16 @@ public class MainFragment extends Fragment {
             isTimeSet = true;
             updateTimeDisplay();
             dialog.dismiss();
+        });
+        buttonmode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int totalsec = ((daysPicker.getValue() * 24 * 60) + (hoursPicker.getValue() * 60) + minutesPicker.getValue())*60;
+                Log.e("test2222",String.valueOf(totalsec));
+                MyTileService mt=new MyTileService();
+                mt.savePreferences_mode(getContext(),selectedApps,totalsec);
+                dialog.dismiss();
+            }
         });
 
         buttonCancel.setOnClickListener(v -> dialog.dismiss());
@@ -222,6 +235,20 @@ public class MainFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(appAdapter);
     }
+    // Add these methods to MainFragment
+    public boolean isTimeSet() {
+        return isTimeSet;
+    }
+
+    public void resetTimeSelection() {
+        isTimeSet = false;
+        selectedDays = 0;
+        selectedHours = 0;
+        selectedMinutes = 0;
+        if (buttonSetTime != null) {
+            buttonSetTime.setText("Set Time");
+        }
+    }
 
     private void proceedWithSelectedTime() {
         if (selectedApps.isEmpty()) {
@@ -229,9 +256,9 @@ public class MainFragment extends Fragment {
             return;
         }
 
-        int totalMinutes = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes)*60;
+        int totalsec = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes)*60;
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
-        sharedPrefHelper.writeData(selectedApps, totalMinutes, true);
+        sharedPrefHelper.writeData(selectedApps, totalsec, true);
 
         startActivity(new Intent(requireActivity(), MainActivity3.class));
         requireActivity().finish();
@@ -240,5 +267,6 @@ public class MainFragment extends Fragment {
     private boolean isValidInput(String timeInput) {
         return !TextUtils.isEmpty(timeInput) && !timeInput.equals("0") && !selectedApps.isEmpty();
     }
+
 
 }

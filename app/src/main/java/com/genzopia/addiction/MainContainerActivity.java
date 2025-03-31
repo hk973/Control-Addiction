@@ -1,14 +1,15 @@
 package com.genzopia.addiction;
 
-
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 public class MainContainerActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
+    private MainFragment mainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,15 +20,37 @@ public class MainContainerActivity extends AppCompatActivity {
         viewPager.setOffscreenPageLimit(1); // Pre-load adjacent pages
         viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
         viewPager.setUserInputEnabled(true);
+
+        // Get reference to MainFragment when it's created
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if (position == 1) {
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + position);
+                    if (fragment instanceof MainFragment) {
+                        mainFragment = (MainFragment) fragment;
+                    }
+                }
+            }
+        });
     }
 
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        if (viewPager.getCurrentItem() == 0) {
-
+        if (viewPager.getCurrentItem() == 1 && mainFragment != null) {
+            // If we're on MainFragment and time is set, reset it
+            if (mainFragment.isTimeSet()) {
+                mainFragment.resetTimeSelection();
+                Toast.makeText(this, "Time selection reset", Toast.LENGTH_SHORT).show();
+            } else {
+                // If time isn't set, go back to home
+                viewPager.setCurrentItem(0);
+            }
         } else {
-            viewPager.setCurrentItem(0);
+            // If we're on HomeFragment, do default back behavior
+            super.onBackPressed();
         }
     }
 
@@ -46,5 +69,4 @@ public class MainContainerActivity extends AppCompatActivity {
             return 2;
         }
     }
-
 }
