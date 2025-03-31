@@ -26,18 +26,14 @@ public class MainActivity3 extends AppCompatActivity {
     private RecyclerView recyclerView;
     private SelectedAppsAdapter adapter;
     private PackageManager packageManager;
-
-    private long elapsedTime;
-    private Handler handler = new Handler();
-    private Runnable timerRunnable;
-    private TextView timerTextView;
     private EditText searchBar;
 
     private ArrayList<String> appNames;
     private ArrayList<String> selectedApps;
-
-    private boolean isTimerRunning = false;
     private SharedPrefHelper sharedPrefHelper;
+    // Existing variables...
+    private Handler timeCheckHandler = new Handler();
+    private static final long CHECK_INTERVAL = 1000; // 1 second
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +73,30 @@ public class MainActivity3 extends AppCompatActivity {
         Intent serviceIntent = new Intent(this, ForegroundAppService.class);
         serviceIntent.putStringArrayListExtra("selectedApps", selectedApps);
         startService(serviceIntent);
+        startPeriodicTimeCheck();
 
     }
+    private void startPeriodicTimeCheck() {
+        timeCheckHandler.postDelayed(timeCheckRunnable, CHECK_INTERVAL);
+    }
+    private Runnable timeCheckRunnable = new Runnable() {
+        @Override
+        public void run() {
+            SharedPrefHelper sp = new SharedPrefHelper(MainActivity3.this);
+            boolean status = sp.getTimeActivateStatus();
+
+            if (!status) {
+                // Time expired - redirect
+                Intent intent = new Intent(MainActivity3.this, MainContainerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish(); // Close current activity
+            } else {
+                // Continue checking
+                timeCheckHandler.postDelayed(this, CHECK_INTERVAL);
+            }
+        }
+    };
     private List<String> getAppNamesFromPackageNames(ArrayList<String> packageNames) {
         List<String> appNames = new ArrayList<>();
         for (String packageName : packageNames) {
@@ -132,5 +150,11 @@ public class MainActivity3 extends AppCompatActivity {
     protected void onApplyThemeResource(Resources.Theme theme, int resid, boolean first) {
         super.onApplyThemeResource(theme, resid, first);
         Log.e("status","1");
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove callbacks to prevent leaks
+        timeCheckHandler.removeCallbacks(timeCheckRunnable);
     }
 }

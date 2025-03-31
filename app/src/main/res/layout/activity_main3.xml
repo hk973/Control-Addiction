@@ -9,13 +9,13 @@
 
 
     <!-- Search Bar -->
-    <EditText
+    <com.google.android.material.textfield.TextInputEditText
         android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Search apps"
-        android:padding="8dp"
-        android:drawableLeft="@android:drawable/ic_menu_search"
+        android:drawablePadding="8dp"
+        android:drawableStart="@android:drawable/ic_menu_search"
         android:inputType="text" />
 
     <!-- RecyclerView -->
