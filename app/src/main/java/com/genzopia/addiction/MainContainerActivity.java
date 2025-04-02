@@ -48,9 +48,6 @@ public class MainContainerActivity extends AppCompatActivity {
                 // If time isn't set, go back to home
                 viewPager.setCurrentItem(0);
             }
-        } else {
-            // If we're on HomeFragment, do default back behavior
-            super.onBackPressed();
         }
     }
 
