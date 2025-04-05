@@ -13,11 +13,15 @@
         android:layout_height="wrap_content"
         android:elevation="4dp">
 
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:background="@color/white"
+            android:fitsSystemWindows="true"
+            android:padding="16dp"
+            android:focusableInTouchMode="true">
 
             <!-- Inside the LinearLayout in AppBarLayout -->
             <LinearLayout
@@ -70,7 +74,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:descendantFocusability="beforeDescendants">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -78,7 +83,8 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:padding="8dp"
-            android:background="@color/white" />
+            android:background="@color/white"
+            android:scrollbarStyle="outsideOverlay"/>
 
         <com.genzopia.addiction.FastScrollView
             android:id="@+id/fastScrollView"
@@ -86,7 +92,9 @@
             android:layout_height="match_parent"
             android:layout_gravity="end"
             android:padding="8dp"
-            android:background="@drawable/fastscroll_bg"/>
+            android:background="@drawable/fastscroll_bg"
+            android:elevation="8dp"/>
+
     </FrameLayout>
 
 

@@ -27,6 +27,15 @@ public class FastScrollView extends View {
         super(context);
         init();
     }
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // Maintain fixed width regardless of keyboard state
+        int width = MeasureSpec.makeMeasureSpec((int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 36, getResources().getDisplayMetrics()),
+                MeasureSpec.EXACTLY);
+
+        super.onMeasure(width, heightMeasureSpec);
+    }
 
     public FastScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
