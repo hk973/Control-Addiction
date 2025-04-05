@@ -10,6 +10,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
@@ -29,6 +30,11 @@ public class FastScrollView extends View {
     private Paint circlePaint;
     private float circleRadius;
     private float selectedTextSize;
+    // Add to FastScrollView class
+    private int currentRecyclerSectionIndex = -1;
+    private int highlightColor = getContext().getResources().getColor(R.color.fast_scroll_highlight);
+    private Paint highlightPaint;
+
 
     public FastScrollView(Context context) {
         super(context);
@@ -67,6 +73,8 @@ public class FastScrollView extends View {
         circlePaint.setColor(Color.argb(128, 0, 0, 0)); // Semi-transparent black
         circlePaint.setAntiAlias(true);
         circleRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
+        highlightPaint = new Paint(textPaint);
+        highlightPaint.setColor(highlightColor);
     }
     private float getTextSizeInPixels() {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics());
@@ -85,7 +93,32 @@ public class FastScrollView extends View {
 
     public void setRecyclerView(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                updateCurrentSection();
+            }
+        });
     }
+
+    private void updateCurrentSection() {
+        if (recyclerView == null || sections.isEmpty()) return;
+
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        int firstVisiblePos = layoutManager.findFirstVisibleItemPosition();
+
+        // Find the last section that starts before or at this position
+        currentRecyclerSectionIndex = -1;
+        for (int i = sections.size() - 1; i >= 0; i--) {
+            if (firstVisiblePos >= sections.get(i).position) {
+                currentRecyclerSectionIndex = i;
+                break;
+            }
+        }
+        invalidate();
+    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -104,7 +137,13 @@ public class FastScrollView extends View {
             Section section = sections.get(i);
             float baselineOffset = (textPaint.descent() - textPaint.ascent()) / 2 - textPaint.descent();
             float y = sectionHeight * i + sectionHeight / 2 + getPaddingTop() + baselineOffset;
-            canvas.drawText(section.letter, x, y, textPaint);
+
+            // Highlight current RecyclerView section when not actively scrolling
+            if (i == currentRecyclerSectionIndex && !isScrolling) {
+                canvas.drawText(section.letter, x, y, highlightPaint);
+            } else {
+                canvas.drawText(section.letter, x, y, textPaint);
+            }
         }
 
         // Draw selected section at touch position

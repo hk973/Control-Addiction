@@ -7,4 +7,5 @@
     <color name="background_unselected_dark">#000000</color>
     <color name="background_selected_dark">#121212</color>
     <color name="button">#696969</color>
+    <color name="fast_scroll_highlight">#64B5F6</color>
 </resources>
