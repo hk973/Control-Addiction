@@ -35,6 +35,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainFragment extends Fragment {
@@ -62,6 +63,16 @@ public class MainFragment extends Fragment {
         setupStatusBar();
         initializeViews();
         checksp();
+        // Add FastScroll setup
+        FastScrollView fastScrollView = view.findViewById(R.id.fastScrollView);
+        fastScrollView.setRecyclerView(recyclerView);
+        appAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                fastScrollView.setSections(appAdapter.getSections());
+            }
+        });
+        fastScrollView.setSections(appAdapter.getSections());
     }
 
     private void setupStatusBar() {
@@ -220,7 +231,7 @@ public class MainFragment extends Fragment {
 
     private void loadApps() {
         PackageManager pm = requireActivity().getPackageManager();
-        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES | PackageManager.MATCH_ALL);
+        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
         List<AppItem_Dataclass> appItems = new ArrayList<>();
 
         for (ApplicationInfo appInfo : apps) {
@@ -230,6 +241,9 @@ public class MainFragment extends Fragment {
                 appItems.add(new AppItem_Dataclass(appName, appInfo.packageName));
             }
         }
+
+        // Add alphabetical sorting here
+        Collections.sort(appItems, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
         appAdapter = new AppAdapter(appItems, selectedApps, requireContext());
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));

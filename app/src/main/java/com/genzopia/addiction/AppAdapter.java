@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> implements Filterable {
@@ -22,12 +23,32 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
     private List<AppItem_Dataclass> appListFull;
     private ArrayList<String> selectedApps;
     private SharedPrefHelper sharedPrefHelper;
+    private List<FastScrollView.Section> sections = new ArrayList<>();
 
     public AppAdapter(List<AppItem_Dataclass> appList, ArrayList<String> selectedApps, Context context) {
         this.appList = appList;
         this.appListFull = new ArrayList<>(appList);
         this.selectedApps = selectedApps;
         this.sharedPrefHelper = new SharedPrefHelper(context);
+        processSections();
+    }
+    private void processSections() {
+        sections.clear();
+        String currentSection = null;
+
+        for (int i = 0; i < appList.size(); i++) {
+            AppItem_Dataclass app = appList.get(i);
+            String firstLetter = app.getName().substring(0, 1).toUpperCase();
+
+            // Only add section if it's different from previous
+            if (!firstLetter.equals(currentSection)) {
+                currentSection = firstLetter;
+                sections.add(new FastScrollView.Section(currentSection, i));
+            }
+        }
+    }
+    public List<FastScrollView.Section> getSections() {
+        return sections;
     }
 
     @NonNull
@@ -129,22 +150,25 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         return appFilter;
     }
 
+    // Update filter to sort filtered results
     private final Filter appFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<AppItem_Dataclass> filteredList = new ArrayList<>();
 
             if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(appListFull); // Show all items if search is empty
+                filteredList.addAll(appListFull);
             } else {
                 String filterPattern = constraint.toString().toLowerCase().trim();
-
                 for (AppItem_Dataclass item : appListFull) {
                     if (item.getName().toLowerCase().contains(filterPattern)) {
-                        filteredList.add(item); // Add matching items to the filtered list
+                        filteredList.add(item);
                     }
                 }
             }
+
+            // Sort filtered results
+            Collections.sort(filteredList, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
             FilterResults results = new FilterResults();
             results.values = filteredList;
@@ -155,6 +179,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         protected void publishResults(CharSequence constraint, FilterResults results) {
             appList.clear();
             appList.addAll((List<AppItem_Dataclass>) results.values);
+            processSections();
             notifyDataSetChanged();
         }
     };

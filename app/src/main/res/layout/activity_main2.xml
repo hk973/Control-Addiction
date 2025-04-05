@@ -65,14 +65,30 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- RecyclerView with white background -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <!-- Updated FrameLayout with fast scroll -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:clipToPadding="false"
-        android:padding="8dp"
-        android:background="@color/white" />
+        android:background="@color/white">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="8dp"
+            android:background="@color/white" />
+
+        <com.genzopia.addiction.FastScrollView
+            android:id="@+id/fastScrollView"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:padding="8dp"
+            android:background="@drawable/fastscroll_bg"/>
+    </FrameLayout>
+
 
     <!-- Bottom Action Button with white background -->
     <LinearLayout
