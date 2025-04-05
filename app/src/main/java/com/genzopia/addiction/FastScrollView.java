@@ -23,6 +23,13 @@ public class FastScrollView extends View {
     private boolean isScrolling = false;
     private int lastSectionIndex = -1;
 
+    private int selectedSectionIndex = -1;
+    private float touchY = -1;
+    private Paint selectedTextPaint;
+    private Paint circlePaint;
+    private float circleRadius;
+    private float selectedTextSize;
+
     public FastScrollView(Context context) {
         super(context);
         init();
@@ -46,9 +53,20 @@ public class FastScrollView extends View {
         textPaint = new Paint();
         textPaint.setAntiAlias(true);
         textPaint.setTextAlign(Paint.Align.CENTER);
-        textPaint.setColor(Color.WHITE);  // More visible color
+        textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(getTextSizeInPixels());
-        textPaint.setTypeface(Typeface.DEFAULT_BOLD);  // Bold letters
+        textPaint.setTypeface(Typeface.DEFAULT_BOLD);
+
+        // Initialize selected text paint
+        selectedTextSize = getTextSizeInPixels() * 1.5f; // 50% larger
+        selectedTextPaint = new Paint(textPaint);
+        selectedTextPaint.setTextSize(selectedTextSize);
+
+        // Initialize circle paint
+        circlePaint = new Paint();
+        circlePaint.setColor(Color.argb(128, 0, 0, 0)); // Semi-transparent black
+        circlePaint.setAntiAlias(true);
+        circleRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
     }
     private float getTextSizeInPixels() {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics());
@@ -78,12 +96,34 @@ public class FastScrollView extends View {
         float sectionHeight = height / sections.size();
         float width = getWidth();
         float x = width / 2;
-        float baselineOffset = (textPaint.descent() - textPaint.ascent()) / 2 - textPaint.descent();
 
+        // Draw all non-selected sections
         for (int i = 0; i < sections.size(); i++) {
+            if (i == selectedSectionIndex) continue;
+
             Section section = sections.get(i);
+            float baselineOffset = (textPaint.descent() - textPaint.ascent()) / 2 - textPaint.descent();
             float y = sectionHeight * i + sectionHeight / 2 + getPaddingTop() + baselineOffset;
             canvas.drawText(section.letter, x, y, textPaint);
+        }
+
+        // Draw selected section at touch position
+        if (selectedSectionIndex != -1 && touchY != -1 && selectedSectionIndex < sections.size()) {
+            Section selected = sections.get(selectedSectionIndex);
+
+            // Clamp touchY within view bounds
+            float clampedY = Math.max(getPaddingTop() + circleRadius,
+                    Math.min(touchY, getHeight() - getPaddingBottom() - circleRadius));
+
+            // Draw background circle
+            canvas.drawCircle(x, clampedY, circleRadius, circlePaint);
+
+            // Calculate text position
+            float baselineOffset = (selectedTextPaint.descent() - selectedTextPaint.ascent()) / 2 - selectedTextPaint.descent();
+            float textY = clampedY + baselineOffset;
+
+            // Draw selected letter
+            canvas.drawText(selected.letter, x, textY, selectedTextPaint);
         }
     }
 
@@ -97,12 +137,18 @@ public class FastScrollView extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 isScrolling = true;
+                touchY = y;
+                selectedSectionIndex = sectionIndex;
                 scrollToSection(sectionIndex);
+                invalidate();
                 return true;
 
             case MotionEvent.ACTION_MOVE:
                 if (isScrolling) {
+                    touchY = y;
+                    selectedSectionIndex = sectionIndex;
                     scrollToSection(sectionIndex);
+                    invalidate();
                 }
                 return true;
 
@@ -110,6 +156,9 @@ public class FastScrollView extends View {
             case MotionEvent.ACTION_CANCEL:
                 isScrolling = false;
                 lastSectionIndex = -1;
+                selectedSectionIndex = -1;
+                touchY = -1;
+                invalidate();
                 return true;
         }
 
