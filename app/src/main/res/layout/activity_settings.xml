@@ -77,4 +77,39 @@
             </RadioGroup>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+<!--    &lt;!&ndash; New Button for To Do List &ndash;&gt;-->
+<!--    <androidx.cardview.widget.CardView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_margin="16dp"-->
+<!--        app:cardCornerRadius="8dp"-->
+<!--        app:cardElevation="4dp">-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="vertical"-->
+<!--            android:padding="16dp">-->
+
+<!--            <TextView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="App Opening Method"-->
+<!--                android:textStyle="bold"-->
+<!--                android:textSize="16sp"/>-->
+<!--            <ImageButton-->
+<!--                android:id="@+id/todoListButton"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="40dp"-->
+
+<!--                android:text="To Do List"-->
+
+<!--                android:layout_marginTop="8dp"-->
+<!--                android:layout_marginBottom="16dp"/>-->
+<!--        </LinearLayout>-->
+
+
+
+<!--    </androidx.cardview.widget.CardView>-->
+
 </LinearLayout>
