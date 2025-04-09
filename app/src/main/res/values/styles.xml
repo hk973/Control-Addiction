@@ -11,5 +11,8 @@
         <item name="hintTextColor">?attr/colorPrimary</item>
         <item name="android:textColorHint">?android:textColorSecondary</item>
     </style>
-
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
 </resources>

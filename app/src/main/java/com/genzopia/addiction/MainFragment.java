@@ -178,11 +178,29 @@ public class MainFragment extends Fragment {
         buttonmode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int totalsec = ((daysPicker.getValue() * 24 * 60) + (hoursPicker.getValue() * 60) + minutesPicker.getValue())*60;
-                Log.e("test2222",String.valueOf(totalsec));
-                MyTileService mt=new MyTileService();
-                mt.savePreferences_mode(getContext(),selectedApps,totalsec);
+                selectedDays = daysPicker.getValue();
+                selectedHours = hoursPicker.getValue();
+                selectedMinutes = minutesPicker.getValue();
+
+                if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
+                    Toast.makeText(requireContext(), "Please set a time limit", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if(selectedApps == null || selectedApps.isEmpty()) {
+                    Toast.makeText(requireContext(), "Please select at least 1 App to set as mode", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                int totalsec = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
+                MyTileService mt = new MyTileService();
+                mt.savePreferences_mode(getContext(), selectedApps, totalsec);
+
+                Toast.makeText(requireContext(), "Mode has been set successfully", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
+
+                // Show GIF Dialog
+                new GIFDialogFragment().show(requireActivity().getSupportFragmentManager(), "gif_dialog");
             }
         });
 
