@@ -46,6 +46,7 @@ public class MainActivity3 extends AppCompatActivity {
         setContentView(R.layout.activity_main3);
         BillingClient billingClient = BillingClient.newBuilder(this)
                 .setListener(new PurchasesUpdatedListener() {
+
                     @Override
                     public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
                         if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
