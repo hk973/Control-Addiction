@@ -21,6 +21,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
 
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+
 public class MainActivity3 extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -39,6 +44,24 @@ public class MainActivity3 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
+        BillingClient billingClient = BillingClient.newBuilder(this)
+                .setListener(new PurchasesUpdatedListener() {
+                    @Override
+                    public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
+                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+                            for (Purchase purchase : purchases) {
+                                // Handle the purchase (e.g., unlock features)
+                            }
+                        } else if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.USER_CANCELED) {
+                            // Handle user canceling the purchase
+                        } else {
+                            // Handle other error codes
+                        }
+                    }
+                })
+                .enablePendingPurchases()
+                .build();
+
 
 
         searchBar = findViewById(R.id.searchBar);
