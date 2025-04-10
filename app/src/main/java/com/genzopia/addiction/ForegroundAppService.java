@@ -53,6 +53,14 @@ public class ForegroundAppService extends Service {
 //        allowedApps.add("com.android.settings"); // Add Settings app
         allowedApps.add("com.android.systemui"); // Add System UI app
         allowedApps.add("android"); // Add Android system apps
+        allowedApps.add("com.android.vending");
+
+        // upi system
+        allowedApps.add("com.google.android.apps.nbu.paisa.user");
+        allowedApps.add("net.one97.paytm");
+        allowedApps.add("com.phonepe.app");
+        allowedApps.add("in.org.npci.upiapp");
+        allowedApps.add("com.google.android.gms");
         // Add any other system apps you want to allow
     }
 
@@ -96,7 +104,10 @@ public class ForegroundAppService extends Service {
         if (timerThread == null || !timerThread.isAlive()) {
             timerThread = new Thread(() -> {
                 while (true) {
+                    timeLimit = sharedPrefHelper.getTimeLimitValue(); // Get the saved time limit
+                    isActive = sharedPrefHelper.getTimeActivateStatus(); // Get the active status
                     if (isActive && timeLimit > 0) {
+
                         timeLimit--; // Decrement the time limit
                         sharedPrefHelper.saveTimeLimitValue(timeLimit); // Save updated time limit
                         updateNotification(notification); // Update notification with remaining time
