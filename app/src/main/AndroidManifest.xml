@@ -23,54 +23,60 @@
         android:theme="@style/Theme.Addiction20"
         tools:targetApi="31">
 
-
-
-
+        <!-- Main Launcher Activity (Hidden from Recents) -->
         <activity
             android:name=".MainContainerActivity"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
-            android:exported="true">
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true">          <!-- Optional: Prevents back-stack retention -->
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.HOME" />
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent-filter>
+    </activity>
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
+    <!-- Other Activities (Hidden from Recents if needed) -->
+    <activity
+        android:name=".SettingsActivity"
+        android:exported="false"
+        android:excludeFromRecents="true" />  <!-- Optional: Hide Settings from Recents -->
 
-            </intent-filter>
-        </activity>
+    <activity
+        android:name=".MainActivity3"
+        android:exported="false"
+        android:excludeFromRecents="true" />  <!-- Optional: Hide from Recents -->
 
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
+    <!-- PopupActivity (SingleInstance, Hidden from Recents) -->
+    <activity
+        android:name=".PopupActivity"
+        android:launchMode="singleInstance"
+        android:theme="@style/Theme.AppCompat.Dialog"
+        android:excludeFromRecents="true" />  <!-- Hide from Recents -->
 
-        <activity
-            android:name=".MainActivity3"
-            android:exported="false" />
-        <activity
-            android:name=".PopupActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/Theme.AppCompat.Dialog" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <!-- Main Launcher Entry (Hidden from Recents) -->
+    <activity
+        android:name=".MainActivity"
+        android:exported="true"
+        android:excludeFromRecents="true">  <!-- Hide from Recents -->
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
 
-
-        <service
-            android:name=".ForegroundAppService"
-            android:foregroundServiceType="dataSync" />
-        <service
-            android:name=".MyTileService"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE" />
-            </intent-filter>
-        </service>
-    </application>
-
-</manifest>
+    <!-- Services (Unchanged) -->
+    <service
+        android:name=".ForegroundAppService"
+        android:foregroundServiceType="dataSync" />
+    <service
+        android:name=".MyTileService"
+        android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+        android:exported="true">
+        <intent-filter>
+            <action android:name="android.service.quicksettings.action.QS_TILE" />
+        </intent-filter>
+    </service>
+</application>
+    </manifest>
