@@ -77,4 +77,11 @@ public class SharedPrefHelper {
         editor.putBoolean(KEY_TIME_ACTIVE, isActive);
         editor.apply();
     }
+    public boolean getReviewShown() {
+        return sharedPreferences.getBoolean("review_shown", false);
+    }
+
+    public void setReviewShown(boolean shown) {
+        sharedPreferences.edit().putBoolean("review_shown", shown).apply();
+    }
 }

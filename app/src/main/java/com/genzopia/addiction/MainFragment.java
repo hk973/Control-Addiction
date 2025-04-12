@@ -133,7 +133,7 @@ public class MainFragment extends Fragment {
         if (selectedMinutes > 0) timeText += selectedMinutes + "m";
 
         if (!timeText.isEmpty()) {
-            buttonSetTime.setText("Lock Apps (" + timeText.trim() + ")");
+            buttonSetTime.setText("Lock unselected Apps (" + timeText.trim() + ")");
         }
     }
 

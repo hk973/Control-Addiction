@@ -37,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        SharedPrefHelper pp=new SharedPrefHelper(this);
+        pp.setReviewShown(false);
         webView= findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true); // Enable JavaScript if needed
         webView.loadUrl("file:///android_asset/tandc.html"); // Load the existing HTML file from assets // Load the HTML file from asset
