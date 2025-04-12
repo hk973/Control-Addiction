@@ -98,6 +98,12 @@ public class MainActivity extends AppCompatActivity {
             // Update dot indicator to step 4
             setDotIndicator(4);
         });
+        SharedPrefHelper sp=new SharedPrefHelper(this);
+        boolean time=sp.getTimeActivateStatus();
+        if(time){
+            Intent intent =new Intent(this, MainContainerActivity.class);
+            startActivity(intent);
+        }
 
 
         setLauncherButton.setOnClickListener(v -> requestHomeLauncherPermission());
