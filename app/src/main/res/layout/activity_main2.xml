@@ -61,6 +61,7 @@
                     android:id="@+id/searchBar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:singleLine="true"
                     android:hint="Search Apps"
                     android:drawableStart="@android:drawable/ic_menu_search"
                     android:drawablePadding="8dp"/>
