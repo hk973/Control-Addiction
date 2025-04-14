@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Control Addiction</string>
+    <string name="accessibility_service_description">Detects notification bar swipes for app functionality.</string>
 </resources>

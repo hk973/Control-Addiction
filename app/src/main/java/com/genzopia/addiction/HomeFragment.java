@@ -1,9 +1,13 @@
 package com.genzopia.addiction;
 
+import android.accessibilityservice.AccessibilityService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +29,31 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupStatusBar();
         setupShortcuts();
+        if (!isAccessibilityServiceEnabled(requireContext(), NotificationBarDetectorService.class)) {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
+    private boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
+        String serviceId = context.getPackageName() + "/" + service.getCanonicalName();
+        String enabledServices = Settings.Secure.getString(
+                context.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        );
+
+        if (enabledServices == null) return false;
+
+        TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
+        splitter.setString(enabledServices);
+        while (splitter.hasNext()) {
+            if (splitter.next().equalsIgnoreCase(serviceId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
