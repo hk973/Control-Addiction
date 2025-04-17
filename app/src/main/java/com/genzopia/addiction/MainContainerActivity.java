@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 public class MainContainerActivity extends AppCompatActivity {
-    private ViewPager2 viewPager;
+    public ViewPager2 viewPager;
     private MainFragment mainFragment;
 
     @Override
@@ -19,11 +19,10 @@ public class MainContainerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_container);
 
         viewPager = findViewById(R.id.view_pager);
-        viewPager.setOffscreenPageLimit(1); // Pre-load adjacent pages
+        viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
         viewPager.setUserInputEnabled(true);
 
-        // Get reference to MainFragment when it's created
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
@@ -32,19 +31,18 @@ public class MainContainerActivity extends AppCompatActivity {
                     Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + position);
                     if (fragment instanceof MainFragment) {
                         mainFragment = (MainFragment) fragment;
+                        mainFragment.loadAppsIfNeeded();
                     }
                 }
             }
         });
-        SharedPrefHelper p = new SharedPrefHelper(this);
-        p.saveTimeActivateStatus(false);
 
-        // Check if review should be shown
+        SharedPrefHelper p = new SharedPrefHelper(this);
+        if(p.getTimeLimitValue()<=0){
+        p.saveTimeActivateStatus(false);}
+
         if (!p.getReviewShown()) {
-            Log.e("test667", String.valueOf(p.getReviewShown()));
-//          p.setReviewShown(true); // Mark as shown to prevent future prompts
             Intent reviewIntent = new Intent(this, ReviewActivity.class);
-            reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(reviewIntent);
         }
     }
@@ -53,12 +51,10 @@ public class MainContainerActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (viewPager.getCurrentItem() == 1 && mainFragment != null) {
-            // If we're on MainFragment and time is set, reset it
             if (mainFragment.isTimeSet()) {
                 mainFragment.resetTimeSelection();
                 Toast.makeText(this, "Time selection reset", Toast.LENGTH_SHORT).show();
             } else {
-                // If time isn't set, go back to home
                 viewPager.setCurrentItem(0);
             }
         }

@@ -93,11 +93,34 @@ public class MainActivity3 extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {}
         });
+// change here to accessibility
+
+
+
+
+
+
+
+
+
+
+
 
         Intent serviceIntent = new Intent(this, ForegroundAppService.class);
         serviceIntent.putStringArrayListExtra("selectedApps", selectedApps);
         startService(serviceIntent);
         startPeriodicTimeCheck();
+
+
+
+
+
+
+
+
+
+
+
 
     }
     private void startPeriodicTimeCheck() {

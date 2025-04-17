@@ -46,7 +46,30 @@ public class SharedPrefHelper {
         }
 
         Type type = new TypeToken<ArrayList<String>>() {}.getType();
-        return new Gson().fromJson(jsonSelectedApps, type);
+       ArrayList<String> selected= new Gson().fromJson(jsonSelectedApps, type);
+       
+
+
+        return selected;
+    }
+
+    public ArrayList<String> appwithnowarning(){
+        ArrayList<String> selectedApp=new ArrayList<>();
+        selectedApp.add("com.genzopia.addiction");
+        selectedApp.add("com.android.systemui");
+        selectedApp.add("com.sec.android.app.launcher");
+        selectedApp.add("com.android.launcher");
+        selectedApp.add("android");
+        selectedApp.add("com.android.vending");
+        // upi system
+        selectedApp.add("com.google.android.apps.nbu.paisa.user");
+        selectedApp.add("net.one97.paytm");
+        selectedApp.add("com.phonepe.app");
+        selectedApp.add("in.org.npci.upiapp");
+        selectedApp.add("com.google.android.gms");
+
+        return selectedApp;
+
     }
 
     public int getTimeLimitValue() {

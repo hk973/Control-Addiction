@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/black">
 
     <!-- Title with Search Bar -->
     <com.google.android.material.appbar.AppBarLayout
@@ -38,6 +38,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Select Apps"
+                    
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"/>
@@ -69,13 +70,13 @@
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- RecyclerView with white background -->
+    <!-- RecyclerView with black background -->
     <!-- Updated FrameLayout with fast scroll -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/white"
+        android:background="@color/black"
         android:descendantFocusability="beforeDescendants">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -84,8 +85,15 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:padding="8dp"
-            android:background="@color/white"
+            android:background="@color/black"
             android:scrollbarStyle="outsideOverlay"/>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
 
         <com.genzopia.addiction.FastScrollView
             android:id="@+id/fastScrollView"
@@ -99,11 +107,11 @@
     </FrameLayout>
 
 
-    <!-- Bottom Action Button with white background -->
+    <!-- Bottom Action Button with black background -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@color/black"
         android:padding="16dp">
 
         <com.google.android.material.button.MaterialButton
