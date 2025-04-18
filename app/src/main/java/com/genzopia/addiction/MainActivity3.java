@@ -121,7 +121,6 @@ public class MainActivity3 extends AppCompatActivity {
 
 
 
-
     }
     private void startPeriodicTimeCheck() {
         timeCheckHandler.postDelayed(timeCheckRunnable, CHECK_INTERVAL);

@@ -4,10 +4,13 @@ import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +37,18 @@ public class HomeFragment extends Fragment {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
+       Context context=getContext();
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        String packageName = context.getPackageName();
+
+        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + packageName));
+            context.startActivity(intent);
+        } else {
+            Log.d("BatteryOpt", "Already whitelisted");
+        }
+
     }
     private boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
         String serviceId = context.getPackageName() + "/" + service.getCanonicalName();

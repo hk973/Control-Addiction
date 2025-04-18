@@ -1,9 +1,11 @@
 package com.genzopia.addiction;
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -16,14 +18,15 @@ public class NotificationBarDetectorService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
-        sharedPrefHelper = new SharedPrefHelper(getApplicationContext());
+
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+        sharedPrefHelper = new SharedPrefHelper(getApplicationContext());
         boolean timeActive = sharedPrefHelper.getTimeActivateStatus();
         String currentPackage = String.valueOf(event.getPackageName());
-       Log.e("test9000",currentPackage);
+       Log.e("test9000",event.toString());
         if (timeActive) {
             selectedApps = sharedPrefHelper.getSelectedAppValue();
             int eventType = event.getEventType();
@@ -50,7 +53,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
                     Log.d("AppDetection", "Blocking non-selected app: " + currentPackage);
                     triggerBlockingPopup();
                     }
-                    if (className.contains("RecentsActivity")) {
+                    if (className.contains("RecentsActivity")||className.contains("FrameLayout")) {
                             performGlobalAction(GLOBAL_ACTION_HOME);
                     }
                 }
@@ -75,8 +78,25 @@ public class NotificationBarDetectorService extends AccessibilityService {
         startActivity(popupIntent);
     }
 
+
+    @Override
+    protected void onServiceConnected() {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            Log.e("AccessibilityCrash", "CRASH: " + Log.getStackTraceString(throwable));
+            // Restart service after crash
+            Intent intent = new Intent(this, NotificationBarDetectorService.class);
+            startService(intent);
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("accessibilty_test", "Service DESTROYED");
+    }
+
     @Override
     public void onInterrupt() {
-        // Required override
+        Log.d("accessibilty_test", "Service INTERRUPTED");
     }
 }

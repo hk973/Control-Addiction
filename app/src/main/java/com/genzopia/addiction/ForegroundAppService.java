@@ -16,7 +16,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -48,14 +50,37 @@ public class ForegroundAppService extends Service {
         packageManager = getPackageManager();
         sharedPrefHelper = new SharedPrefHelper(this); // Initialize SharedPrefHelper
 
+        // Initialize the list of allowed apps
+        allowedApps = new ArrayList<>();
+//        allowedApps.add("com.android.settings"); // Add Settings app
+        allowedApps.add("com.android.systemui"); // Add System UI app
+        allowedApps.add("android"); // Add Android system apps
+        allowedApps.add("com.android.vending");
 
+        // upi system
+        allowedApps.add("com.google.android.apps.nbu.paisa.user");
+        allowedApps.add("net.one97.paytm");
+        allowedApps.add("com.phonepe.app");
+        allowedApps.add("in.org.npci.upiapp");
+        allowedApps.add("com.google.android.gms");
+        // Add any other system apps you want to allow
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            Log.e("ForegroundAppService", "Received null Intent, initializing empty selectedApps list");
+            selectedApps = new ArrayList<>();
+        } else {
+            selectedApps = intent.getStringArrayListExtra("selectedApps");
+            if (selectedApps == null) {
+                selectedApps = new ArrayList<>();
+            }
+        }
 
-
-
+        // Add the service's package to selected apps as needed
+        selectedApps.add("com.genzopia.addiction");
+        Log.e("test100", String.valueOf(selectedApps));
 
         // Retrieve the time limit and active status from SharedPreferences
         timeLimit = sharedPrefHelper.getTimeLimitValue(); // Get the saved time limit
@@ -102,7 +127,7 @@ public class ForegroundAppService extends Service {
                         p.saveTimeActivateStatus(false);
                         break; // Exit the loop if the service has been stopped
                     }
-
+                    checkForegroundApp();
                 }
             });
             timerThread.start();
@@ -147,7 +172,40 @@ public class ForegroundAppService extends Service {
         startForeground(1, updatedNotification); // Update the existing notification
     }
 
+    private String getForegroundAppPackageName() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            long time = System.currentTimeMillis();
 
+            // Get usage stats for the last 10 seconds (you can adjust the duration as needed)
+            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, time - 1000 * 10, time);
+
+            if (usageStatsList != null && !usageStatsList.isEmpty()) {
+                SortedMap<Long, UsageStats> sortedMap = new TreeMap<>();
+                for (UsageStats usageStats : usageStatsList) {
+                    sortedMap.put(usageStats.getLastTimeUsed(), usageStats);
+                }
+                if (!sortedMap.isEmpty()) {
+                    String packageName = sortedMap.get(sortedMap.lastKey()).getPackageName();
+                    Log.e("test300",packageName);
+                    return packageName; // Return the package name of the foreground app
+                }
+            }
+        } else {
+            // For devices below Lollipop, you can use the previous method
+            ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+            if (activityManager != null) {
+                List<ActivityManager.RunningAppProcessInfo> runningProcesses = activityManager.getRunningAppProcesses();
+                for (ActivityManager.RunningAppProcessInfo processInfo : runningProcesses) {
+                    if (processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                        Log.e("test300",processInfo.processName);
+                        return processInfo.processName;
+                    }
+                }
+            }
+        }
+        return null; // No foreground app found
+    }
 
     // Function to check if permission is granted
     private boolean isUsageStatsGranted() {
@@ -163,8 +221,61 @@ public class ForegroundAppService extends Service {
         }
     }
 
+    private void checkForegroundApp() {
+        try {
+            String foregroundApp = getForegroundAppPackageName();
+            Log.e("test456", foregroundApp);
 
+            // Check if the foreground app is in the selected apps or allowed apps
+            if (foregroundApp != null) {
+                boolean isAllowed = allowedApps.contains(foregroundApp);
+                boolean isSelected = selectedApps.contains(foregroundApp);
+                boolean isApp = isValidApplication(foregroundApp); // Check if it is a valid app
+                String package_i_want_tobe_app="com.android.settings";
+                String i_want="com.android.vending";
+                String youtube="com.google.android.youtube";
+                String chrome="com.android.chrome";
+                if(foregroundApp.equals(package_i_want_tobe_app)||foregroundApp.equals(i_want)||foregroundApp.equals(youtube)||foregroundApp.equals(chrome)){
+                    isApp=true;
+                }
+                Log.e("test300",isAllowed+" "+isSelected+" "+isApp);
 
+                // If the app is neither in the selected apps nor in the allowed apps, show the popup
+                if (!isAllowed && !isSelected && isApp) {
+                    // Get the app name from the package name
+                    String appName = getApplicationName(foregroundApp);
+
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        Intent popupIntent = new Intent(ForegroundAppService.this, PopupActivity.class);
+                        popupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(popupIntent);
+                    });
+
+                }
+            }
+        } catch (Exception e) {
+            Log.e("ForegroundAppService", "Error checking foreground app", e);
+        }
+    }
+
+    private String getApplicationName(String packageName) {
+        try {
+            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+            return (String) packageManager.getApplicationLabel(appInfo);
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+            return packageName; // Return package name if not found
+        }
+    }
+
+    private boolean isValidApplication(String packageName) {
+        try {
+            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+            return appInfo.enabled && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0;
+        } catch (NameNotFoundException e) {
+            return false; // Not a valid application
+        }
+    }
     public  String formatTime(int totalSeconds) {
         int hours = totalSeconds / 3600;
         int minutes = (totalSeconds % 3600) / 60;
