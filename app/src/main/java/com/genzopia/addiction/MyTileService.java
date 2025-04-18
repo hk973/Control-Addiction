@@ -42,7 +42,7 @@ public class MyTileService extends TileService {
             Icon icon = Icon.createWithContentUri(iconPath);
             tile.setIcon(icon);
         } else {
-            tile.setIcon(Icon.createWithResource(this, R.drawable.dot_selected));
+            tile.setIcon(Icon.createWithResource(this, R.mipmap.ic_launcher_foreground));
         }
 
         tile.updateTile();
