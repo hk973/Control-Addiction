@@ -32,11 +32,6 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupStatusBar();
         setupShortcuts();
-        if (!isAccessibilityServiceEnabled(requireContext(), NotificationBarDetectorService.class)) {
-            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
        Context context=getContext();
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         String packageName = context.getPackageName();
@@ -49,24 +44,6 @@ public class HomeFragment extends Fragment {
             Log.d("BatteryOpt", "Already whitelisted");
         }
 
-    }
-    private boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
-        String serviceId = context.getPackageName() + "/" + service.getCanonicalName();
-        String enabledServices = Settings.Secure.getString(
-                context.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        );
-
-        if (enabledServices == null) return false;
-
-        TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
-        splitter.setString(enabledServices);
-        while (splitter.hasNext()) {
-            if (splitter.next().equalsIgnoreCase(serviceId)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 

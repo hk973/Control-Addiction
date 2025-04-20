@@ -1,15 +1,22 @@
 package com.genzopia.addiction;
 
+import android.accessibilityservice.AccessibilityService;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -215,20 +222,53 @@ public class MainFragment extends Fragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         AlertDialog dialog = builder.setView(dialogView).create();
-
+//doing work
         buttonSet.setOnClickListener(v -> {
             selectedDays = daysPicker.getValue();
             selectedHours = hoursPicker.getValue();
             selectedMinutes = minutesPicker.getValue();
+            if(selectedApps == null || selectedApps.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select at least 1 App to set as mode", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
                 Toast.makeText(requireContext(), "Please set a time limit", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (!isAccessibilityServiceEnabled(requireContext(), NotificationBarDetectorService.class)) {
 
-            isTimeSet = true;
-            updateTimeDisplay();
-            dialog.dismiss();
+                AlertDialog.Builder builderr = new AlertDialog.Builder(getContext());
+                builderr.setTitle("Accessibility Permission Required");
+                builderr.setMessage("To completely lock the apps, this app needs Accessibility feature to be enabled. Please enable the feature.");
+
+                builderr.setPositiveButton("Enable", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+                });
+
+                builderr.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(getContext(), "You can't lock apps without Accessibility access", Toast.LENGTH_LONG).show();
+                        dialog.dismiss();
+                    }
+                });
+
+                AlertDialog dialoge = builderr.create();
+                dialoge.show();
+            }else {
+                Log.d("BatteryOpt", "Already whitelisted");
+                isTimeSet = true;
+                updateTimeDisplay();
+                dialog.dismiss();
+
+            }
+
         });
         buttonmode.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -354,6 +394,24 @@ public class MainFragment extends Fragment {
 
     private boolean isValidInput(String timeInput) {
         return !TextUtils.isEmpty(timeInput) && !timeInput.equals("0") && !selectedApps.isEmpty();
+    }
+    private boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
+        String serviceId = context.getPackageName() + "/" + service.getCanonicalName();
+        String enabledServices = Settings.Secure.getString(
+                context.getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        );
+
+        if (enabledServices == null) return false;
+
+        TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
+        splitter.setString(enabledServices);
+        while (splitter.hasNext()) {
+            if (splitter.next().equalsIgnoreCase(serviceId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
