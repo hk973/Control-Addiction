@@ -107,4 +107,19 @@ public class SharedPrefHelper {
     public void setReviewShown(boolean shown) {
         sharedPreferences.edit().putBoolean("review_shown", shown).apply();
     }
+    public void saveStartTime(long startTime) {
+        sharedPreferences.edit().putLong("startTime", startTime).apply();
+    }
+
+    public long getStartTime() {
+        return sharedPreferences.getLong("startTime", 0);
+    }
+
+    public void saveInitialDuration(int duration) {
+        sharedPreferences.edit().putInt("initialDuration", duration).apply();
+    }
+
+    public int getInitialDuration() {
+        return sharedPreferences.getInt("initialDuration", 0);
+    }
 }

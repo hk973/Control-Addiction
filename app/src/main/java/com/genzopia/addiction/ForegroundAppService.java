@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -42,6 +43,8 @@ public class ForegroundAppService extends Service {
     private int timeLimit; // Time limit in seconds
     private boolean isActive; // Timer active status
     private Thread timerThread; // Thread for timer management
+    private long startTime; // Track when the timer started
+    private int initialDuration; // Initial time limit in seconds
 
     @Override
     public void onCreate() {
@@ -77,6 +80,15 @@ public class ForegroundAppService extends Service {
                 selectedApps = new ArrayList<>();
             }
         }
+        isActive = sharedPrefHelper.getTimeActivateStatus();
+        initialDuration = sharedPrefHelper.getTimeLimitValue();
+        startTime = sharedPrefHelper.getStartTime();
+        // If timer is active but no start time recorded, initialize
+        if (isActive && startTime == 0) {
+            startTime = SystemClock.elapsedRealtime();
+            sharedPrefHelper.saveStartTime(startTime);
+            sharedPrefHelper.saveInitialDuration(initialDuration);
+        }
 
         // Add the service's package to selected apps as needed
         selectedApps.add("com.genzopia.addiction");
@@ -102,31 +114,40 @@ public class ForegroundAppService extends Service {
 
         startForeground(1, notification);
 
-        // Start the timer thread to check the foreground app and countdown periodically
+
+        // Start the monitoring thread
         if (timerThread == null || !timerThread.isAlive()) {
             timerThread = new Thread(() -> {
                 while (true) {
-                    timeLimit = sharedPrefHelper.getTimeLimitValue(); // Get the saved time limit
-                    isActive = sharedPrefHelper.getTimeActivateStatus(); // Get the active status
-                    if (isActive && timeLimit > 0) {
+                    // Get current status from SharedPreferences
+                    isActive = sharedPrefHelper.getTimeActivateStatus();
+                    initialDuration = sharedPrefHelper.getInitialDuration();
+                    startTime = sharedPrefHelper.getStartTime();
 
-                        timeLimit--; // Decrement the time limit
-                        sharedPrefHelper.saveTimeLimitValue(timeLimit); // Save updated time limit
-                        updateNotification(notification); // Update notification with remaining time
+                    if (isActive && initialDuration > 0 && startTime != 0) {
+                        long currentTime = SystemClock.elapsedRealtime();
+                        long elapsedSeconds = (currentTime - startTime) / 1000;
+                        int remainingTime = (int) (initialDuration - elapsedSeconds);
 
-                        try {
-                            Thread.sleep(1000); // Wait for 1 second
-                        } catch (InterruptedException e) {
-                            Log.e("ForegroundAppService", "Thread interrupted", e);
+                        if (remainingTime > 0) {
+                            updateNotification(remainingTime,notification);
+                        } else {
+                            // Time's up
+                            handleTimerExpiration();
+                            break;
                         }
-                    } else if (timeLimit <= 0) {
-                        // Stop the service when the timer reaches zero
-                        Log.e("ForegroundAppService", "Timer expired, stopping service");
-                        stopSelf(); // Stop the service
-                        SharedPrefHelper p = new SharedPrefHelper(this);
-                        p.saveTimeActivateStatus(false);
-                        break; // Exit the loop if the service has been stopped
+                    } else {
+                        // Timer not active or invalid values
+                        break;
                     }
+
+                    // Check every 5 seconds to save resources
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        Log.e("ForegroundAppService", "Thread interrupted", e);
+                    }
+
                     checkForegroundApp();
                 }
             });
@@ -159,18 +180,28 @@ public class ForegroundAppService extends Service {
         }
     }
 
-    private void updateNotification(Notification notification) {
+
+    private void updateNotification(int remainingSeconds,Notification notification) {
+        String formattedTime = formatTime(remainingSeconds);
         Notification updatedNotification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Monitoring Apps")
-                .setContentText("Monitoring selected apps. Time remaining: " + formatTime(timeLimit))
+                .setContentText("Time remaining: " + formattedTime)
                 .setSmallIcon(R.drawable.app)
                 .setContentIntent(notification.contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setSilent(true)
                 .build();
 
-        startForeground(1, updatedNotification); // Update the existing notification
+        startForeground(1, updatedNotification);
     }
+    private void handleTimerExpiration() {
+        // Stop service and clean up
+        sharedPrefHelper.saveTimeActivateStatus(false);
+        sharedPrefHelper.saveStartTime(0);
+        sharedPrefHelper.saveInitialDuration(0);
+        stopSelf();
+    }
+
 
     private String getForegroundAppPackageName() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
