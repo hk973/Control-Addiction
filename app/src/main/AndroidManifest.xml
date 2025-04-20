@@ -6,8 +6,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" tools:ignore="ProtectedPermissions"/>
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions"/>
+    <uses-permission
+        android:name="android.permission.MANAGE_ACCESSIBILITY"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -25,14 +29,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Addiction20"
         tools:targetApi="31">
+        <activity
+            android:name=".MainContainerActivity2"
+            android:exported="false" />
 
         <service
             android:name=".NotificationBarDetectorService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
@@ -40,64 +48,54 @@
 
         <activity
             android:name=".ReviewActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true"
-            android:noHistory="true" />
-
-        <!-- Main Launcher Activity (Hidden from Recents) -->
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" /> <!-- Main Launcher Activity (Hidden from Recents) -->
         <activity
             android:name=".MainContainerActivity"
-            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
-            android:exported="true"
             android:excludeFromRecents="true"
-            android:noHistory="true">          <!-- Optional: Prevents back-stack retention -->
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.HOME" />
-            <category android:name="android.intent.category.DEFAULT" />
-        </intent-filter>
-    </activity>
+            android:exported="true"
+            android:noHistory="true"
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"> <!-- Optional: Prevents back-stack retention -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-    <!-- Other Activities (Hidden from Recents if needed) -->
-    <activity
-        android:name=".SettingsActivity"
-        android:exported="false"
-        android:excludeFromRecents="true" />  <!-- Optional: Hide Settings from Recents -->
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity> <!-- Other Activities (Hidden from Recents if needed) -->
+        <activity
+            android:name=".SettingsActivity"
+            android:excludeFromRecents="true"
+            android:exported="false" /> <!-- Optional: Hide Settings from Recents -->
 
-    <activity
-        android:name=".MainActivity3"
-        android:exported="false"
-        android:excludeFromRecents="true" />  <!-- Optional: Hide from Recents -->
+        <activity
+            android:name=".PopupActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.AppCompat.Dialog" /> <!-- Hide from Recents -->
+        <!-- Main Launcher Entry (Hidden from Recents) -->
+        <activity
+            android:name=".MainActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"> <!-- Hide from Recents -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-    <!-- PopupActivity (SingleInstance, Hidden from Recents) -->
-    <activity
-        android:name=".PopupActivity"
-        android:launchMode="singleInstance"
-        android:theme="@style/Theme.AppCompat.Dialog"
-        android:excludeFromRecents="true" />  <!-- Hide from Recents -->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> <!-- Services (Unchanged) -->
+        <service
+            android:name=".ForegroundAppService"
+            android:foregroundServiceType="dataSync" />
+        <service
+            android:name=".MyTileService"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+    </application>
 
-    <!-- Main Launcher Entry (Hidden from Recents) -->
-    <activity
-        android:name=".MainActivity"
-        android:exported="true"
-        android:excludeFromRecents="true">  <!-- Hide from Recents -->
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
-
-    <!-- Services (Unchanged) -->
-    <service
-        android:name=".ForegroundAppService"
-        android:foregroundServiceType="dataSync" />
-    <service
-        android:name=".MyTileService"
-        android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-        android:exported="true">
-        <intent-filter>
-            <action android:name="android.service.quicksettings.action.QS_TILE" />
-        </intent-filter>
-    </service>
-</application>
-    </manifest>
+</manifest>

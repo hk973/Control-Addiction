@@ -101,7 +101,7 @@ public class ForegroundAppService extends Service {
         sp.saveTimeActivateStatus(true);
 
         // Create and show the notification
-        Intent notificationIntent = new Intent(this, MainActivity3.class);
+        Intent notificationIntent = new Intent(this, SelectedAppsFragment.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)

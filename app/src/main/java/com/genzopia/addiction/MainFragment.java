@@ -1,6 +1,5 @@
 package com.genzopia.addiction;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +23,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -301,7 +298,7 @@ public class MainFragment extends Fragment {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
         boolean status = sp.getTimeActivateStatus();
         if(status){
-            startActivity(new Intent(requireActivity(), MainActivity3.class));
+            startActivity(new Intent(requireActivity(), SelectedAppsFragment.class));
         }
     }
 
@@ -351,7 +348,7 @@ public class MainFragment extends Fragment {
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
         sharedPrefHelper.writeData(selectedApps, totalsec, true);
 
-        startActivity(new Intent(requireActivity(), MainActivity3.class));
+        startActivity(new Intent(requireActivity(), MainContainerActivity2.class));
         requireActivity().finish();
     }
 

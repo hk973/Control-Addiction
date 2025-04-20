@@ -1,11 +1,9 @@
 package com.genzopia.addiction;
 
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Icon;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
@@ -119,7 +117,7 @@ public class MyTileService extends TileService {
         sharedPrefHelper.writeData(savedApps, savedSecMode, true);
 
         // Start activity with the retrieved values
-        Intent intent = new Intent(this, MainActivity3.class);
+        Intent intent = new Intent(this, SelectedAppsFragment.class);
         intent.putStringArrayListExtra("SELECTED_APPS", savedApps);  // Pass as intent extra
         intent.putExtra("SEC_MODE", savedSecMode);                  // Pass as intent extra
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
