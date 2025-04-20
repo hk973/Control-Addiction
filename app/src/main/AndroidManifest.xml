@@ -76,7 +76,7 @@
             android:theme="@style/Theme.AppCompat.Dialog" /> <!-- Hide from Recents -->
         <!-- Main Launcher Entry (Hidden from Recents) -->
         <activity
-            android:name=".MainActivity"
+            android:name=".permission.MainActivity"
             android:excludeFromRecents="true"
             android:exported="true"> <!-- Hide from Recents -->
             <intent-filter>

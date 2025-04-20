@@ -1,85 +1,21 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
-    <WebView
-        android:id="@+id/webView"
+    android:orientation="vertical">
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
-        android:visibility="gone"/>
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/dotsLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_marginBottom="24dp"
         android:gravity="center"
-        android:layout_marginBottom="16dp">
+        android:orientation="horizontal" />
 
-        <View
-            android:id="@+id/dot1"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/dot_unselected" />
-
-        <View
-            android:id="@+id/dot2"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/dot_unselected" />
-
-        <View
-            android:id="@+id/dot3"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/dot_unselected" />
-
-        <View
-            android:id="@+id/dot4"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/dot_unselected" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/notificationPermissionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Request Notification Permission" />
-
-    <Button
-        android:id="@+id/usagePermissionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Request Usage Permission"
-        android:visibility="gone" />
-
-    <CheckBox
-        android:id="@+id/termsCheckbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="I agree to the Terms and Conditions"
-        android:visibility="gone" />
-
-    <Button
-        android:id="@+id/proceedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Proceed"
-        android:visibility="gone"
-        />
-
-    <Button
-        android:id="@+id/setLauncherButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set Home Launcher Permission"
-        android:visibility="gone" />
 </LinearLayout>

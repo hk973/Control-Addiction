@@ -338,7 +338,7 @@ public class MainFragment extends Fragment {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
         boolean status = sp.getTimeActivateStatus();
         if(status){
-            startActivity(new Intent(requireActivity(), SelectedAppsFragment.class));
+            startActivity(new Intent(requireActivity(), MainContainerActivity2.class));
         }
     }
 

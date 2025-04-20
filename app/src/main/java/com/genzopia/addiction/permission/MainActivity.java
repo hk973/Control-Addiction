@@ -1,0 +1,180 @@
+// MainActivity.java
+package com.genzopia.addiction.permission;
+
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import android.view.View;
+import android.widget.LinearLayout;
+
+import com.genzopia.addiction.MainContainerActivity;
+import com.genzopia.addiction.R;
+import com.genzopia.addiction.SharedPrefHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements PermissionListener {
+
+    private ViewPager viewPager;
+    private LinearLayout dotsLayout;
+    private View[] dots;
+    private PermissionPagerAdapter pagerAdapter;
+    private int maxAllowedPosition = 0;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Check if we should skip to main activity
+        SharedPrefHelper sp = new SharedPrefHelper(this);
+        if (sp.getTimeActivateStatus()) {
+            startMainContainerActivity();
+            return;
+        }
+
+        sp.setReviewShown(false);
+
+        // Initialize ViewPager and dots
+        viewPager = findViewById(R.id.viewPager);
+        dotsLayout = findViewById(R.id.dotsLayout);
+
+        setupViewPager();
+        setupDots();
+
+
+        // Listen for page changes to update dots
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+            @Override
+            public void onPageSelected(int position) {
+                if (position > maxAllowedPosition) {
+                    viewPager.setCurrentItem(maxAllowedPosition, false); // Block forward swipe
+                } else {
+                    updateDots(position);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
+    }
+
+    private void setupViewPager() {
+        pagerAdapter = new PermissionPagerAdapter(getSupportFragmentManager());
+
+        // Add all fragments
+        pagerAdapter.addFragment(NotificationPermissionFragment.newInstance());
+        pagerAdapter.addFragment(UsagePermissionFragment.newInstance());
+        pagerAdapter.addFragment(AccessibilityPermissionFragment.newInstance());
+        pagerAdapter.addFragment(TermsFragment.newInstance());
+        pagerAdapter.addFragment(LauncherPermissionFragment.newInstance());
+
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setOffscreenPageLimit(5); // Keep all fragments in memory
+    }
+
+    private void setupDots() {
+        dots = new View[5];
+
+        for (int i = 0; i < 5; i++) {
+            dots[i] = new View(this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    getResources().getDimensionPixelSize(R.dimen.dot_width),
+                    getResources().getDimensionPixelSize(R.dimen.dot_height)
+            );
+            params.setMargins(8, 0, 8, 0);
+            dots[i].setLayoutParams(params);
+            dots[i].setBackgroundResource(i == 0 ? R.drawable.dot_selected : R.drawable.dot_unselected);
+            dotsLayout.addView(dots[i]);
+        }
+    }
+
+    private void updateDots(int currentPosition) {
+        for (int i = 0; i < dots.length; i++) {
+            dots[i].setBackgroundResource(i == currentPosition ? R.drawable.dot_selected : R.drawable.dot_unselected);
+        }
+    }
+
+    // PermissionListener implementation
+    @Override
+    public void onPermissionGranted(int position) {
+        // Update max allowed position
+        if (position + 1 > maxAllowedPosition) {
+            maxAllowedPosition = position + 1;
+        }
+        // Move to next page if applicable
+        if (position == viewPager.getCurrentItem() && position < pagerAdapter.getCount() - 1) {
+            viewPager.setCurrentItem(position + 1, true);
+        }
+    }
+
+    @Override
+    public void onAllPermissionsComplete() {
+        // Start the main application
+        startMainContainerActivity();
+    }
+
+    private void startMainContainerActivity() {
+        SharedPrefHelper sp = new SharedPrefHelper(this);
+        sp.setTimeActivateStatus(true);
+        android.content.Intent intent = new android.content.Intent(this, MainContainerActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private boolean canMoveToPreviousPage() {
+        int currentPosition = viewPager.getCurrentItem();
+        if (currentPosition == 0) {
+            return false; // First page, can't go back
+        }
+
+        // Check if previous permission is granted
+        Fragment previousFragment = pagerAdapter.getItem(currentPosition - 1);
+        if (previousFragment instanceof BasePermissionFragment) {
+            return ((BasePermissionFragment) previousFragment).isPermissionGranted();
+        }
+
+        return false;
+    }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        // Disable back button
+    }
+
+    /**
+     * Adapter for the permission fragments
+     */
+    private class PermissionPagerAdapter extends FragmentPagerAdapter {
+        private final List<Fragment> fragmentList = new ArrayList<>();
+
+        public PermissionPagerAdapter(FragmentManager manager) {
+            super(manager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        }
+
+        @NonNull
+        @Override
+        public Fragment getItem(int position) {
+            return fragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return fragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment) {
+            fragmentList.add(fragment);
+        }
+    }
+}

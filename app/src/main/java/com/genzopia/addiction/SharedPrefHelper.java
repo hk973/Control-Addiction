@@ -110,6 +110,12 @@ public class SharedPrefHelper {
     public void saveStartTime(long startTime) {
         sharedPreferences.edit().putLong("startTime", startTime).apply();
     }
+    public void setTimeActivateStatus(boolean status) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(KEY_TIME_ACTIVE, status);
+        editor.apply();
+    }
+
 
     public long getStartTime() {
         return sharedPreferences.getLong("startTime", 0);

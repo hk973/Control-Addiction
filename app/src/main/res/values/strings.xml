@@ -1,4 +1,22 @@
+
 <resources>
-    <string name="app_name">Control Addiction</string>
-    <string name="accessibility_service_description">Detects notification bar swipes for app functionality.</string>
+<string name="app_name">Control Addiction</string>
+<string name="accessibility_service_description">Detects notification bar swipes for app functionality.</string>
+<string name="notification_permission_title">Notification Permission</string>
+<string name="notification_permission_desc">We need notification permission to alert you when you\'ve reached your screen time limits.</string>
+<string name="usage_permission_title">Usage Access Permission</string>
+<string name="usage_permission_desc">We need usage access permission to monitor how much time you spend on different apps.</string>
+<string name="accessibility_permission_title">Accessibility Permission</string>
+<string name="accessibility_permission_desc">We need accessibility permission to help restrict access to addictive apps when you\'ve reached your time limits.</string>
+<string name="terms_title">Terms and Conditions</string>
+<string name="terms_checkbox">I agree to the Terms and Conditions</string>
+<string name="launcher_title">Set as Default Launcher</string>
+<string name="launcher_desc">For the best experience, set our app as your default launcher.</string>
+<string name="proceed">Proceed</string>
+<string name="finish_setup">Finish Setup</string>
+<string name="permission_granted">Permission Granted</string>
+<string name="permission_required">Permission Required</string>
+<string name="terms_accepted">Terms Accepted</string>
+<string name="terms_required">Terms Review Required</string>
+<string name="launcher_optional">Optional but Recommended</string>
 </resources>

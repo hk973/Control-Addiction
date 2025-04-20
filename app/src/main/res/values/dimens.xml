@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="dot_width">10dp</dimen>
+    <dimen name="dot_height">10dp</dimen>
+</resources>

@@ -7,5 +7,12 @@
     <color name="background_unselected_dark">#000000</color>
     <color name="background_selected_dark">#121212</color>
     <color name="button">#696969</color>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorGray">#BDBDBD</color>
+    <color name="green">#4CAF50</color>
+    <color name="red">#F44336</color>
+    <color name="blue">#2196F3</color>
     <color name="fast_scroll_highlight">#64B5F6</color>
 </resources>
