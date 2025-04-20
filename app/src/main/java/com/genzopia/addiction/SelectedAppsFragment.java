@@ -99,31 +99,7 @@ public class SelectedAppsFragment extends Fragment {
                 Intent intent = new Intent(getContext(), MainContainerActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//                finish(); // Close current activity
+                requireActivity().finish(); // Close current activity
 
 
             } else {
