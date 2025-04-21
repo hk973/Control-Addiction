@@ -53,17 +53,17 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar" /> <!-- Main Launcher Activity (Hidden from Recents) -->
         <activity
             android:name=".MainContainerActivity"
-            android:excludeFromRecents="true"
             android:exported="true"
+            android:excludeFromRecents="true"
             android:noHistory="true"
-            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"> <!-- Optional: Prevents back-stack retention -->
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity> <!-- Other Activities (Hidden from Recents if needed) -->
+        </activity><!-- Other Activities (Hidden from Recents if needed) -->
         <activity
             android:name=".SettingsActivity"
             android:excludeFromRecents="true"
@@ -81,7 +81,6 @@
             android:exported="true"> <!-- Hide from Recents -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity> <!-- Services (Unchanged) -->

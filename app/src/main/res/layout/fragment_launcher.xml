@@ -60,6 +60,15 @@
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:layout_marginBottom="16dp" />
+    <Button
+        android:id="@+id/proceedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/proceed"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:layout_marginBottom="16dp" />
+
 
 
 
