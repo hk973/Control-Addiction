@@ -33,5 +33,5 @@
 ### 🚀 Installation
 
 ```bash
-git clone https://github.com/your-username/addiction-control.git
+git clone https://github.com/hk973/Addiction_Control.git
 cd addiction-control
