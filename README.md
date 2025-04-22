@@ -34,4 +34,9 @@
 
 ```bash
 git clone https://github.com/hk973/Addiction_Control.git
-cd addiction-control
+cd addiction-control 
+```
+
+### 🤝 Contributions
+
+Feel free to open issues or pull requests. Any feature suggestions, bug reports, or improvements are welcome!
