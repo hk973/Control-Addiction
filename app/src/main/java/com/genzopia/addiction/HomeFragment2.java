@@ -96,7 +96,7 @@ public class HomeFragment2 extends Fragment {
 
     private void updateCountdown() {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
-        current_time = SystemClock.elapsedRealtime();
+        current_time = System.currentTimeMillis();
         startTime = sp.getStartTime();
         time = sp.getTimeLimitValue();
         boolean isActive = sp.getTimeActivateStatus();

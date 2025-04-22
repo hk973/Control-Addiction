@@ -28,7 +28,6 @@
                 android:text="Set the Time"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#333333"
                 android:layout_margin="16dp"/>
         </LinearLayout>
 

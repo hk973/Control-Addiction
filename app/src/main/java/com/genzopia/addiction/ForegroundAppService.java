@@ -85,7 +85,7 @@ public class ForegroundAppService extends Service {
         startTime = sharedPrefHelper.getStartTime();
         // If timer is active but no start time recorded, initialize
         if (isActive && startTime == 0) {
-            startTime = SystemClock.elapsedRealtime();
+            startTime = System.currentTimeMillis(); // Changed from elapsedRealtime()
             sharedPrefHelper.saveStartTime(startTime);
             sharedPrefHelper.saveInitialDuration(initialDuration);
         }
@@ -125,7 +125,8 @@ public class ForegroundAppService extends Service {
                     startTime = sharedPrefHelper.getStartTime();
 
                     if (isActive && initialDuration > 0 && startTime != 0) {
-                        long currentTime = SystemClock.elapsedRealtime();
+                        // In the timer thread loop:
+                        long currentTime = System.currentTimeMillis(); // Changed from elapsedRealtime()
                         long elapsedSeconds = (currentTime - startTime) / 1000;
                         int remainingTime = (int) (initialDuration - elapsedSeconds);
 
