@@ -1,4 +1,7 @@
 <resources>
     <dimen name="dot_width">10dp</dimen>
     <dimen name="dot_height">10dp</dimen>
+    <dimen name="menu_elevation">8dp</dimen>
+    <dimen name="handle_size">56dp</dimen>
+    <dimen name="menu_corner_radius">28dp</dimen>
 </resources>

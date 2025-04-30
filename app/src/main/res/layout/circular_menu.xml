@@ -1,0 +1,41 @@
+<!-- circular_menu.xml -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Circular Handle -->
+    <ImageView
+        android:id="@+id/drag_handle"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:src="@drawable/circle_shape"
+        android:elevation="8dp"/>
+
+    <!-- Expanded Menu (Initially hidden) -->
+    <LinearLayout
+        android:id="@+id/expanded_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        android:alpha="0"
+        android:elevation="8dp"
+        android:background="@drawable/menu_background">
+
+        <Button
+            android:id="@+id/btn_option1"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="1"/>
+
+        <Button
+            android:id="@+id/btn_option2"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="2"
+            android:layout_marginStart="8dp"/>
+
+    </LinearLayout>
+
+</FrameLayout>
