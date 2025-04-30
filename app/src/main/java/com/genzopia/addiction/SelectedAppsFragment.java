@@ -233,7 +233,7 @@ public class SelectedAppsFragment extends Fragment {
                         requestDisallowParentIntercept(false);
 
                         if (isDragging) {
-                            snapToNearestCorner(view, screenSize[0], screenSize[1]);
+                            snapToNearestEdge(view, screenSize[0], screenSize[1]);
                         } else {
                             // Handle click if under 200ms
                             if (System.currentTimeMillis() - startTime < 200) {
@@ -257,34 +257,62 @@ public class SelectedAppsFragment extends Fragment {
     }
 
 
-    private void snapToNearestCorner(View view, int screenWidth, int screenHeight) {
-        final float[] corners = {
-                0, 0, // Top-left
-                screenWidth - view.getWidth(), 0, // Top-right
-                0, screenHeight - view.getHeight(), // Bottom-left
-                screenWidth - view.getWidth(), screenHeight - view.getHeight() // Bottom-right
-        };
+    private void snapToNearestEdge(View view, int screenWidth, int screenHeight) {
+        // current position
+        float curX = view.getX();
+        float curY = view.getY();
+        float vw = view.getWidth();
+        float vh = view.getHeight();
 
-        float minDistance = Float.MAX_VALUE;
-        int closestCorner = 0;
+        // Define the 4 candidate snap‐points by projecting onto each edge:
+        //   Top edge:    x stays within [0, screenWidth-vw], y = 0
+        //   Bottom edge: x stays within [0, screenWidth-vw], y = screenHeight-vh
+        //   Left edge:   x = 0, y stays within [0, screenHeight-vh]
+        //   Right edge:  x = screenWidth-vw, y stays within [0, screenHeight-vh]
+        float[][] candidates = new float[4][2];
 
-        for (int i = 0; i < corners.length; i += 2) {
-            float distance = (float) Math.hypot(
-                    view.getX() - corners[i],
-                    view.getY() - corners[i + 1]
-            );
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestCorner = i;
+        // top
+        candidates[0][0] = clamp(curX, 0, screenWidth - vw);
+        candidates[0][1] = 0;
+
+        // bottom
+        candidates[1][0] = clamp(curX, 0, screenWidth - vw);
+        candidates[1][1] = screenHeight - vh;
+
+        // left
+        candidates[2][0] = 0;
+        candidates[2][1] = clamp(curY, 0, screenHeight - vh);
+
+        // right
+        candidates[3][0] = screenWidth - vw;
+        candidates[3][1] = clamp(curY, 0, screenHeight - vh);
+
+        // find the closest of the four
+        float minDist = Float.MAX_VALUE;
+        int   best   = 0;
+        for (int i = 0; i < candidates.length; i++) {
+            float dx = curX - candidates[i][0];
+            float dy = curY - candidates[i][1];
+            float dist = (float) Math.hypot(dx, dy);
+            if (dist < minDist) {
+                minDist = dist;
+                best = i;
             }
         }
 
+        // animate to it
         view.animate()
-                .x(corners[closestCorner])
-                .y(corners[closestCorner + 1])
+                .x(candidates[best][0])
+                .y(candidates[best][1])
                 .setDuration(200)
                 .start();
     }
+
+    /** simple clamp helper **/
+    private float clamp(float val, float min, float max) {
+        return Math.max(min, Math.min(max, val));
+    }
+
 
     private void toggleMenu() {
         if (isMenuExpanded) {
