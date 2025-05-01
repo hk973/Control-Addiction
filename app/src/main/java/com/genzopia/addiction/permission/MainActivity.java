@@ -104,16 +104,23 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         }
     }
 
-    // PermissionListener implementation
     @Override
     public void onPermissionGranted(int position) {
         // Update max allowed position
         if (position + 1 > maxAllowedPosition) {
             maxAllowedPosition = position + 1;
         }
+
         // Move to next page if applicable
         if (position == viewPager.getCurrentItem() && position < pagerAdapter.getCount() - 1) {
-            viewPager.setCurrentItem(position + 1, true);
+            viewPager.postDelayed(() -> {
+                try {
+                    viewPager.setCurrentItem(position + 1, true);
+                } catch (IllegalStateException e) {
+                    // Handle exception gracefully
+                    e.printStackTrace();
+                }
+            }, 100); // Small delay to ensure transaction safety
         }
     }
 
