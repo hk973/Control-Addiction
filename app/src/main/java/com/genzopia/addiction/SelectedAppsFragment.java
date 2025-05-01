@@ -211,51 +211,29 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
             private float dX, dY;
             private long startTime;
             private boolean isDragging = false;
-            private boolean isValidTouch = false;
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        // Get view dimensions
-                        int width = view.getWidth();
-                        int height = view.getHeight();
-
-                        // Calculate center coordinates
-                        float centerX = width / 2f;
-                        float centerY = height / 2f;
-
-                        // Calculate touch coordinates relative to view
-                        float touchX = event.getX();
-                        float touchY = event.getY();
-
-                        // Calculate distance from touch to center
-                        float distance = (float) Math.sqrt(
-                                Math.pow(touchX - centerX, 2) + Math.pow(touchY - centerY, 2)
-                        );
-
-                        // Use smallest dimension for radius to ensure circular detection
-                        float radius = Math.min(width, height) / 2f;
-
-                        // Only handle touches inside the circle
-                        if (distance > radius) {
-                            isValidTouch = false;
-                            return false;
-                        }
-
-                        // Valid touch detected
+                    case MotionEvent.ACTION_DOWN:
                         dX = view.getX() - event.getRawX();
                         dY = view.getY() - event.getRawY();
                         startTime = System.currentTimeMillis();
                         isDragging = false;
-                        isValidTouch = true;
                         return true;
-                    }
 
-                    case MotionEvent.ACTION_MOVE: {
-                        if (!isValidTouch) return false;
+                    case MotionEvent.ACTION_MOVE:
+                        // Calculate absolute movement
+                        float deltaX = Math.abs(event.getRawX() - (view.getX() + dX));
+                        float deltaY = Math.abs(event.getRawY() - (view.getY() + dY));
 
-                        // Existing drag logic
+                        if (deltaX > 5 || deltaY > 5) {
+                            isDragging = true;
+                            // Disable ViewPager scrolling
+                            requestDisallowParentIntercept(true);
+                        }
+
+                        // Calculate new coordinates
                         float newX = event.getRawX() + dX;
                         float newY = event.getRawY() + dY;
 
@@ -269,26 +247,26 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
                                 .setDuration(0)
                                 .start();
                         return true;
-                    }
 
-                    case MotionEvent.ACTION_UP: {
-                        if (!isValidTouch) return false;
-
+                    case MotionEvent.ACTION_UP:
                         requestDisallowParentIntercept(false);
+
                         if (isDragging) {
                             snapToNearestEdge(view, screenSize[0], screenSize[1]);
                         } else {
+                            // Handle click if under 200ms
                             if (System.currentTimeMillis() - startTime < 200) {
                                 toggleMenu();
                             }
                         }
-                        isValidTouch = false;
                         return true;
-                    }
+
+                    default:
+                        return false;
                 }
-                return false;
             }
-        });}
+        });
+    }
     private void requestDisallowParentIntercept(boolean disallow) {
         ViewParent parent = dragHandle.getParent();
         while (parent != null) {
