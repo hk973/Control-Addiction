@@ -7,18 +7,28 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class MainPagerAdapter extends FragmentStateAdapter {
 
+    private final Fragment[] fragments;
+
     public MainPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
+        fragments = new Fragment[]{
+                new HomeFragment2(),
+                new SelectedAppsFragment()
+        };
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return position == 0 ? new HomeFragment2() : new SelectedAppsFragment();
+        return fragments[position];
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return fragments.length;
+    }
+
+    public Fragment getFragment(int position) {
+        return fragments[position];
     }
 }

@@ -10,14 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
 
-public class SelectedAppsFragment extends Fragment {
+public class SelectedAppsFragment extends Fragment implements OnBack{
 
     private RecyclerView recyclerView;
     private SelectedAppsAdapter adapter;
@@ -351,4 +350,15 @@ public class SelectedAppsFragment extends Fragment {
                 .start();
     }
 
+    @Override
+    public void back(ViewPager2 viewPager) {
+        if (isMenuExpanded) {
+            collapseMenu();
+        }else {
+            viewPager.setCurrentItem(0);
+        }
+        Log.e("test20000","back");
+
+
+    }
 }

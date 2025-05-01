@@ -9,11 +9,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 public class MainContainerActivity2 extends AppCompatActivity {
 MainFragment mainFragment;
     private ViewPager2 viewPager;
+    private MainPagerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,15 +23,18 @@ MainFragment mainFragment;
         setContentView(R.layout.activity_main_container);
 
         viewPager = findViewById(R.id.view_pager);
-        viewPager.setAdapter(new MainPagerAdapter(this));
+        adapter = new MainPagerAdapter(this);
+        viewPager.setAdapter(adapter);
     }
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
 
-        if (viewPager.getCurrentItem() == 1 ) {
+        int currentItem = viewPager.getCurrentItem();
+        Fragment fragment = adapter.getFragment(currentItem);
 
-                viewPager.setCurrentItem(0);
+        if (fragment instanceof OnBack) {
+            ((OnBack) fragment).back(viewPager); // call custom back
 
         }
     }
