@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
@@ -213,6 +214,11 @@ public class MainFragment extends Fragment {
         Button buttonSet = dialogView.findViewById(R.id.buttonSet);
         Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
         Button buttonMode = dialogView.findViewById(R.id.buttonMode);
+        CardView card15Min = dialogView.findViewById(R.id.card15Min);
+        CardView card30Min = dialogView.findViewById(R.id.card30Min);
+        CardView card1Hour = dialogView.findViewById(R.id.card1Hour);
+        CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
+
 
         // Set picker ranges
         daysPicker.setMinValue(0);
@@ -221,6 +227,11 @@ public class MainFragment extends Fragment {
         hoursPicker.setMaxValue(23); // Max 23 hours
         minutesPicker.setMinValue(0);
         minutesPicker.setMaxValue(59); // Max 59 minutes
+        // Set click listeners for preset times
+        card15Min.setOnClickListener(v -> setTimeValues(1, 0, 0, daysPicker, hoursPicker, minutesPicker));
+        card30Min.setOnClickListener(v -> setTimeValues(0, 0, 30, daysPicker, hoursPicker, minutesPicker));
+        card1Hour.setOnClickListener(v -> setTimeValues(0, 1, 0, daysPicker, hoursPicker, minutesPicker));
+        card3Hours.setOnClickListener(v -> setTimeValues(0, 3, 0, daysPicker, hoursPicker, minutesPicker));
 
         // Initialize with current values
         daysPicker.setValue(selectedDays);
@@ -389,6 +400,13 @@ public class MainFragment extends Fragment {
                 })
                 .create()
                 .show();
+    }
+    // Helper method to update picker values
+    private void setTimeValues(int days, int hours, int minutes,
+                               NumberPicker daysPicker, NumberPicker hoursPicker, NumberPicker minutesPicker) {
+        daysPicker.setValue(days);
+        hoursPicker.setValue(hours);
+        minutesPicker.setValue(minutes);
     }
 
     private void applyTheme(AppBarLayout appBarLayout, TextView titleTextView,
