@@ -6,7 +6,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,6 +27,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ViewParent;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -47,6 +50,7 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
     private ImageView dragHandle;
     private LinearLayout expandedMenu;
     private boolean isMenuExpanded = false;
+    private View overlay;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,6 +60,7 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+
         super.onViewCreated(view, savedInstanceState);
         setupCircularMenu(view);
 
@@ -180,6 +185,21 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
     private void setupCircularMenu(View rootView) {
         dragHandle = rootView.findViewById(R.id.drag_handle);
         expandedMenu = rootView.findViewById(R.id.expanded_menu);
+
+        // Position the handle at the right middle edge initially
+        rootView.post(() -> {
+            int screenWidth = rootView.getWidth();
+            int screenHeight = rootView.getHeight();
+            int handleWidth = dragHandle.getWidth();
+            int handleHeight = dragHandle.getHeight();
+
+            // Calculate right middle position
+            float x = screenWidth - handleWidth;
+            float y = (screenHeight - handleHeight) / 2f;
+
+            dragHandle.setX(x);
+            dragHandle.setY(y);
+        });
 
         final int[] screenSize = new int[2];
         rootView.post(() -> {
@@ -323,14 +343,65 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
 
     private void expandMenu() {
         isMenuExpanded = true;
-        expandedMenu.setVisibility(View.VISIBLE);
 
-        // Position menu next to handle
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) expandedMenu.getLayoutParams();
-        params.leftMargin = (int) dragHandle.getX() - expandedMenu.getWidth()/2;
-        params.topMargin = (int) dragHandle.getY() - expandedMenu.getHeight()/2;
+        // Get screen dimensions
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int screenHeight = displayMetrics.heightPixels;
+        int desiredHeight = screenHeight / 2;
+
+        // Set layout params to match parent width and half screen height, centered
+        ViewGroup.LayoutParams params = expandedMenu.getLayoutParams();
+        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        params.height = desiredHeight;
+        if (params instanceof FrameLayout.LayoutParams) {
+            ((FrameLayout.LayoutParams) params).gravity = Gravity.CENTER;
+        }
         expandedMenu.setLayoutParams(params);
 
+        // Create overlay if it doesn't exist
+        if (overlay == null) {
+            overlay = new View(requireContext());
+            overlay.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            overlay.setBackgroundColor(0x10000000); // Semi-transparent black
+            overlay.setOnTouchListener((v, event) -> {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    // Get menu position
+                    int[] menuLocation = new int[2];
+                    expandedMenu.getLocationOnScreen(menuLocation);
+                    int x = (int) event.getRawX();
+                    int y = (int) event.getRawY();
+
+                    // Check if touch is outside menu
+                    if (x < menuLocation[0] || x > menuLocation[0] + expandedMenu.getWidth() ||
+                            y < menuLocation[1] || y > menuLocation[1] + expandedMenu.getHeight()) {
+                        collapseMenu();
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+
+        // Add overlay to root view
+        ViewGroup rootView = (ViewGroup) getView();
+        if (overlay.getParent() == null) {
+            rootView.addView(overlay);
+        }
+
+        // Ensure menu and handle are above overlay
+        rootView.bringChildToFront(dragHandle);
+        rootView.bringChildToFront(expandedMenu);
+
+        // Initial animation state
+        expandedMenu.setAlpha(0f);
+        expandedMenu.setScaleX(0.9f);
+        expandedMenu.setScaleY(0.9f);
+        expandedMenu.setVisibility(View.VISIBLE);
+
+        // Animate to full size
         expandedMenu.animate()
                 .alpha(1f)
                 .scaleX(1f)
@@ -343,10 +414,16 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
         isMenuExpanded = false;
         expandedMenu.animate()
                 .alpha(0f)
-                .scaleX(0.5f)
-                .scaleY(0.5f)
+                .scaleX(0.9f)
+                .scaleY(0.9f)
                 .setDuration(300)
-                .withEndAction(() -> expandedMenu.setVisibility(View.INVISIBLE))
+                .withEndAction(() -> {
+                    expandedMenu.setVisibility(View.INVISIBLE);
+                    // Remove overlay when collapsed
+                    if (overlay != null && overlay.getParent() != null) {
+                        ((ViewGroup) overlay.getParent()).removeView(overlay);
+                    }
+                })
                 .start();
     }
 
