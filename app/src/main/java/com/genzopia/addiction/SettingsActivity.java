@@ -1,5 +1,6 @@
 package com.genzopia.addiction;
 
+import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
@@ -49,5 +50,11 @@ public class SettingsActivity extends AppCompatActivity {
             boolean isClick = checkedId == R.id.clickOption;
             sharedPrefHelper.setClickToOpen(isClick);
         });
+    }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+
     }
 }
