@@ -118,6 +118,7 @@
                 android:thumbTint="#FF5722"/>
 
             <TextView
+                android:id="@+id/difficultyLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Easy"

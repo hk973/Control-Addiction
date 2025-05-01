@@ -1,6 +1,7 @@
 package com.genzopia.addiction;
 
 import android.accessibilityservice.AccessibilityService;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +60,7 @@ public class MainFragment extends Fragment {
      int selectedMinutes = 0;
     private AppListViewModel viewModel;
     private ProgressBar progressBar;
+    private SeekBar.OnSeekBarChangeListener seekBarChangeListener;
 
 
     @Override
@@ -204,29 +207,102 @@ public class MainFragment extends Fragment {
         NumberPicker daysPicker = dialogView.findViewById(R.id.daysPicker);
         NumberPicker hoursPicker = dialogView.findViewById(R.id.hoursPicker);
         NumberPicker minutesPicker = dialogView.findViewById(R.id.minutesPicker);
+        SeekBar difficultySlider = dialogView.findViewById(R.id.difficultySlider);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"})
+        TextView difficultyLabel = dialogView.findViewById(R.id.difficultyLabel);
         Button buttonSet = dialogView.findViewById(R.id.buttonSet);
         Button buttonCancel = dialogView.findViewById(R.id.buttonCancel);
-        Button buttonmode=dialogView.findViewById(R.id.buttonMode);
+        Button buttonMode = dialogView.findViewById(R.id.buttonMode);
 
+        // Set picker ranges
         daysPicker.setMinValue(0);
-        daysPicker.setMaxValue(30);
-        daysPicker.setValue(selectedDays);
-
+        daysPicker.setMaxValue(30); // Max 30 days
         hoursPicker.setMinValue(0);
-        hoursPicker.setMaxValue(23);
-        hoursPicker.setValue(selectedHours);
-
+        hoursPicker.setMaxValue(23); // Max 23 hours
         minutesPicker.setMinValue(0);
-        minutesPicker.setMaxValue(59);
+        minutesPicker.setMaxValue(59); // Max 59 minutes
+
+        // Initialize with current values
+        daysPicker.setValue(selectedDays);
+        hoursPicker.setValue(selectedHours);
         minutesPicker.setValue(selectedMinutes);
+
+        // Calculate initial progress (0-100)
+        int totalMinutes = (selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes;
+        int maxPossibleMinutes = (30 * 24 * 60) + (23 * 60) + 59; // 30 days, 23 hours, 59 minutes
+        int progress = (int) (((float)totalMinutes / maxPossibleMinutes) * 100);
+        difficultySlider.setProgress(progress);
+        updateDifficultyLabel(difficultyLabel, progress);
+
+        // Picker change listeners
+        NumberPicker.OnValueChangeListener pickerChangeListener = (picker, oldVal, newVal) -> {
+            int days = daysPicker.getValue();
+            int hours = hoursPicker.getValue();
+            int minutes = minutesPicker.getValue();
+
+            // Calculate total minutes
+            int total = (days * 24 * 60) + (hours * 60) + minutes;
+            int maxTotal = (30 * 24 * 60) + (23 * 60) + 59;
+            int newProgress = (int) (((float)total / maxTotal) * 100);
+
+            // Update seekbar without triggering its listener
+            difficultySlider.setOnSeekBarChangeListener(null);
+            difficultySlider.setProgress(newProgress);
+            updateDifficultyLabel(difficultyLabel, newProgress);
+            difficultySlider.setOnSeekBarChangeListener(seekBarChangeListener);
+
+        };
+
+        daysPicker.setOnValueChangedListener(pickerChangeListener);
+        hoursPicker.setOnValueChangedListener(pickerChangeListener);
+        minutesPicker.setOnValueChangedListener(pickerChangeListener);
+
+        // Seekbar change listener
+         seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    // Calculate total minutes based on progress
+                    int maxTotalMinutes = (30 * 24 * 60) + (23 * 60) + 59;
+                    int totalMinutes = (int) ((progress / 100f) * maxTotalMinutes);
+
+                    // Convert back to days, hours, minutes
+                    int days = totalMinutes / (24 * 60);
+                    int remainingMinutes = totalMinutes % (24 * 60);
+                    int hours = remainingMinutes / 60;
+                    int minutes = remainingMinutes % 60;
+
+                    // Update pickers without triggering their listeners
+                    daysPicker.setOnValueChangedListener(null);
+                    hoursPicker.setOnValueChangedListener(null);
+                    minutesPicker.setOnValueChangedListener(null);
+
+                    daysPicker.setValue(days);
+                    hoursPicker.setValue(hours);
+                    minutesPicker.setValue(minutes);
+
+                    daysPicker.setOnValueChangedListener(pickerChangeListener);
+                    hoursPicker.setOnValueChangedListener(pickerChangeListener);
+                    minutesPicker.setOnValueChangedListener(pickerChangeListener);
+
+                    updateDifficultyLabel(difficultyLabel, progress);
+                }
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
+
+        difficultySlider.setOnSeekBarChangeListener(seekBarChangeListener);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         AlertDialog dialog = builder.setView(dialogView).create();
-//doing work
+
         buttonSet.setOnClickListener(v -> {
             selectedDays = daysPicker.getValue();
             selectedHours = hoursPicker.getValue();
             selectedMinutes = minutesPicker.getValue();
+
             if(selectedApps == null || selectedApps.isEmpty()) {
                 Toast.makeText(requireContext(), "Please select at least 1 App to set as mode", Toast.LENGTH_SHORT).show();
                 return;
@@ -236,67 +312,40 @@ public class MainFragment extends Fragment {
                 Toast.makeText(requireContext(), "Please set a time limit", Toast.LENGTH_SHORT).show();
                 return;
             }
+
             if (!isAccessibilityServiceEnabled(requireContext(), NotificationBarDetectorService.class)) {
-
-                AlertDialog.Builder builderr = new AlertDialog.Builder(getContext());
-                builderr.setTitle("Accessibility Permission Required");
-                builderr.setMessage("To completely lock the apps, this app needs Accessibility feature to be enabled. Please enable the feature.");
-
-                builderr.setPositiveButton("Enable", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                });
-
-                builderr.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(getContext(), "You can't lock apps without Accessibility access", Toast.LENGTH_LONG).show();
-                        dialog.dismiss();
-                    }
-                });
-
-                AlertDialog dialoge = builderr.create();
-                dialoge.show();
-            }else {
+                showAccessibilityDialog();
+            } else {
                 Log.d("BatteryOpt", "Already whitelisted");
                 isTimeSet = true;
                 updateTimeDisplay();
                 dialog.dismiss();
-
             }
-
         });
-        buttonmode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selectedDays = daysPicker.getValue();
-                selectedHours = hoursPicker.getValue();
-                selectedMinutes = minutesPicker.getValue();
 
-                if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
-                    Toast.makeText(requireContext(), "Please set a time limit", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        buttonMode.setOnClickListener(view -> {
+            selectedDays = daysPicker.getValue();
+            selectedHours = hoursPicker.getValue();
+            selectedMinutes = minutesPicker.getValue();
 
-                if(selectedApps == null || selectedApps.isEmpty()) {
-                    Toast.makeText(requireContext(), "Please select at least 1 App to set as mode", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                int totalsec = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
-                MyTileService mt = new MyTileService();
-                mt.savePreferences_mode(getContext(), selectedApps, totalsec);
-
-                Toast.makeText(requireContext(), "Mode has been set successfully", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-
-                // Show GIF Dialog
-                new GIFDialogFragment().show(requireActivity().getSupportFragmentManager(), "gif_dialog");
+            if (selectedDays == 0 && selectedHours == 0 && selectedMinutes == 0) {
+                Toast.makeText(requireContext(), "Please set a time limit", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            if(selectedApps == null || selectedApps.isEmpty()) {
+                Toast.makeText(requireContext(), "Please select at least 1 App to set as mode", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int totalsec = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
+            MyTileService mt = new MyTileService();
+            mt.savePreferences_mode(getContext(), selectedApps, totalsec);
+
+            Toast.makeText(requireContext(), "Mode has been set successfully", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+
+            new GIFDialogFragment().show(requireActivity().getSupportFragmentManager(), "gif_dialog");
         });
 
         buttonCancel.setOnClickListener(v -> dialog.dismiss());
@@ -307,6 +356,39 @@ public class MainFragment extends Fragment {
         }
 
         dialog.show();
+    }
+
+    private void updateDifficultyLabel(TextView label, int progress) {
+        String difficulty;
+        if (progress < 20) {
+            difficulty = "Very Easy";
+        } else if (progress < 40) {
+            difficulty = "Easy";
+        } else if (progress < 60) {
+            difficulty = "Medium";
+        } else if (progress < 80) {
+            difficulty = "Hard";
+        } else {
+            difficulty = "Very Hard";
+        }
+        label.setText(difficulty);
+    }
+
+    private void showAccessibilityDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Accessibility Permission Required")
+                .setMessage("To completely lock the apps, this app needs Accessibility feature to be enabled. Please enable the feature.")
+                .setPositiveButton("Enable", (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    Toast.makeText(getContext(), "You can't lock apps without Accessibility access", Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
+                })
+                .create()
+                .show();
     }
 
     private void applyTheme(AppBarLayout appBarLayout, TextView titleTextView,
