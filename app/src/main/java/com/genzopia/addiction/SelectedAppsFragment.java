@@ -77,7 +77,8 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
         searchBar = view.findViewById(R.id.searchBar);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-
+        menu a=new menu(view);
+        a.initializeview();
         packageManager = requireActivity().getPackageManager();
         sharedPrefHelper = new SharedPrefHelper(requireContext());
         selectedApps = sharedPrefHelper.getSelectedAppValue();
