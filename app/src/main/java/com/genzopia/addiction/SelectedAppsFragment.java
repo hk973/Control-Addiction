@@ -208,10 +208,16 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
             screenSize[1] = rootView.getHeight();
         });
 
+        // Add separate click listener for reliable click detection
+        dragHandle.setOnClickListener(v -> {
+            toggleMenu();
+        });
+
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
             private float dX, dY;
-            private long startTime;
+            private float startX, startY;
             private boolean isDragging = false;
+            private static final float CLICK_DISTANCE_THRESHOLD = 10f; // In pixels
 
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -219,34 +225,39 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
                     case MotionEvent.ACTION_DOWN:
                         dX = view.getX() - event.getRawX();
                         dY = view.getY() - event.getRawY();
-                        startTime = System.currentTimeMillis();
+                        startX = event.getRawX();
+                        startY = event.getRawY();
                         isDragging = false;
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
                         // Calculate absolute movement
-                        float deltaX = Math.abs(event.getRawX() - (view.getX() + dX));
-                        float deltaY = Math.abs(event.getRawY() - (view.getY() + dY));
+                        float deltaX = Math.abs(event.getRawX() - startX);
+                        float deltaY = Math.abs(event.getRawY() - startY);
 
-                        if (deltaX > 5 || deltaY > 5) {
+                        // Only consider as dragging if moved beyond threshold
+                        if (!isDragging && (deltaX > CLICK_DISTANCE_THRESHOLD || deltaY > CLICK_DISTANCE_THRESHOLD)) {
                             isDragging = true;
                             // Disable ViewPager scrolling
                             requestDisallowParentIntercept(true);
                         }
 
-                        // Calculate new coordinates
-                        float newX = event.getRawX() + dX;
-                        float newY = event.getRawY() + dY;
+                        // Only move if we're dragging
+                        if (isDragging) {
+                            // Calculate new coordinates
+                            float newX = event.getRawX() + dX;
+                            float newY = event.getRawY() + dY;
 
-                        // Constrain to screen boundaries
-                        newX = Math.max(0, Math.min(newX, screenSize[0] - view.getWidth()));
-                        newY = Math.max(0, Math.min(newY, screenSize[1] - view.getHeight()));
+                            // Constrain to screen boundaries
+                            newX = Math.max(0, Math.min(newX, screenSize[0] - view.getWidth()));
+                            newY = Math.max(0, Math.min(newY, screenSize[1] - view.getHeight()));
 
-                        view.animate()
-                                .x(newX)
-                                .y(newY)
-                                .setDuration(0)
-                                .start();
+                            view.animate()
+                                    .x(newX)
+                                    .y(newY)
+                                    .setDuration(0)
+                                    .start();
+                        }
                         return true;
 
                     case MotionEvent.ACTION_UP:
@@ -254,12 +265,19 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
 
                         if (isDragging) {
                             snapToNearestEdge(view, screenSize[0], screenSize[1]);
+                            return true;
                         } else {
-                            // Handle click if under 200ms
-                            if (System.currentTimeMillis() - startTime < 200) {
-                                toggleMenu();
+                            // Check if it's a small movement (potential click)
+                            float totalMovement = Math.abs(event.getRawX() - startX) + Math.abs(event.getRawY() - startY);
+                            if (totalMovement < CLICK_DISTANCE_THRESHOLD) {
+                                // Let the click listener handle it
+                                view.performClick();
                             }
                         }
+                        return true;
+
+                    case MotionEvent.ACTION_CANCEL:
+                        requestDisallowParentIntercept(false);
                         return true;
 
                     default:
