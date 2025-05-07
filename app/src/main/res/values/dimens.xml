@@ -4,4 +4,16 @@
     <dimen name="menu_elevation">8dp</dimen>
     <dimen name="handle_size">56dp</dimen>
     <dimen name="menu_corner_radius">28dp</dimen>
+    <dimen name="notification_panel_corner_radius">16dp</dimen>
+    <dimen name="notification_panel_padding">16dp</dimen>
+    <dimen name="tile_size">50dp</dimen>
+    <dimen name="tile_icon_size">24dp</dimen>
+    <dimen name="tile_text_size">10sp</dimen>
+    <dimen name="tile_text_margin_top">4dp</dimen>
+    <dimen name="row_margin_top">16dp</dimen>
+    <dimen name="slider_section_margin_top">24dp</dimen>
+    <dimen name="slider_height">4dp</dimen>
+    <dimen name="slider_corner_radius">8dp</dimen>
+    <dimen name="slider_thumb_size">16dp</dimen>
+    <dimen name="slider_icon_margin_end">16dp</dimen>
 </resources>

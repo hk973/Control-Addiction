@@ -15,4 +15,12 @@
     <color name="red">#F44336</color>
     <color name="blue">#2196F3</color>
     <color name="fast_scroll_highlight">#64B5F6</color>
+    <color name="notification_panel_background">#222222</color>
+    <color name="quick_settings_tile_background">#333333</color>
+    <color name="quick_settings_tile_background_active">#666666</color>
+    <color name="slider_track_background">#444444</color>
+    <color name="slider_progress">#FFFFFF</color>
+    <color name="slider_thumb">#FFFFFF</color>
+    <color name="tile_text">#FFFFFF</color>
+    <color name="icon_color">#FFFFFF</color>
 </resources>
