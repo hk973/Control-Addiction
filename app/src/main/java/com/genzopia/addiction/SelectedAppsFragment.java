@@ -1,9 +1,12 @@
 package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -15,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,17 +30,24 @@ import java.util.List;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ViewParent;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ConsumeParams;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
 
-public class SelectedAppsFragment extends Fragment implements OnBack{
+public class SelectedAppsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SelectedAppsAdapter adapter;
@@ -48,7 +59,9 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
     private Handler timeCheckHandler = new Handler();
     private static final long CHECK_INTERVAL = 1000;
     private ImageView dragHandle;
-    private LinearLayout expandedMenu;
+    private BillingClient billingClient;
+    private SkuDetails targetSkuDetails; // To store fetched product details
+
     private boolean isMenuExpanded = false;
     private View overlay;
 
@@ -77,7 +90,7 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
         searchBar = view.findViewById(R.id.searchBar);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        menu a=new menu(view,getContext());
+
 
         packageManager = requireActivity().getPackageManager();
         sharedPrefHelper = new SharedPrefHelper(requireContext());
@@ -185,7 +198,7 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
     @SuppressLint("ClickableViewAccessibility")
     private void setupCircularMenu(View rootView) {
         dragHandle = rootView.findViewById(R.id.drag_handle);
-        expandedMenu = rootView.findViewById(R.id.expanded_menu);
+
 
         // Position the handle at the right middle edge initially
         rootView.post(() -> {
@@ -210,8 +223,28 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
 
         // Add separate click listener for reliable click detection
         dragHandle.setOnClickListener(v -> {
-            toggleMenu();
+            Dialog dialog = new Dialog(getContext());
+            dialog.setContentView(R.layout.dialog_unlock);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+            Button payToUnlockBtn = dialog.findViewById(R.id.payToUnlockBtn);
+            payToUnlockBtn.setOnClickListener(view -> {
+                // Trigger your payment flow here
+
+                dialog.dismiss();
+                if (targetSkuDetails != null) {
+                    BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+                            .setSkuDetails(targetSkuDetails)
+                            .build();
+                    billingClient.launchBillingFlow(getActivity(), flowParams);
+                } else {
+                    showMessage("Product not ready yet. Try again in a moment.");
+                }
+            });
+
+            dialog.show();
         });
+
 
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
             private float dX, dY;
@@ -350,111 +383,82 @@ public class SelectedAppsFragment extends Fragment implements OnBack{
     private float clamp(float val, float min, float max) {
         return Math.max(min, Math.min(max, val));
     }
-
-
-    private void toggleMenu() {
-        if (isMenuExpanded) {
-            collapseMenu();
-        } else {
-            expandMenu();
-        }
-    }
-
-    private void expandMenu() {
-        isMenuExpanded = true;
-
-        // Get screen dimensions
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int screenHeight = displayMetrics.heightPixels;
-        int desiredHeight = screenHeight / 2;
-
-        // Set layout params to match parent width and half screen height, centered
-        ViewGroup.LayoutParams params = expandedMenu.getLayoutParams();
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.height = desiredHeight;
-        if (params instanceof FrameLayout.LayoutParams) {
-            ((FrameLayout.LayoutParams) params).gravity = Gravity.CENTER;
-        }
-        expandedMenu.setLayoutParams(params);
-
-        // Create overlay if it doesn't exist
-        if (overlay == null) {
-            overlay = new View(requireContext());
-            overlay.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
-            overlay.setBackgroundColor(0x10000000); // Semi-transparent black
-            overlay.setOnTouchListener((v, event) -> {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    // Get menu position
-                    int[] menuLocation = new int[2];
-                    expandedMenu.getLocationOnScreen(menuLocation);
-                    int x = (int) event.getRawX();
-                    int y = (int) event.getRawY();
-
-                    // Check if touch is outside menu
-                    if (x < menuLocation[0] || x > menuLocation[0] + expandedMenu.getWidth() ||
-                            y < menuLocation[1] || y > menuLocation[1] + expandedMenu.getHeight()) {
-                        collapseMenu();
-                        return true;
-                    }
-                }
-                return false;
-            });
-        }
-
-        // Add overlay to root view
-        ViewGroup rootView = (ViewGroup) getView();
-        if (overlay.getParent() == null) {
-            rootView.addView(overlay);
-        }
-
-        // Ensure menu and handle are above overlay
-        rootView.bringChildToFront(dragHandle);
-        rootView.bringChildToFront(expandedMenu);
-
-        // Initial animation state
-        expandedMenu.setAlpha(0f);
-        expandedMenu.setScaleX(0.9f);
-        expandedMenu.setScaleY(0.9f);
-        expandedMenu.setVisibility(View.VISIBLE);
-
-        // Animate to full size
-        expandedMenu.animate()
-                .alpha(1f)
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(300)
-                .start();
-    }
-
-    private void collapseMenu() {
-        isMenuExpanded = false;
-        expandedMenu.animate()
-                .alpha(0f)
-                .scaleX(0.9f)
-                .scaleY(0.9f)
-                .setDuration(300)
-                .withEndAction(() -> {
-                    expandedMenu.setVisibility(View.INVISIBLE);
-                    // Remove overlay when collapsed
-                    if (overlay != null && overlay.getParent() != null) {
-                        ((ViewGroup) overlay.getParent()).removeView(overlay);
+    private void initBillingClient() {
+        billingClient = BillingClient.newBuilder(getContext())
+                .enablePendingPurchases()
+                .setListener((billingResult, purchases) -> {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+                        for (Purchase purchase : purchases) {
+                            handlePurchase(purchase);
+                        }
                     }
                 })
-                .start();
+                .build();
+
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(BillingResult billingResult) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    queryProductDetails();
+                }
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                // Retry connection if needed
+            }
+        });
     }
 
-    @Override
-    public void back(ViewPager2 viewPager) {
-        if (isMenuExpanded) {
-            collapseMenu();
-        }else {
-            viewPager.setCurrentItem(0);
-        }
-        Log.e("test20000","back");
+    private void queryProductDetails() {
+        List<String> skuList = List.of("unlock_discipline_lock_v2");
+
+        SkuDetailsParams params = SkuDetailsParams.newBuilder()
+                .setSkusList(skuList)
+                .setType(BillingClient.SkuType.INAPP)
+                .build();
+
+        billingClient.querySkuDetailsAsync(params, (billingResult, skuDetailsList) -> {
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
+                for (SkuDetails skuDetails : skuDetailsList) {
+                    if (skuDetails.getSku().equals("unlock_discipline_lock_v2")) {
+                        targetSkuDetails = skuDetails;
+                    }
+                }
+            }
+        });
+    }
+
+    private void handlePurchase(Purchase purchase) {
+        // Consume the purchase to make it "consumable"
+        ConsumeParams consumeParams = ConsumeParams.newBuilder()
+                .setPurchaseToken(purchase.getPurchaseToken())
+                .build();
+
+        billingClient.consumeAsync(consumeParams, (billingResult, purchaseToken) -> {
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                // Save time limit after successful purchase
+                SharedPrefHelper prefHelper = new SharedPrefHelper(getContext());
+                prefHelper.saveTimeLimitValue(0);
+                prefHelper.saveTimeActivateStatus(false);
+
+                // Show success message
+                showMessage("Unlocked successfully!");
+            } else {
+                showMessage("Purchase failed. Try again.");
+            }
+        });
+
+    }
+    private void showMessage(String msg) {
+               new AlertDialog.Builder(getContext())
+                .setMessage(msg)
+                .setPositiveButton("OK", null)
+                .show();
 
 
     }
+
+
+
 }
