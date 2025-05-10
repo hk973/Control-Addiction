@@ -5,10 +5,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Circular Handle -->
-    <ImageView
+    <FrameLayout
         android:id="@+id/drag_handle"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:src="@drawable/circle_shape"
-        android:elevation="8dp"/>
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/circle_shape"
+        android:layout_gravity="center">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/unlock"
+            android:scaleType="fitCenter" />
+    </FrameLayout>
+
+
 </FrameLayout>

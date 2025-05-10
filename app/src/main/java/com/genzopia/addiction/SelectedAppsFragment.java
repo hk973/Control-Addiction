@@ -58,7 +58,7 @@ public class SelectedAppsFragment extends Fragment {
     private SharedPrefHelper sharedPrefHelper;
     private Handler timeCheckHandler = new Handler();
     private static final long CHECK_INTERVAL = 1000;
-    private ImageView dragHandle;
+    private FrameLayout dragHandle;
     private BillingClient billingClient;
     private SkuDetails targetSkuDetails; // To store fetched product details
 
