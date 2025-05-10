@@ -75,17 +75,8 @@ public class SelectedAppsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 
         super.onViewCreated(view, savedInstanceState);
+        initBillingClient();
         setupCircularMenu(view);
-
-        BillingClient billingClient = BillingClient.newBuilder(requireContext())
-                .setListener(new PurchasesUpdatedListener() {
-                    @Override
-                    public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases) {
-                        // Handle purchases
-                    }
-                })
-                .enablePendingPurchases()
-                .build();
 
         searchBar = view.findViewById(R.id.searchBar);
         recyclerView = view.findViewById(R.id.recyclerView);
