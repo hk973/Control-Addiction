@@ -89,10 +89,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Services (Unchanged) -->
-        <service
-            android:name=".ForegroundAppService"
-            android:foregroundServiceType="dataSync" />
+        </activity>
+
         <service
             android:name=".MyTileService"
             android:exported="true"

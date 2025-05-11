@@ -62,7 +62,6 @@ public class MyTileService extends TileService {
 
         // Start async operation
         new Thread(() -> {
-            // Simulate async work (replace with your actual task)
             try {
 
                 start_mode();

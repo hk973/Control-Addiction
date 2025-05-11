@@ -76,9 +76,7 @@ public class SharedPrefHelper {
         return sharedPreferences.getInt(KEY_TIME_LIMIT, 0);
     }
 
-    public boolean getTimeActivateStatus() {
-        return sharedPreferences.getBoolean(KEY_TIME_ACTIVE, false);
-    }
+
 
     public void writeData(ArrayList<String> selectedApps, int timeLimit, boolean isActive) {
         Gson gson = new Gson();
@@ -127,5 +125,30 @@ public class SharedPrefHelper {
 
     public int getInitialDuration() {
         return sharedPreferences.getInt("initialDuration", 0);
+    }
+    public boolean getTimeActivateStatus() {
+        boolean isActive = sharedPreferences.getBoolean(KEY_TIME_ACTIVE, false);
+        if (isActive) {
+            long startTime = getStartTime();
+            int initialDuration = getInitialDuration();
+            long currentTime = System.currentTimeMillis();
+            long elapsed = currentTime - startTime;
+            long durationMillis = initialDuration * 1000L; // Convert seconds to milliseconds
+
+            if (elapsed >= durationMillis) {
+                setTimeActivateStatus(false);
+                return false;
+            }
+        }
+        return isActive;
+    }
+
+
+    public long getRemainingTimeMillis() {
+        long startTime = getStartTime();
+        int initialDuration = getInitialDuration();
+        long durationMillis = initialDuration * 1000L;
+        long elapsed = System.currentTimeMillis() - startTime;
+        return Math.max(durationMillis - elapsed, 0);
     }
 }

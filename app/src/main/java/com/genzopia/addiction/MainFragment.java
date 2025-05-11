@@ -467,9 +467,12 @@ public class MainFragment extends Fragment {
             return;
         }
 
-        int totalsec = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes)*60;
+        int totalSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
+
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
-        sharedPrefHelper.writeData(selectedApps, totalsec, true);
+        sharedPrefHelper.saveStartTime(System.currentTimeMillis());
+        sharedPrefHelper.saveInitialDuration(totalSeconds);
+        sharedPrefHelper.setTimeActivateStatus(true);
 
         startActivity(new Intent(requireActivity(), MainContainerActivity2.class));
         requireActivity().finish();

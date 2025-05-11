@@ -100,14 +100,8 @@ public class SelectedAppsFragment extends Fragment {
             }
             @Override public void afterTextChanged(Editable s) {}
         });
+    }
 
-        Intent serviceIntent = new Intent(requireContext(), ForegroundAppService.class);
-        serviceIntent.putStringArrayListExtra("selectedApps", selectedApps);
-        requireContext().startService(serviceIntent);
-    }
-    private void startPeriodicTimeCheck() {
-        timeCheckHandler.postDelayed(timeCheckRunnable, CHECK_INTERVAL);
-    }
 
     private Runnable timeCheckRunnable = new Runnable() {
         @Override
