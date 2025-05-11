@@ -84,11 +84,42 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         setupStatusBar();
         initializeViews();
         checksp();
+
+        // Remove progress bar since we expect instant load
+        progressBar.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+
+        AppListViewModel viewModel = new ViewModelProvider(requireActivity()).get(AppListViewModel.class);
+        viewModel.getAppItemsLiveData().observe(getViewLifecycleOwner(), appItems -> {
+            if (appItems != null) {
+                setupRecyclerView(appItems);
+            }
+        });
     }
+    private void setupRecyclerView(List<AppItem_Dataclass> appItems) {
+        if (appAdapter == null) {
+            appAdapter = new AppAdapter(appItems, selectedApps, requireContext());
+            recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+            recyclerView.setAdapter(appAdapter);
+
+            // FastScrollView setup...
+            FastScrollView fastScrollView = requireView().findViewById(R.id.fastScrollView);
+            fastScrollView.setRecyclerView(recyclerView);
+            appAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    fastScrollView.setSections(appAdapter.getSections());
+                }
+            });
+            fastScrollView.setSections(appAdapter.getSections());
+        } else {
+            appAdapter.updateData(appItems);
+        }
+    }
+
 
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
@@ -138,57 +169,9 @@ public class MainFragment extends Fragment {
         });
     }
 
-    public void loadAppsIfNeeded() {
-        if (viewModel.getAppItems() != null) {
-            setupRecyclerView(viewModel.getAppItems());
-        } else {
-            new LoadAppsTask().execute();
-        }
-    }
-    private void setupRecyclerView(List<AppItem_Dataclass> appItems) {
-        progressBar.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
-        appAdapter = new AppAdapter(appItems, selectedApps, requireContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(appAdapter);
 
-        FastScrollView fastScrollView = requireView().findViewById(R.id.fastScrollView);
-        fastScrollView.setRecyclerView(recyclerView);
-        appAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onChanged() {
-                fastScrollView.setSections(appAdapter.getSections());
-            }
-        });
-        fastScrollView.setSections(appAdapter.getSections());
-    }
 
-    private class LoadAppsTask extends AsyncTask<Void, Void, List<AppItem_Dataclass>> {
-        @Override
-        protected List<AppItem_Dataclass> doInBackground(Void... voids) {
-            PackageManager pm = requireActivity().getPackageManager();
-            List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-            List<AppItem_Dataclass> appItems = new ArrayList<>();
 
-            for (ApplicationInfo appInfo : apps) {
-                Intent launchIntent = pm.getLaunchIntentForPackage(appInfo.packageName);
-                if (launchIntent != null) {
-                    String appName = pm.getApplicationLabel(appInfo).toString();
-                    appItems.add(new AppItem_Dataclass(appName, appInfo.packageName));
-                }
-            }
-            Collections.sort(appItems, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
-            return appItems;
-        }
-
-        @Override
-        protected void onPostExecute(List<AppItem_Dataclass> appItems) {
-            if (isAdded()) {
-                viewModel.setAppItems(appItems);
-                setupRecyclerView(appItems);
-            }
-        }
-    }
 
     // All original MainActivity2 methods below - unchanged except context access
 

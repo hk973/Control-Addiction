@@ -103,6 +103,30 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
 
 
     }
+    public void updateData(List<AppItem_Dataclass> newData) {
+        // Update both the main list and full list (for filtering)
+        this.appList = new ArrayList<>(newData);
+        this.appListFull = new ArrayList<>(newData);
+
+        // Re-process sections for fast scroll
+        processSections();
+
+        // Update selected apps list to maintain selections
+        ArrayList<String> newSelectedApps = new ArrayList<>();
+        for (String packageName : selectedApps) {
+            // Only keep selections that exist in the new data
+            for (AppItem_Dataclass item : newData) {
+                if (item.getPackageName().equals(packageName)) {
+                    newSelectedApps.add(packageName);
+                    break;
+                }
+            }
+        }
+        this.selectedApps = newSelectedApps;
+
+        // Notify adapter of data change
+        notifyDataSetChanged();
+    }
 
     private void toggleSelection(View itemView, String packageName, int selectedColor, int unselectedColor) {
         if (selectedApps.contains(packageName)) {

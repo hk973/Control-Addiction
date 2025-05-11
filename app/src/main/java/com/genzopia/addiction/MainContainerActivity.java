@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 public class MainContainerActivity extends AppCompatActivity {
@@ -23,19 +24,10 @@ public class MainContainerActivity extends AppCompatActivity {
         viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
         viewPager.setUserInputEnabled(true);
 
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                if (position == 1) {
-                    Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + position);
-                    if (fragment instanceof MainFragment) {
-                        mainFragment = (MainFragment) fragment;
-                        mainFragment.loadAppsIfNeeded();
-                    }
-                }
-            }
-        });
+        AppListViewModel viewModel = new ViewModelProvider(this).get(AppListViewModel.class);
+        if (viewModel.getAppItemsLiveData().getValue() == null) {
+            viewModel.loadApps(getApplicationContext());
+        }
 
         SharedPrefHelper p = new SharedPrefHelper(this);
         if(p.getTimeLimitValue()<=0){
