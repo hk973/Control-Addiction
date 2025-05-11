@@ -96,24 +96,8 @@ public class HomeFragment2 extends Fragment {
 
     private void updateCountdown() {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
-        current_time = System.currentTimeMillis();
-        startTime = sp.getStartTime();
-        time = sp.getTimeLimitValue();
-        boolean isActive = sp.getTimeActivateStatus();
-
-        if (isActive) {
-            long elapsed_time = (current_time - startTime) / 1000;
-            long remain_time = time - elapsed_time;
-            Log.e("TIMER_UPDATE", "Remaining: " + remain_time + "s");
-            // Update your UI here
-            requireActivity().runOnUiThread(() -> {
-                // Example: Update a TextView
-
-                timerText.setText(formatTime((int) remain_time));
-            });
-        } else {
-            Log.e("TIMER_UPDATE", "Timer inactive");
-        }
+       long remaintime= sp.getRemainingTimeMillis();
+       timerText.setText(formatTime((int) remaintime/1000));
     }
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
