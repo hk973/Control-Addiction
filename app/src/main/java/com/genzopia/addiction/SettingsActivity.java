@@ -55,6 +55,7 @@ public class SettingsActivity extends AppCompatActivity {
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
 
     }
 }

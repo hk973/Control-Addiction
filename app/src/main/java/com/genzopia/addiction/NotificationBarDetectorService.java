@@ -53,7 +53,8 @@ public class NotificationBarDetectorService extends AccessibilityService {
                     Log.d("AppDetection", "Blocking non-selected app: " + currentPackage);
                     triggerBlockingPopup();
                     }
-                    if (className.contains("RecentsActivity")||className.contains("FrameLayout")) {
+                    if (className.contains("RecentsActivity")) {
+                        Log.e("test22",className);
                             performGlobalAction(GLOBAL_ACTION_HOME);
                     }
                 }
