@@ -140,6 +140,25 @@ public class MainFragment extends Fragment {
         ImageView settingsButton = requireView().findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(v ->
                 startActivity(new Intent(requireActivity(), SettingsActivity.class)));
+        int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                // Light mode
+              settingsButton.setImageResource(R.drawable.ic_setting_dark);
+                break;
+
+            case Configuration.UI_MODE_NIGHT_YES:
+               //dark mode
+                settingsButton.setImageResource(R.drawable.ic_settings);
+                break;
+
+            case Configuration.UI_MODE_NIGHT_UNDEFINED:
+                // Undefined mode
+                Log.d("ThemeCheck", "Theme is undefined");
+                break;
+        }
+
         AppBarLayout appBarLayout = requireView().findViewById(R.id.appBarLayout);
         TextView titleTextView = requireView().findViewById(R.id.titleTextView);
         progressBar = requireView().findViewById(R.id.progressBar);

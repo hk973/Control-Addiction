@@ -2,6 +2,8 @@
 package com.genzopia.addiction.permission;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +12,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.genzopia.addiction.MainContainerActivity;
@@ -38,6 +42,10 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
             startMainContainerActivity();
             return;
         }
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#000000")); // Your color
+
 
         sp.setReviewShown(false);
 

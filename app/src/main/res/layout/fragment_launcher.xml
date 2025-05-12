@@ -57,13 +57,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Set as Default Launcher"
+        android:textColor="@color/white"
+        android:backgroundTint="#FF5722"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
         android:layout_marginBottom="16dp" />
     <Button
         android:id="@+id/proceedButton"
         android:layout_width="wrap_content"
+        android:textColor="@color/white"
         android:layout_height="wrap_content"
+        android:backgroundTint="#FF5722"
         android:text="@string/proceed"
         android:paddingStart="24dp"
         android:paddingEnd="24dp"
