@@ -104,6 +104,12 @@
                 android:layout_marginTop="8dp">
 
                 <RadioButton
+                    android:id="@+id/grayd_opt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Follow System Theme"/>
+
+                <RadioButton
                     android:id="@+id/darkmode_opt"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -121,9 +127,78 @@
                     android:text="Gray Mode"/>
             </RadioGroup>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
 
-<!--    &lt;!&ndash; New Button for To Do List &ndash;&gt;-->
+
+    </androidx.cardview.widget.CardView>
+    <LinearLayout
+        android:id="@+id/dropdown_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Clickable Header -->
+        <TextView
+            android:id="@+id/dropdown_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Choose Theme Options"
+            android:padding="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:textStyle="bold" />
+
+        <!-- Expandable Content -->
+        <LinearLayout
+            android:id="@+id/dropdown_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="16dp">
+
+            <!-- FAQ 1 -->
+            <TextView
+                android:id="@+id/faq_question_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="What is Dark Mode?"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true" />
+
+            <TextView
+                android:id="@+id/faq_answer_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dark Mode is a UI setting that uses darker colors to reduce eye strain and save battery."
+                android:visibility="gone"
+                android:padding="8dp" />
+
+            <!-- FAQ 2 -->
+            <TextView
+                android:id="@+id/faq_question_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="How does Gray Mode work?"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true" />
+
+            <TextView
+                android:id="@+id/faq_answer_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Gray Mode applies a grayscale filter to the UI to minimize visual distractions."
+                android:visibility="gone"
+                android:padding="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <!--    &lt;!&ndash; New Button for To Do List &ndash;&gt;-->
 <!--    <androidx.cardview.widget.CardView-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="wrap_content"-->

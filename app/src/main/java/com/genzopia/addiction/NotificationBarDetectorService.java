@@ -49,7 +49,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
                     if(currentPackage.equals(package_i_want_tobe_app)||currentPackage.equals(i_want)||currentPackage.equals(youtube)||currentPackage.equals(chrome)||currentPackage.equals(interresolver)){
                         isApp=true;
                     }
-                    if(isApp&&!sharedPrefHelper.appwithnowarning().contains(currentPackage)){
+                    if(isApp&&!sharedPrefHelper.appWithNoWarning().contains(currentPackage)){
                     Log.d("AppDetection", "Blocking non-selected app: " + currentPackage);
                     triggerBlockingPopup();
                     }

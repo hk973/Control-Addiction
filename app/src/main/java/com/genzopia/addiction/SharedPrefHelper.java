@@ -20,6 +20,32 @@ public class SharedPrefHelper {
     private static final String KEY_DARK_MODE = "DarkMode";
 
     private static final String KEY_GRAY_MODE = "GrayMode";
+    private static final String KEY_MODE_NIGHT = "modeNight";
+
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
+
+    // Save if Gray Mode with Dark Mode is enabled
+    public void setGrayModeWithDarkMode(boolean enabled) {
+        editor.putBoolean(KEY_GRAY_MODE, enabled);
+        editor.apply();
+    }
+
+    // Get if Gray Mode with Dark Mode is enabled
+    public boolean isGrayModeWithDarkModeEnabled() {
+        return prefs.getBoolean(KEY_GRAY_MODE, false);
+    }
+
+    // Save Mode Night Preference (Yes or No)
+    public void setModeNight(boolean isNight) {
+        editor.putBoolean(KEY_MODE_NIGHT, isNight);
+        editor.apply();
+    }
+
+    // Get Mode Night Preference
+    public boolean isModeNightEnabled() {
+        return prefs.getBoolean(KEY_MODE_NIGHT, false);
+    }
 
     public boolean isGrayModeEnabled() {
         return prefs.getBoolean(KEY_GRAY_MODE, false);
@@ -28,10 +54,6 @@ public class SharedPrefHelper {
     public void setGrayModeEnabled(boolean enabled) {
         editor.putBoolean(KEY_GRAY_MODE, enabled).apply();
     }
-
-
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor editor;
 
     public SharedPrefHelper(Context context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);

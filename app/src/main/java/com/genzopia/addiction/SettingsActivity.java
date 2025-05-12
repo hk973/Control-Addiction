@@ -8,9 +8,12 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -54,6 +57,19 @@ public class SettingsActivity extends BaseActivity {
         RadioButton darkModeOption = findViewById(R.id.darkmode_opt);
         RadioButton lightModeOption = findViewById(R.id.lightmode_opt);
         RadioButton grayModeOption = findViewById(R.id.gray_opt);
+        RadioButton systemOption = findViewById(R.id.grayd_opt);
+        TextView dropdownHeader = findViewById(R.id.dropdown_header);
+        LinearLayout dropdownContent = findViewById(R.id.dropdown_content);
+
+// Toggle visibility when header is clicked
+        dropdownHeader.setOnClickListener(v -> {
+            if (dropdownContent.getVisibility() == View.VISIBLE) {
+                dropdownContent.setVisibility(View.GONE);
+            } else {
+                dropdownContent.setVisibility(View.VISIBLE);
+            }
+        });
+
 
         // Set current open method selection based on saved preferences
         boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
@@ -80,21 +96,36 @@ public class SettingsActivity extends BaseActivity {
 
         // Handle theme selection changes
         themeSelectionGroup.setOnCheckedChangeListener((group, checkedId) -> {
+
+
             if (checkedId == R.id.darkmode_opt) {
+                // Enable Dark Mode
                 sharedPrefHelper.setDarkModeEnabled(true);
                 sharedPrefHelper.setGrayModeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
+                // Show or hide checkboxes based on Dark Mode
+
             } else if (checkedId == R.id.lightmode_opt) {
+                // Disable both Dark Mode and Gray Mode (Light Mode)
                 sharedPrefHelper.setDarkModeEnabled(false);
                 sharedPrefHelper.setGrayModeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+
             } else if (checkedId == R.id.gray_opt) {
-                sharedPrefHelper.setDarkModeEnabled(false);
-                sharedPrefHelper.setGrayModeEnabled(true);
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                // Enable both Dark Mode and Gray Mode together
+                sharedPrefHelper.setDarkModeEnabled(true);  // Dark Mode is enabled
+                sharedPrefHelper.setGrayModeEnabled(true);  // Gray Mode is enabled
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);  // Apply Dark Mode
+
+                // Apply grayscale effect to Activity
+                applyGrayScaleIfNeeded();
+            }else if (checkedId == R.id.grayd_opt){
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
             }
-            recreate(); // Recreate activity to apply new theme/filter
         });
+
     }
 
     // Apply grayscale effect to the root view if Gray Mode is enabled
@@ -114,6 +145,7 @@ public class SettingsActivity extends BaseActivity {
             root.setLayerPaint(paint);
         }
     }
+
 
     @SuppressLint("MissingSuperCall")
     @Override

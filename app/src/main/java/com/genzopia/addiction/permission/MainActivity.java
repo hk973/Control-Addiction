@@ -19,6 +19,7 @@ import com.genzopia.addiction.SharedPrefHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainActivity extends AppCompatActivity implements PermissionListener {
 
     private ViewPager viewPager;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         // Check if we should skip to main activity
         SharedPrefHelper sp = new SharedPrefHelper(this);
@@ -184,4 +186,6 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
             fragmentList.add(fragment);
         }
     }
+
+
 }
