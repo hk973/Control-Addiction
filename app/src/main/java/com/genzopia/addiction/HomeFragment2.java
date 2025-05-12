@@ -21,8 +21,6 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 
-import java.time.LocalTime;
-
 public class HomeFragment2 extends Fragment {
     private long time;
     private long startTime;
