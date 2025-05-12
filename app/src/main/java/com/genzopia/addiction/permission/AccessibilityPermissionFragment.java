@@ -47,7 +47,7 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
         requestPermissionButton.setText("Grant Accessibility Permission");
 
         // Set position
-        position = 2;
+        position = 0;
 
         // Set click listener
         requestPermissionButton.setOnClickListener(v -> requestAccessibilityPermission());

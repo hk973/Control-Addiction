@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Permissions and Privacy Policy</title>
+    <title>Permissions and Privacy Policy - Focus Launcher</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,53 +32,81 @@
         li {
             margin: 5px 0;
         }
+        .highlight {
+            background-color: #fffde7;
+            padding: 10px;
+            border-left: 4px solid #ffd600;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Permissions and Privacy Policy for Addiction App</h1>
+<h1>Permissions and Privacy Policy for Focus Launcher</h1>
 
-    <h2>Permissions Required for Addiction Control Features</h2>
-    <p>To provide addiction control services and help users manage app usage, <strong>Addiction App</strong> requires the following permissions:</p>
-    
-    <h3>1. Foreground Services and Notifications</h3>
-    <p>We use the following permissions to run essential services:</p>
-    <ul>
-        <li><strong>FOREGROUND_SERVICE</strong>: This permission enables our app to run foreground services that monitor app usage in real-time.</li>
-        <li><strong>FOREGROUND_SERVICE_DATA_SYNC</strong>: This permission allows us to sync data necessary for displaying reminders and timers, helping users stay aware of restricted app usage.</li>
-    </ul>
+<div class="highlight">
+    <p><strong>Last Updated:</strong> [Insert Date]</p>
+    <p>Focus Launcher helps users improve productivity by temporarily restricting access to selected apps. Users may unlock apps early by paying a fee.</p>
+</div>
 
-    <h3>2. Usage Access (PACKAGE_USAGE_STATS)</h3>
-    <p><strong>PACKAGE_USAGE_STATS</strong>: This permission allows us to monitor which apps are currently being used. This functionality is critical for alerting users when a restricted app is opened. Users must grant this access in system settings for the app to function as intended.</p>
+<h2>Permissions Required</h2>
 
-    <h3>3. All Apps Query (QUERY_ALL_PACKAGES)</h3>
-    <p><strong>QUERY_ALL_PACKAGES</strong>: We request this permission to display a list of all installed apps on your device. This feature allows users to select which apps to restrict, enabling a personalized list of restricted applications. This permission is essential for the app’s core functionality.</p>
+<h3>1. Accessibility Service</h3>
+<p>Focus Launcher uses the Android Accessibility Service <strong>only</strong> to:</p>
+<ul>
+    <li>Detect when a restricted app is launched.</li>
+    <li>Enforce app locking during the restricted period.</li>
+    <li>Display focus reminders (without notifications).</li>
+</ul>
+<p><strong>Note:</strong> We do not collect, log, or transmit any sensitive user data accessed through this service.</p>
 
-    <h3>4. Notification Access (POST_NOTIFICATIONS)</h3>
-    <p><strong>POST_NOTIFICATIONS</strong>: This permission is used to send notifications to users when restricted apps are in use and to show usage time. Users can manage these notifications within the app settings.</p>
+<h3>2. Query All Packages (QUERY_ALL_PACKAGES)</h3>
+<p>This permission allows the app to:</p>
+<ul>
+    <li>Display a list of installed apps so users can select which apps to restrict.</li>
+    <li>Verify if a restricted app is launched.</li>
+</ul>
 
-    <h2>Privacy and Data Security</h2>
-    <h3>Commitment to User Privacy</h3>
-    <p>We value your privacy. All data related to app usage is processed locally on your device and is not shared with external parties. We do not collect, store, or transmit any personally identifiable information (PII) without your explicit consent.</p>
+<h2>Premium Unlock Feature</h2>
+<p>Users may unlock restricted apps before the scheduled time by paying a fee. All payments are processed securely via Google Play Billing.</p>
 
-    <h3>Data Processing</h3>
-    <ul>
-        <li><strong>Local Data Processing</strong>: All app usage data is processed locally to ensure that your information remains confidential. We do not upload or back up any data to external servers.</li>
-        <li><strong>User Control</strong>: Users have full control over their data and can revoke permissions at any time through the app settings or device settings.</li>
-    </ul>
+<h2>Privacy Policy</h2>
+<h3>Data Collection</h3>
+<p>Focus Launcher does <strong>not</strong> collect or store:</p>
+<ul>
+    <li>Personal user data (emails, contacts, etc.).</li>
+    <li>App usage history beyond the local device.</li>
+    <li>Accessibility service data (keystrokes, text inputs, etc.).</li>
+</ul>
 
-    <h3>Data Retention</h3>
-    <p>We retain data only for as long as necessary to fulfill the purposes outlined in this policy. Once it is no longer needed, we securely delete any data stored locally on your device.</p>
+<h3>Data Processing</h3>
+<ul>
+    <li><strong>Local-Only Processing:</strong> All app restrictions and timers are managed locally on the device.</li>
+    <li><strong>No Backups:</strong> We do not upload or sync data to external servers.</li>
+</ul>
 
-    <h2>Compliance with Regulations</h2>
-    <p><strong>Addiction App</strong> is committed to complying with all relevant data protection regulations, including the General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).</p>
+<h3>User Control</h3>
+<p>Users can:</p>
+<ul>
+    <li>Revoke permissions anytime via device settings.</li>
+    <li>Uninstall the app to remove all local data.</li>
+</ul>
 
-    <h2>Disclaimer of Liability</h2>
-    <p>While we strive to provide accurate and up-to-date information, <strong>Addiction App</strong> does not guarantee the accuracy, reliability, or completeness of any information provided in the app. Users should use the app at their own risk.</p>
+<h2>Compliance</h2>
+<p>Focus Launcher complies with:</p>
+<ul>
+    <li>Google Play’s <a href="https://play.google.com/about/restricted-content/" target="_blank">Restricted Content Policy</a>.</li>
+    <li>GDPR and CCPA (where applicable).</li>
+</ul>
 
-    <h2>Changes to This Policy</h2>
-    <p>We may update this permissions and privacy policy from time to time. Any changes will be posted within the app, and users will be notified. We encourage users to review this policy periodically for the latest information on our practices.</p>
+<h2>Disclaimer</h2>
+<p>Focus Launcher is provided "as is." We are not liable for:</p>
+<ul>
+    <li>Device malfunctions due to misuse.</li>
+    <li>Financial losses from early unlock payments.</li>
+</ul>
+
+<h2>Changes to This Policy</h2>
+<p>Updates will be posted in-app and on this page. Continued use constitutes acceptance.</p>
 
 </body>
 </html>
-
