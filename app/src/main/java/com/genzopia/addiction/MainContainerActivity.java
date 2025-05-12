@@ -1,18 +1,24 @@
 package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 public class MainContainerActivity extends BaseActivity {
     public ViewPager2 viewPager;
     private MainFragment mainFragment;
+    private AppUpdateChecker updateChecker;
+    private static final int REQUEST_CODE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +42,19 @@ public class MainContainerActivity extends BaseActivity {
         if (!p.getReviewShown()) {
             Intent reviewIntent = new Intent(this, ReviewActivity.class);
             startActivity(reviewIntent);
+        }
+
+        updateChecker = new AppUpdateChecker(this);
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(updateChecker);
+
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode != Activity.RESULT_OK) {
+            // Update cancelled or failed — optionally close app
+            finish();
         }
     }
 

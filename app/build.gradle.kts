@@ -46,6 +46,10 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("com.android.billingclient:billing:7.1.1")
     implementation ("com.google.android.play:review:2.0.2")
+    implementation("com.google.android.play:app-update:2.1.0")
+    implementation ("androidx.lifecycle:lifecycle-process:2.6.2")
+
+
 
 
 
