@@ -12,7 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
-public class MainContainerActivity2 extends AppCompatActivity {
+public class MainContainerActivity2 extends BaseActivity {
 MainFragment mainFragment;
     private ViewPager2 viewPager;
     private MainPagerAdapter adapter;
