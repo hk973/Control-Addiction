@@ -102,7 +102,7 @@ public class SharedPrefHelper {
         Gson gson = new Gson();
         String jsonSelectedApps = gson.toJson(selectedApps);
         Log.d("SharedPrefDebug", "JSON to Store: " + jsonSelectedApps);
-
+       Log.e("test444", String.valueOf(timeLimit));
         editor.putString(KEY_SELECTED_APPS, jsonSelectedApps);
         editor.putInt(KEY_TIME_LIMIT, timeLimit);
         editor.putBoolean(KEY_TIME_ACTIVE, isActive);

@@ -104,22 +104,35 @@ public class MyTileService extends TileService {
 
     // Method to retrieve and use the saved data
     public void start_mode() {
-        // Retrieve from SharedPreferences
-        SharedPreferences sharedPref = getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
-        Set<String> set = sharedPref.getStringSet("selected_app_mode", new HashSet<String>());
-        ArrayList<String> savedApps = new ArrayList<>(set);
-        int savedSecMode = sharedPref.getInt("sec_mode", 0);
-        Log.e("test222",String.valueOf(savedSecMode));
+       ArrayList<String>savedApps=new ArrayList<>();
+       savedApps=getSelectedAppMode(this);
+       int savedSecMode=getSecMode(this);
+       Log.e("test333", String.valueOf(savedSecMode));
 
         // If you still need to use SharedPrefHelper (though not clear why since we already have the values)
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getBaseContext());
+        sharedPrefHelper.saveStartTime(System.currentTimeMillis());
+        sharedPrefHelper.saveInitialDuration(savedSecMode);
+        sharedPrefHelper.setTimeActivateStatus(true);
         sharedPrefHelper.writeData(savedApps, savedSecMode, true);
 
         // Start activity with the retrieved values
-        Intent intent = new Intent(this, SelectedAppsFragment.class);
-        intent.putStringArrayListExtra("SELECTED_APPS", savedApps);  // Pass as intent extra
-        intent.putExtra("SEC_MODE", savedSecMode);                  // Pass as intent extra
+        Intent intent = new Intent(this, MainContainerActivity2.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    public ArrayList<String> getSelectedAppMode(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+        // Retrieve set with empty default
+        Set<String> set = sharedPref.getStringSet("selected_app_mode", new HashSet<>());
+        // Convert to ArrayList
+        return new ArrayList<>(set);
+    }
+
+    public int getSecMode(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+        // Retrieve integer with 0 as default
+        return sharedPref.getInt("sec_mode", 0);
     }
 }
