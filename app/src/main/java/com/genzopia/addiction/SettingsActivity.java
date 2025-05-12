@@ -60,8 +60,74 @@ public class SettingsActivity extends BaseActivity {
         RadioButton systemOption = findViewById(R.id.grayd_opt);
         TextView dropdownHeader = findViewById(R.id.dropdown_header);
         LinearLayout dropdownContent = findViewById(R.id.dropdown_content);
+        // Initialize the question and answer views
+        TextView faqQuestion1 = findViewById(R.id.faq_question_1);
+        TextView faqAnswer1 = findViewById(R.id.faq_answer_1);
 
-// Toggle visibility when header is clicked
+        TextView faqQuestion2 = findViewById(R.id.faq_question_2);
+        TextView faqAnswer2 = findViewById(R.id.faq_answer_2);
+
+        TextView faqQuestion3 = findViewById(R.id.faq_question_3);
+        TextView faqAnswer3 = findViewById(R.id.faq_answer_3);
+
+        TextView faqQuestion4 = findViewById(R.id.faq_question_4);
+        TextView faqAnswer4 = findViewById(R.id.faq_answer_4);
+
+        TextView faqQuestion5 = findViewById(R.id.faq_question_5);
+        TextView faqAnswer5 = findViewById(R.id.faq_answer_5);
+
+// Set the initial visibility to gone
+        faqAnswer1.setVisibility(View.GONE);
+        faqAnswer2.setVisibility(View.GONE);
+        faqAnswer3.setVisibility(View.GONE);
+        faqAnswer4.setVisibility(View.GONE);
+        faqAnswer5.setVisibility(View.GONE);
+
+// Set OnClickListeners for each question
+        faqQuestion1.setOnClickListener(v -> {
+            if (faqAnswer1.getVisibility() == View.VISIBLE) {
+                faqAnswer1.setVisibility(View.GONE);
+            } else {
+                faqAnswer1.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion2.setOnClickListener(v -> {
+            if (faqAnswer2.getVisibility() == View.VISIBLE) {
+                faqAnswer2.setVisibility(View.GONE);
+            } else {
+                faqAnswer2.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion3.setOnClickListener(v -> {
+            if (faqAnswer3.getVisibility() == View.VISIBLE) {
+                faqAnswer3.setVisibility(View.GONE);
+            } else {
+                faqAnswer3.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion4.setOnClickListener(v -> {
+            if (faqAnswer4.getVisibility() == View.VISIBLE) {
+                faqAnswer4.setVisibility(View.GONE);
+            } else {
+                faqAnswer4.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion5.setOnClickListener(v -> {
+            if (faqAnswer5.getVisibility() == View.VISIBLE) {
+                faqAnswer5.setVisibility(View.GONE);
+            } else {
+                faqAnswer5.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+
+
+        // Toggle visibility when header is clicked
         dropdownHeader.setOnClickListener(v -> {
             if (dropdownContent.getVisibility() == View.VISIBLE) {
                 dropdownContent.setVisibility(View.GONE);
@@ -69,6 +135,7 @@ public class SettingsActivity extends BaseActivity {
                 dropdownContent.setVisibility(View.VISIBLE);
             }
         });
+
 
 
         // Set current open method selection based on saved preferences
