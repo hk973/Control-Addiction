@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="10dp"
     android:gravity="center">
 
     <TextView
@@ -40,7 +40,7 @@
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="500dp"
         android:layout_marginBottom="16dp" />
 
     <CheckBox
@@ -54,6 +54,8 @@
         android:id="@+id/proceedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="#FF5722"
+        android:textColor="@color/white"
         android:text="Proceed"
         android:enabled="false"
         android:paddingStart="24dp"

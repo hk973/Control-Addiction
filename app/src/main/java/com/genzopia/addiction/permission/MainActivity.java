@@ -2,6 +2,8 @@
 package com.genzopia.addiction.permission;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +12,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import com.genzopia.addiction.MainContainerActivity;
@@ -40,6 +44,10 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
             startMainContainerActivity();
             return;
         }
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.parseColor("#000000")); // Your color
+
 
         sp.setReviewShown(false);
 
@@ -49,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
 
         setupViewPager();
         setupDots();
-
 
         // Listen for page changes to update dots
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -73,21 +80,19 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
     private void setupViewPager() {
         pagerAdapter = new PermissionPagerAdapter(getSupportFragmentManager());
 
-        // Add all fragments
-        pagerAdapter.addFragment(NotificationPermissionFragment.newInstance());
-        pagerAdapter.addFragment(UsagePermissionFragment.newInstance());
+        // Add only the needed fragments (3 fragments now)
         pagerAdapter.addFragment(AccessibilityPermissionFragment.newInstance());
         pagerAdapter.addFragment(TermsFragment.newInstance());
         pagerAdapter.addFragment(LauncherPermissionFragment.newInstance());
 
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(5); // Keep all fragments in memory
+        viewPager.setOffscreenPageLimit(3); // Keep all fragments in memory
     }
 
     private void setupDots() {
-        dots = new View[5];
+        dots = new View[3]; // Only 3 dots now
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             dots[i] = new View(this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     getResources().getDimensionPixelSize(R.dimen.dot_width),
@@ -138,21 +143,6 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         android.content.Intent intent = new android.content.Intent(this, MainContainerActivity.class);
         startActivity(intent);
         finish();
-    }
-
-    private boolean canMoveToPreviousPage() {
-        int currentPosition = viewPager.getCurrentItem();
-        if (currentPosition == 0) {
-            return false; // First page, can't go back
-        }
-
-        // Check if previous permission is granted
-        Fragment previousFragment = pagerAdapter.getItem(currentPosition - 1);
-        if (previousFragment instanceof BasePermissionFragment) {
-            return ((BasePermissionFragment) previousFragment).isPermissionGranted();
-        }
-
-        return false;
     }
 
     @SuppressLint("MissingSuperCall")

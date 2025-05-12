@@ -65,7 +65,7 @@ public class LauncherPermissionFragment extends BasePermissionFragment {
         descriptionText.setText("For the best experience, set our app as your default launcher. This will help you control your phone usage by giving you a more mindful home screen experience.");
 
         // Set position
-        position = 4;
+        position = 2;
 
         // Set click listeners
         setLauncherButton.setOnClickListener(v -> requestHomeLauncherPermission());
