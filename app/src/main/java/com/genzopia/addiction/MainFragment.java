@@ -473,6 +473,7 @@ public class MainFragment extends Fragment {
         sharedPrefHelper.saveStartTime(System.currentTimeMillis());
         sharedPrefHelper.saveInitialDuration(totalSeconds);
         sharedPrefHelper.setTimeActivateStatus(true);
+        sharedPrefHelper.writeData(selectedApps,totalSeconds,true);
 
         startActivity(new Intent(requireActivity(), MainContainerActivity2.class));
         requireActivity().finish();

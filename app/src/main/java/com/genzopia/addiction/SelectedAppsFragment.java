@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.text.Editable;
@@ -86,6 +87,7 @@ public class SelectedAppsFragment extends Fragment {
         packageManager = requireActivity().getPackageManager();
         sharedPrefHelper = new SharedPrefHelper(requireContext());
         selectedApps = sharedPrefHelper.getSelectedAppValue();
+        Log.e("test456", Arrays.toString(selectedApps.toArray()));
 
         if (selectedApps != null && !selectedApps.isEmpty()) {
             appNames = (ArrayList<String>) getAppNamesFromPackageNames(selectedApps);
