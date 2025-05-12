@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
-public class MainContainerActivity extends AppCompatActivity {
+public class MainContainerActivity extends BaseActivity {
     public ViewPager2 viewPager;
     private MainFragment mainFragment;
 

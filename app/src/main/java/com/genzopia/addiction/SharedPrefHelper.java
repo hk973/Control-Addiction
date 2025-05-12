@@ -17,15 +17,25 @@ public class SharedPrefHelper {
     private static final String KEY_TIME_LIMIT = "timeLimit";
     private static final String KEY_TIME_ACTIVE = "timeActive";
     private static final String CLICK_TO_OPEN = "click_to_open";
+    private static final String KEY_DARK_MODE = "DarkMode";
 
-    private Context context;
-    private SharedPreferences sharedPreferences;
+    private static final String KEY_GRAY_MODE = "GrayMode";
+
+    public boolean isGrayModeEnabled() {
+        return prefs.getBoolean(KEY_GRAY_MODE, false);
+    }
+
+    public void setGrayModeEnabled(boolean enabled) {
+        editor.putBoolean(KEY_GRAY_MODE, enabled).apply();
+    }
+
+
+    private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
     public SharedPrefHelper(Context context) {
-        this.context = context;
-        this.sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        this.editor = sharedPreferences.edit();
+        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        editor = prefs.edit();
     }
 
     public void setClickToOpen(boolean isClick) {
@@ -34,11 +44,11 @@ public class SharedPrefHelper {
     }
 
     public boolean isClickToOpen() {
-        return sharedPreferences.getBoolean(CLICK_TO_OPEN, true);
+        return prefs.getBoolean(CLICK_TO_OPEN, true);
     }
 
     public ArrayList<String> getSelectedAppValue() {
-        String jsonSelectedApps = sharedPreferences.getString(KEY_SELECTED_APPS, null);
+        String jsonSelectedApps = prefs.getString(KEY_SELECTED_APPS, null);
         Log.d("SharedPrefDebug", "Retrieved JSON: " + jsonSelectedApps);
 
         if (jsonSelectedApps == null || jsonSelectedApps.isEmpty()) {
@@ -46,13 +56,8 @@ public class SharedPrefHelper {
         }
 
         Type type = new TypeToken<ArrayList<String>>() {}.getType();
-       ArrayList<String> selected= new Gson().fromJson(jsonSelectedApps, type);
-       
-
-
-        return selected;
+        return new Gson().fromJson(jsonSelectedApps, type);
     }
-
     public ArrayList<String> appwithnowarning(){
         ArrayList<String> selectedApp=new ArrayList<>();
         selectedApp.add("com.genzopia.addiction");
@@ -72,11 +77,26 @@ public class SharedPrefHelper {
 
     }
 
-    public int getTimeLimitValue() {
-        return sharedPreferences.getInt(KEY_TIME_LIMIT, 0);
+    public ArrayList<String> appWithNoWarning() {
+        ArrayList<String> selectedApp = new ArrayList<>();
+        selectedApp.add("com.genzopia.addiction");
+        selectedApp.add("com.android.systemui");
+        selectedApp.add("com.sec.android.app.launcher");
+        selectedApp.add("com.android.launcher");
+        selectedApp.add("android");
+        selectedApp.add("com.android.vending");
+        selectedApp.add("com.google.android.apps.nbu.paisa.user");
+        selectedApp.add("net.one97.paytm");
+        selectedApp.add("com.phonepe.app");
+        selectedApp.add("in.org.npci.upiapp");
+        selectedApp.add("com.google.android.gms");
+
+        return selectedApp;
     }
 
-
+    public int getTimeLimitValue() {
+        return prefs.getInt(KEY_TIME_LIMIT, 0);
+    }
 
     public void writeData(ArrayList<String> selectedApps, int timeLimit, boolean isActive) {
         Gson gson = new Gson();
@@ -98,42 +118,44 @@ public class SharedPrefHelper {
         editor.putBoolean(KEY_TIME_ACTIVE, isActive);
         editor.apply();
     }
+
     public boolean getReviewShown() {
-        return sharedPreferences.getBoolean("review_shown", false);
+        return prefs.getBoolean("review_shown", false);
     }
 
     public void setReviewShown(boolean shown) {
-        sharedPreferences.edit().putBoolean("review_shown", shown).apply();
+        prefs.edit().putBoolean("review_shown", shown).apply();
     }
+
     public void saveStartTime(long startTime) {
-        sharedPreferences.edit().putLong("startTime", startTime).apply();
+        prefs.edit().putLong("startTime", startTime).apply();
     }
+
     public void setTimeActivateStatus(boolean status) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(KEY_TIME_ACTIVE, status);
         editor.apply();
     }
 
-
     public long getStartTime() {
-        return sharedPreferences.getLong("startTime", 0);
+        return prefs.getLong("startTime", 0);
     }
 
     public void saveInitialDuration(int duration) {
-        sharedPreferences.edit().putInt("initialDuration", duration).apply();
+        prefs.edit().putInt("initialDuration", duration).apply();
     }
 
     public int getInitialDuration() {
-        return sharedPreferences.getInt("initialDuration", 0);
+        return prefs.getInt("initialDuration", 0);
     }
+
     public boolean getTimeActivateStatus() {
-        boolean isActive = sharedPreferences.getBoolean(KEY_TIME_ACTIVE, false);
+        boolean isActive = prefs.getBoolean(KEY_TIME_ACTIVE, false);
         if (isActive) {
             long startTime = getStartTime();
             int initialDuration = getInitialDuration();
             long currentTime = System.currentTimeMillis();
             long elapsed = currentTime - startTime;
-            long durationMillis = initialDuration * 1000L; // Convert seconds to milliseconds
+            long durationMillis = initialDuration * 1000L;
 
             if (elapsed >= durationMillis) {
                 setTimeActivateStatus(false);
@@ -143,12 +165,19 @@ public class SharedPrefHelper {
         return isActive;
     }
 
-
     public long getRemainingTimeMillis() {
         long startTime = getStartTime();
         int initialDuration = getInitialDuration();
         long durationMillis = initialDuration * 1000L;
         long elapsed = System.currentTimeMillis() - startTime;
         return Math.max(durationMillis - elapsed, 0);
+    }
+
+    public boolean isDarkModeEnabled() {
+        return prefs.getBoolean(KEY_DARK_MODE, false); // default to light mode
+    }
+
+    public void setDarkModeEnabled(boolean isEnabled) {
+        prefs.edit().putBoolean(KEY_DARK_MODE, isEnabled).apply();
     }
 }
