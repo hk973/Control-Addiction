@@ -221,5 +221,21 @@ public class SharedPrefHelper {
         editor.apply();
         Log.d("SharedPrefDebug", "Dark Mode preference set to: " + isEnabled);
     }
+    private static final String PREFS_NAME = "MyAppPrefs";
 
+    // Store a string in SharedPreferences
+    public  void saveString(Context context, String key, String value) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(key, value);
+        editor.apply(); // or use commit() if you need immediate result
+    }
+
+    // Retrieve a string from SharedPreferences
+    public String getString(Context context, String key, String defaultValue) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(key, defaultValue);
+    }
 }
+
+

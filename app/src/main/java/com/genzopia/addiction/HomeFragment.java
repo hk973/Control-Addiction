@@ -68,6 +68,13 @@ public class HomeFragment extends Fragment {
         ImageButton cameraButton = requireView().findViewById(R.id.cameraButton);
 
         phoneButton.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_DIAL)));
-        cameraButton.setOnClickListener(v -> startActivity(new Intent(MediaStore.ACTION_IMAGE_CAPTURE)));
+        cameraButton.setOnClickListener(v -> new PopupSelectApp(getContext()).show());
+        cameraButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                new PopupSelectApp(getContext()).show2();
+                return false;
+            }
+        });
     }
 }
