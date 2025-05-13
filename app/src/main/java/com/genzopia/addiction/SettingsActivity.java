@@ -6,6 +6,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
@@ -146,10 +147,27 @@ public class SettingsActivity extends BaseActivity {
         // Set current theme selection based on saved preferences
         if (sharedPrefHelper.isDarkModeEnabled()) {
             darkModeOption.setChecked(true);
+            grayModeOption.setChecked(false);
+            lightModeOption.setChecked(false);
+            systemOption.setChecked(false);
         } else if (sharedPrefHelper.isGrayModeEnabled()) {
             grayModeOption.setChecked(true);
-        } else {
+            darkModeOption.setChecked(false);
+            lightModeOption.setChecked(false);
+            systemOption.setChecked(false);
+            Log.d("tsss","grey");
+        } else if (sharedPrefHelper.isFollowSystemThemeEnabled()){
+            lightModeOption.setChecked(false);
+            grayModeOption.setChecked(false);
+            darkModeOption.setChecked(false);
+            systemOption.setChecked(true);
+            Log.d("tsss","system");
+        }else {
             lightModeOption.setChecked(true);
+            grayModeOption.setChecked(false);
+            darkModeOption.setChecked(false);
+            systemOption.setChecked(false);
+            Log.d("tsss","light");
         }
 
         // Back button behavior
@@ -162,38 +180,47 @@ public class SettingsActivity extends BaseActivity {
         });
 
         // Handle theme selection changes
+        // Handle theme selection changes
         themeSelectionGroup.setOnCheckedChangeListener((group, checkedId) -> {
-
-
             if (checkedId == R.id.darkmode_opt) {
                 // Enable Dark Mode
                 sharedPrefHelper.setDarkModeEnabled(true);
                 sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-                // Show or hide checkboxes based on Dark Mode
+                applyGrayScaleIfNeeded();
 
             } else if (checkedId == R.id.lightmode_opt) {
                 // Disable both Dark Mode and Gray Mode (Light Mode)
                 sharedPrefHelper.setDarkModeEnabled(false);
                 sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
+                applyGrayScaleIfNeeded();
 
             } else if (checkedId == R.id.gray_opt) {
-                // Enable both Dark Mode and Gray Mode together
-                sharedPrefHelper.setDarkModeEnabled(true);  // Dark Mode is enabled
-                sharedPrefHelper.setGrayModeEnabled(true);  // Gray Mode is enabled
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);  // Apply Dark Mode
-
-                // Apply grayscale effect to Activity
+                // Enable Gray Mode along with Dark Mode
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(true);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 applyGrayScaleIfNeeded();
-            }else if (checkedId == R.id.grayd_opt){
+
+            } else if (checkedId == R.id.grayd_opt) {
+                // Follow system theme
+                sharedPrefHelper.setFollowSystemThemeEnabled(true);
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                applyGrayScaleIfNeeded();
             }
         });
 
+
+
     }
+
+
 
     // Apply grayscale effect to the root view if Gray Mode is enabled
     private void applyGrayScaleIfNeeded() {

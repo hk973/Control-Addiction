@@ -52,8 +52,11 @@ public class SharedPrefHelper {
     }
 
     public void setGrayModeEnabled(boolean enabled) {
-        editor.putBoolean(KEY_GRAY_MODE, enabled).apply();
+        editor.putBoolean(KEY_GRAY_MODE, enabled);
+        editor.apply();
+        Log.d("SharedPrefDebug", "Gray Mode preference set to: " + enabled);
     }
+
 
     public SharedPrefHelper(Context context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -195,11 +198,28 @@ public class SharedPrefHelper {
         return Math.max(durationMillis - elapsed, 0);
     }
 
+    private static final String KEY_FOLLOW_SYSTEM_THEME = "FollowSystemTheme";
+
+    // Save Follow System Preference
+    public void setFollowSystemThemeEnabled(boolean isEnabled) {
+        editor.putBoolean(KEY_FOLLOW_SYSTEM_THEME, isEnabled);
+        editor.apply();
+        Log.d("SharedPrefDebug", "Follow System Theme preference set to: " + isEnabled);
+    }
+
+    // Get Follow System Preference
+    public boolean isFollowSystemThemeEnabled() {
+        return prefs.getBoolean(KEY_FOLLOW_SYSTEM_THEME, false); // default to false (i.e., not following system theme)
+    }
+
     public boolean isDarkModeEnabled() {
         return prefs.getBoolean(KEY_DARK_MODE, false); // default to light mode
     }
 
     public void setDarkModeEnabled(boolean isEnabled) {
-        prefs.edit().putBoolean(KEY_DARK_MODE, isEnabled).apply();
+        editor.putBoolean(KEY_DARK_MODE, isEnabled);
+        editor.apply();
+        Log.d("SharedPrefDebug", "Dark Mode preference set to: " + isEnabled);
     }
+
 }
