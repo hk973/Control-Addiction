@@ -30,7 +30,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.AppViewH
     @Override
     public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_app, parent, false); // You'll need to create this layout
+                .inflate(R.layout.item_2, parent, false); // You'll need to create this layout
         return new AppViewHolder(view);
     }
 

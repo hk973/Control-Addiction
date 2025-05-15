@@ -18,6 +18,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,7 +48,10 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainFragment extends Fragment {
 
@@ -96,16 +101,86 @@ public class MainFragment extends Fragment {
         viewModel.getAppItemsLiveData().observe(getViewLifecycleOwner(), appItems -> {
             if (appItems != null) {
                 setupRecyclerView(appItems);
+                refreshPinnedApps();
             }
         });
+
     }
+    void showPinnedAppOptions(AppItem_Dataclass appItem) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(appItem.getName())
+                .setItems(new CharSequence[]{"Remove Pin", "Select"}, (dialog, which) -> {
+                    switch (which) {
+                        case 0: // Remove Pin
+                            SharedPrefHelper helper = new SharedPrefHelper(requireContext());
+                            List<String> pinned = new ArrayList<>(helper.getPinnedApps());
+                            pinned.remove(appItem.getPackageName());
+                            helper.savePinnedApps(pinned);
+                            refreshPinnedApps();
+                            break;
+
+                        case 1: // Select
+                            toggleAppSelection(appItem.getPackageName());
+                            break;
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+    public interface PinnedAppActionListener {
+        void showPinnedAppOptions(AppItem_Dataclass appItem);
+    }
+
+    private void toggleAppSelection(String packageName) {
+        if (selectedApps.contains(packageName)) {
+            selectedApps.remove(packageName);
+        } else {
+            selectedApps.add(packageName);
+        }
+        appAdapter.notifyDataSetChanged();
+    }
+
+    void showPinnedAppOptionsSafe(AppItem_Dataclass appItem) {
+        Context context = getContext();
+        if (context == null || !isAdded()) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Appname :"+appItem.getName()) // Cleaner title without "Appname:"
+                .setItems(new CharSequence[]{"Remove Pin", "Select"}, (dialog, which) -> {
+                    switch (which) {
+                        case 0: // Remove Pin
+                            SharedPrefHelper helper = new SharedPrefHelper(context);
+
+                            // Get current pinned apps and remove the selected one
+                            List<String> pinned = new ArrayList<>(helper.getPinnedApps());
+                            pinned.remove(appItem.getPackageName());
+
+                            // Update SharedPreferences
+                            helper.setPinnedApps(pinned);
+
+                            // Refresh UI
+                            refreshPinnedApps();
+                            Toast.makeText(context, "Unpinned " + appItem.getName(), Toast.LENGTH_SHORT).show();
+                            break;
+
+                        case 1: // Select
+                            toggleAppSelection(appItem.getPackageName());
+                            break;
+                    }
+                }).show();
+    }
+
     private void setupRecyclerView(List<AppItem_Dataclass> appItems) {
+        Pair<List<AppItem_Dataclass>, Integer> processed = (Pair<List<AppItem_Dataclass>, Integer>) processAppList(appItems);
+        List<AppItem_Dataclass> processedList = processed.first;
+        int pinnedCount = processed.second;
+
         if (appAdapter == null) {
-            appAdapter = new AppAdapter(appItems, selectedApps, requireContext());
+            appAdapter = new AppAdapter(processedList, selectedApps, requireContext());
+            appAdapter.setPinnedCount(pinnedCount); // Set pinned count
             recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
             recyclerView.setAdapter(appAdapter);
 
-            // FastScrollView setup...
             FastScrollView fastScrollView = requireView().findViewById(R.id.fastScrollView);
             fastScrollView.setRecyclerView(recyclerView);
             appAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -116,11 +191,39 @@ public class MainFragment extends Fragment {
             });
             fastScrollView.setSections(appAdapter.getSections());
         } else {
-            appAdapter.updateData(appItems);
+            appAdapter.updateData(processedList);
+            appAdapter.setPinnedCount(pinnedCount); // Update pinned count
         }
     }
 
+    private Pair<List<AppItem_Dataclass>, Integer> processAppList(List<AppItem_Dataclass> appItems) {
+        SharedPrefHelper spHelper = new SharedPrefHelper(requireContext());
+        List<String> pinnedPackageNames = spHelper.getPinnedApps();
 
+        // Use LinkedHashMap to preserve order
+        Map<String, AppItem_Dataclass> appMap = new LinkedHashMap<>();
+        for (AppItem_Dataclass app : appItems) {
+            appMap.put(app.getPackageName(), app);
+        }
+
+        List<AppItem_Dataclass> orderedPinned = new ArrayList<>();
+        // Maintain insertion order from SharedPreferences
+        for (String packageName : pinnedPackageNames) {
+            if (appMap.containsKey(packageName)) {
+                orderedPinned.add(appMap.remove(packageName));
+            }
+        }
+
+        // Get remaining apps
+        List<AppItem_Dataclass> otherApps = new ArrayList<>(appMap.values());
+        Collections.sort(otherApps, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+
+        List<AppItem_Dataclass> combined = new ArrayList<>();
+        combined.addAll(orderedPinned);
+        combined.addAll(otherApps);
+
+        return new Pair<>(combined, orderedPinned.size());
+    }
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
         int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -141,6 +244,9 @@ public class MainFragment extends Fragment {
         settingsButton.setOnClickListener(v ->
                 startActivity(new Intent(requireActivity(), SettingsActivity.class)));
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        ImageView pinButton = requireView().findViewById(R.id.pin);
+        pinButton.setOnClickListener(v -> handlePinButtonClick());
+
 
         switch (currentNightMode) {
             case Configuration.UI_MODE_NIGHT_NO:
@@ -189,8 +295,41 @@ public class MainFragment extends Fragment {
     }
 
 
+    private void handlePinButtonClick() {
+        if (selectedApps.isEmpty()) {
+            Toast.makeText(requireContext(), "Select apps to pin", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
+        sharedPrefHelper.savePinnedApps(selectedApps);
+        selectedApps.clear();
 
+        refreshPinnedApps();
+    }
+
+    // Modify refreshPinnedApps
+    private void refreshPinnedApps() {
+        SharedPrefHelper spHelper = new SharedPrefHelper(requireContext());
+        List<String> pinnedPackageNames = spHelper.getPinnedApps();
+
+        // Update adapter before refreshing data
+        if (appAdapter != null) {
+            appAdapter.setPinnedApps(pinnedPackageNames);
+
+            // Get current list and reorder
+            List<AppItem_Dataclass> currentList = new ArrayList<>(appAdapter.appListFull);
+            Pair<List<AppItem_Dataclass>, Integer> processed = processAppList(currentList);
+
+            // Animate changes
+            applyListChangesWithAnimation(processed.first);
+        }
+    }
+    private void applyListChangesWithAnimation(List<AppItem_Dataclass> newList) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new AppDiffCallback(appAdapter.appList, newList));
+        appAdapter.appList = new ArrayList<>(newList);
+        diffResult.dispatchUpdatesTo(appAdapter);
+    }
 
     // All original MainActivity2 methods below - unchanged except context access
 

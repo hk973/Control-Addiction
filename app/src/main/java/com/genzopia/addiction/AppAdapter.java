@@ -3,15 +3,18 @@ package com.genzopia.addiction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,11 +22,14 @@ import java.util.List;
 
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> implements Filterable {
 
-    private List<AppItem_Dataclass> appList;
-    private List<AppItem_Dataclass> appListFull;
+     List<AppItem_Dataclass> appList;
+     List<AppItem_Dataclass> appListFull;
     private ArrayList<String> selectedApps;
     private SharedPrefHelper sharedPrefHelper;
+    private int pinnedCount = 0;
+    private List<String> pinnedApps = new ArrayList<>();
     private List<FastScrollView.Section> sections = new ArrayList<>();
+    Context con;
 
     public AppAdapter(List<AppItem_Dataclass> appList, ArrayList<String> selectedApps, Context context) {
         this.appList = appList;
@@ -31,16 +37,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         this.selectedApps = selectedApps;
         this.sharedPrefHelper = new SharedPrefHelper(context);
         processSections();
+        this.con=context;
     }
+
     private void processSections() {
         sections.clear();
         String currentSection = null;
 
-        for (int i = 0; i < appList.size(); i++) {
+        // Start from pinnedCount to skip pinned apps
+        for (int i = pinnedCount; i < appList.size(); i++) {
             AppItem_Dataclass app = appList.get(i);
             String firstLetter = app.getName().substring(0, 1).toUpperCase();
 
-            // Only add section if it's different from previous
             if (!firstLetter.equals(currentSection)) {
                 currentSection = firstLetter;
                 sections.add(new FastScrollView.Section(currentSection, i));
@@ -55,14 +63,20 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
     @Override
     public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
+                .inflate(R.layout.item_app, parent, false);
         return new AppViewHolder(view);
+    }
+    public void setPinnedCount(int pinnedCount) {
+        this.pinnedCount = pinnedCount;
+        processSections(); // Re-process sections with new pinned count
     }
 
     @Override
     public void onBindViewHolder(@NonNull AppViewHolder holder, int position) {
         AppItem_Dataclass appItem = appList.get(position);
         holder.textView.setText(appItem.getName());
+        // Show pin icon if app is pinned
+        holder.pinIcon.setVisibility(pinnedApps.contains(appItem.getPackageName()) ? View.VISIBLE : View.GONE);
 
         int selectedColor = holder.itemView.getContext().getResources().getColor(R.color.background_selected);
         int unselectedColor = holder.itemView.getContext().getResources().getColor(
@@ -75,58 +89,49 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         holder.itemView.setOnClickListener(null);
         holder.itemView.setOnLongClickListener(null);
 
+        boolean isPinned = pinnedApps.contains(appItem.getPackageName());
 
         holder.itemView.setOnClickListener(v -> {
-            boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
-            if(isClickToOpen) {
-                Log.e("test111", String.valueOf(isClickToOpen));
-                launchApp(holder.itemView.getContext(), appItem.getPackageName());
-            }else {
-                toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor);
-            }
-        });
-        holder.itemView.setOnLongClickListener(v -> {
-            boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
-            if(isClickToOpen){
-                Log.e("test111", String.valueOf(isClickToOpen));
-                toggleSelection(holder.itemView, appItem.getPackageName(), selectedColor, unselectedColor);
-                return true;
-
-            }else{
-                Log.e("test111", String.valueOf(isClickToOpen));
-                launchApp(holder.itemView.getContext(), appItem.getPackageName());
-                return true;
-            }
-
-        });
-
-
-
-    }
-    public void updateData(List<AppItem_Dataclass> newData) {
-        // Update both the main list and full list (for filtering)
-        this.appList = new ArrayList<>(newData);
-        this.appListFull = new ArrayList<>(newData);
-
-        // Re-process sections for fast scroll
-        processSections();
-
-        // Update selected apps list to maintain selections
-        ArrayList<String> newSelectedApps = new ArrayList<>();
-        for (String packageName : selectedApps) {
-            // Only keep selections that exist in the new data
-            for (AppItem_Dataclass item : newData) {
-                if (item.getPackageName().equals(packageName)) {
-                    newSelectedApps.add(packageName);
-                    break;
+            if (isPinned) {
+                if (con instanceof MainContainerActivity) {
+                    ((MainContainerActivity) con).showPinnedAppOptions(appItem);
                 }
             }
-        }
-        this.selectedApps = newSelectedApps;
+        });
 
-        // Notify adapter of data change
+
+
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (isPinned) {
+                if (con instanceof MainContainerActivity) {
+                    ((MainContainerActivity) con).showPinnedAppOptions(appItem);
+                }
+                return true;
+            } else {
+                // Original long click behavior for non-pinned apps
+                boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
+                if(isClickToOpen){
+                    toggleSelection(holder.itemView, appItem.getPackageName(),
+                            selectedColor, unselectedColor);
+                } else {
+                    launchApp(holder.itemView.getContext(), appItem.getPackageName());
+                }
+                return true;
+            }
+        });
+
+
+
+    }
+
+
+    // Update setPinnedApps
+    public void setPinnedApps(List<String> pinnedPackageNames) {
+        this.pinnedApps = new ArrayList<>(pinnedPackageNames);
         notifyDataSetChanged();
     }
+
 
     private void toggleSelection(View itemView, String packageName, int selectedColor, int unselectedColor) {
         if (selectedApps.contains(packageName)) {
@@ -158,13 +163,14 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         return appList.size();
     }
 
-    // View Holder class for RecyclerView
     public static class AppViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
+        ImageView pinIcon;
 
         public AppViewHolder(@NonNull View itemView) {
             super(itemView);
-            textView = itemView.findViewById(android.R.id.text1);
+            textView = itemView.findViewById(R.id.app_name);
+            pinIcon = itemView.findViewById(R.id.pin_icon);
         }
     }
 
@@ -173,29 +179,53 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
     public Filter getFilter() {
         return appFilter;
     }
-
-    // Update filter to sort filtered results
+    // Modify the filter to handle pinned apps correctly
     private final Filter appFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
-            List<AppItem_Dataclass> filteredList = new ArrayList<>();
+            List<AppItem_Dataclass> filtered = new ArrayList<>();
+            List<AppItem_Dataclass> original = new ArrayList<>(appListFull);
 
-            if (constraint == null || constraint.length() == 0) {
-                filteredList.addAll(appListFull);
+            if (TextUtils.isEmpty(constraint)) {
+                filtered.addAll(original);
             } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
-                for (AppItem_Dataclass item : appListFull) {
-                    if (item.getName().toLowerCase().contains(filterPattern)) {
-                        filteredList.add(item);
+                String pattern = constraint.toString().toLowerCase().trim();
+
+                // Separate pinned and others
+                List<AppItem_Dataclass> pinned = new ArrayList<>();
+                List<AppItem_Dataclass> others = new ArrayList<>();
+
+                for (AppItem_Dataclass item : original) {
+                    if (pinnedApps.contains(item.getPackageName())) {
+                        pinned.add(item);
+                    } else {
+                        others.add(item);
                     }
                 }
+
+                // Filter pinned
+                List<AppItem_Dataclass> filteredPinned = new ArrayList<>();
+                for (AppItem_Dataclass item : pinned) {
+                    if (item.getName().toLowerCase().contains(pattern)) {
+                        filteredPinned.add(item);
+                    }
+                }
+
+                // Filter others
+                List<AppItem_Dataclass> filteredOthers = new ArrayList<>();
+                for (AppItem_Dataclass item : others) {
+                    if (item.getName().toLowerCase().contains(pattern)) {
+                        filteredOthers.add(item);
+                    }
+                }
+                Collections.sort(filteredOthers, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+
+                filtered.addAll(filteredPinned);
+                filtered.addAll(filteredOthers);
             }
 
-            // Sort filtered results
-            Collections.sort(filteredList, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
-
             FilterResults results = new FilterResults();
-            results.values = filteredList;
+            results.values = filtered;
             return results;
         }
 
@@ -206,5 +236,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
             processSections();
             notifyDataSetChanged();
         }
+
     };
+    public void updateData(List<AppItem_Dataclass> newData) {
+        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new AppDiffCallback(this.appList, newData));
+        this.appList = new ArrayList<>(newData);
+        this.appListFull = new ArrayList<>(newData);
+        diffResult.dispatchUpdatesTo(this);
+        processSections();
+    }
+
+
 }

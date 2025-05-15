@@ -2,6 +2,7 @@ package com.genzopia.addiction;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -9,6 +10,11 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class SharedPrefHelper {
 
@@ -30,7 +36,31 @@ public class SharedPrefHelper {
         editor.putBoolean(KEY_GRAY_MODE, enabled);
         editor.apply();
     }
+    public void savePinnedApps(List<String> newPinnedApps) {
+        List<String> current = getPinnedApps();
+        current.addAll(newPinnedApps);
 
+        // Remove duplicates while preserving order
+        Set<String> unique = new LinkedHashSet<>(current);
+        editor.putString("pinned_apps", TextUtils.join(",", unique)).apply();
+    }
+
+    // Updated getPinnedApps()
+    public List<String> getPinnedApps() {
+        String pinned = prefs.getString("pinned_apps", "");
+        if (pinned.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(Arrays.asList(TextUtils.split(pinned, ",")));
+    }
+
+    // Updated setPinnedApps()
+    public void setPinnedApps(List<String> pinnedApps) {
+        Set<String> unique = new LinkedHashSet<>(pinnedApps);
+        // Remove any accidental empty strings
+        unique.removeIf(TextUtils::isEmpty);
+        editor.putString("pinned_apps", TextUtils.join(",", unique)).apply();
+    }
     // Get if Gray Mode with Dark Mode is enabled
     public boolean isGrayModeWithDarkModeEnabled() {
         return prefs.getBoolean(KEY_GRAY_MODE, false);

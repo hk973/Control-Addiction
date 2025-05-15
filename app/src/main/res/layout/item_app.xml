@@ -3,20 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="12dp">
-
-    <ImageView
-        android:id="@+id/appIcon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:visibility="gone"
-        android:contentDescription="App icon"/>
+    android:padding="16dp">
 
     <TextView
-        android:id="@+id/appName"
-        android:layout_width="wrap_content"
+        android:id="@+id/app_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="16dp"
+        android:layout_weight="1"
         android:textSize="16sp"/>
+
+    <ImageView
+        android:id="@+id/pin_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/pin"
+        android:visibility="gone"/>
+
 </LinearLayout>

@@ -14,7 +14,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
-public class MainContainerActivity extends BaseActivity {
+public class MainContainerActivity extends BaseActivity implements MainFragment.PinnedAppActionListener{
     public ViewPager2 viewPager;
     private MainFragment mainFragment;
     private AppUpdateChecker updateChecker;
@@ -69,6 +69,26 @@ public class MainContainerActivity extends BaseActivity {
                 viewPager.setCurrentItem(0);
             }
         }
+    }
+
+
+    @Override
+    public void showPinnedAppOptions(AppItem_Dataclass appItem) {
+        // Get existing fragment from ViewPager adapter
+        Fragment fragment = getSupportFragmentManager()
+                .findFragmentByTag("f" + viewPager.getCurrentItem());
+
+        if (fragment instanceof MainFragment && isAdded()) {
+            ((MainFragment) fragment).showPinnedAppOptionsSafe(appItem);
+        }
+    }
+    private boolean isAdded() {
+        return !isFinishing() && !isDestroyed();
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
     }
 
     private static class ScreenSlidePagerAdapter extends androidx.viewpager2.adapter.FragmentStateAdapter {
