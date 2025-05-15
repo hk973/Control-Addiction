@@ -6,6 +6,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
@@ -60,8 +61,74 @@ public class SettingsActivity extends BaseActivity {
         RadioButton systemOption = findViewById(R.id.grayd_opt);
         TextView dropdownHeader = findViewById(R.id.dropdown_header);
         LinearLayout dropdownContent = findViewById(R.id.dropdown_content);
+        // Initialize the question and answer views
+        TextView faqQuestion1 = findViewById(R.id.faq_question_1);
+        TextView faqAnswer1 = findViewById(R.id.faq_answer_1);
 
-// Toggle visibility when header is clicked
+        TextView faqQuestion2 = findViewById(R.id.faq_question_2);
+        TextView faqAnswer2 = findViewById(R.id.faq_answer_2);
+
+        TextView faqQuestion3 = findViewById(R.id.faq_question_3);
+        TextView faqAnswer3 = findViewById(R.id.faq_answer_3);
+
+        TextView faqQuestion4 = findViewById(R.id.faq_question_4);
+        TextView faqAnswer4 = findViewById(R.id.faq_answer_4);
+
+        TextView faqQuestion5 = findViewById(R.id.faq_question_5);
+        TextView faqAnswer5 = findViewById(R.id.faq_answer_5);
+
+// Set the initial visibility to gone
+        faqAnswer1.setVisibility(View.GONE);
+        faqAnswer2.setVisibility(View.GONE);
+        faqAnswer3.setVisibility(View.GONE);
+        faqAnswer4.setVisibility(View.GONE);
+        faqAnswer5.setVisibility(View.GONE);
+
+// Set OnClickListeners for each question
+        faqQuestion1.setOnClickListener(v -> {
+            if (faqAnswer1.getVisibility() == View.VISIBLE) {
+                faqAnswer1.setVisibility(View.GONE);
+            } else {
+                faqAnswer1.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion2.setOnClickListener(v -> {
+            if (faqAnswer2.getVisibility() == View.VISIBLE) {
+                faqAnswer2.setVisibility(View.GONE);
+            } else {
+                faqAnswer2.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion3.setOnClickListener(v -> {
+            if (faqAnswer3.getVisibility() == View.VISIBLE) {
+                faqAnswer3.setVisibility(View.GONE);
+            } else {
+                faqAnswer3.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion4.setOnClickListener(v -> {
+            if (faqAnswer4.getVisibility() == View.VISIBLE) {
+                faqAnswer4.setVisibility(View.GONE);
+            } else {
+                faqAnswer4.setVisibility(View.VISIBLE);
+            }
+        });
+
+        faqQuestion5.setOnClickListener(v -> {
+            if (faqAnswer5.getVisibility() == View.VISIBLE) {
+                faqAnswer5.setVisibility(View.GONE);
+            } else {
+                faqAnswer5.setVisibility(View.VISIBLE);
+            }
+        });
+
+
+
+
+        // Toggle visibility when header is clicked
         dropdownHeader.setOnClickListener(v -> {
             if (dropdownContent.getVisibility() == View.VISIBLE) {
                 dropdownContent.setVisibility(View.GONE);
@@ -69,6 +136,7 @@ public class SettingsActivity extends BaseActivity {
                 dropdownContent.setVisibility(View.VISIBLE);
             }
         });
+
 
 
         // Set current open method selection based on saved preferences
@@ -79,10 +147,27 @@ public class SettingsActivity extends BaseActivity {
         // Set current theme selection based on saved preferences
         if (sharedPrefHelper.isDarkModeEnabled()) {
             darkModeOption.setChecked(true);
+            grayModeOption.setChecked(false);
+            lightModeOption.setChecked(false);
+            systemOption.setChecked(false);
         } else if (sharedPrefHelper.isGrayModeEnabled()) {
             grayModeOption.setChecked(true);
-        } else {
+            darkModeOption.setChecked(false);
+            lightModeOption.setChecked(false);
+            systemOption.setChecked(false);
+            Log.d("tsss","grey");
+        } else if (sharedPrefHelper.isFollowSystemThemeEnabled()){
+            lightModeOption.setChecked(false);
+            grayModeOption.setChecked(false);
+            darkModeOption.setChecked(false);
+            systemOption.setChecked(true);
+            Log.d("tsss","system");
+        }else {
             lightModeOption.setChecked(true);
+            grayModeOption.setChecked(false);
+            darkModeOption.setChecked(false);
+            systemOption.setChecked(false);
+            Log.d("tsss","light");
         }
 
         // Back button behavior
@@ -95,38 +180,47 @@ public class SettingsActivity extends BaseActivity {
         });
 
         // Handle theme selection changes
+        // Handle theme selection changes
         themeSelectionGroup.setOnCheckedChangeListener((group, checkedId) -> {
-
-
             if (checkedId == R.id.darkmode_opt) {
                 // Enable Dark Mode
                 sharedPrefHelper.setDarkModeEnabled(true);
                 sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-
-                // Show or hide checkboxes based on Dark Mode
+                applyGrayScaleIfNeeded();
 
             } else if (checkedId == R.id.lightmode_opt) {
                 // Disable both Dark Mode and Gray Mode (Light Mode)
                 sharedPrefHelper.setDarkModeEnabled(false);
                 sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
+                applyGrayScaleIfNeeded();
 
             } else if (checkedId == R.id.gray_opt) {
-                // Enable both Dark Mode and Gray Mode together
-                sharedPrefHelper.setDarkModeEnabled(true);  // Dark Mode is enabled
-                sharedPrefHelper.setGrayModeEnabled(true);  // Gray Mode is enabled
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);  // Apply Dark Mode
-
-                // Apply grayscale effect to Activity
+                // Enable Gray Mode along with Dark Mode
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(true);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 applyGrayScaleIfNeeded();
-            }else if (checkedId == R.id.grayd_opt){
+
+            } else if (checkedId == R.id.grayd_opt) {
+                // Follow system theme
+                sharedPrefHelper.setFollowSystemThemeEnabled(true);
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                applyGrayScaleIfNeeded();
             }
         });
 
+
+
     }
+
+
 
     // Apply grayscale effect to the root view if Gray Mode is enabled
     private void applyGrayScaleIfNeeded() {
