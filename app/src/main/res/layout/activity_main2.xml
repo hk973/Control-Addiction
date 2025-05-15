@@ -67,6 +67,24 @@
                     android:drawableStart="@android:drawable/ic_menu_search"
                     android:drawablePadding="8dp"/>
             </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="20dp">
+
+            <TextView
+                android:backgroundTint="#00000000"
+                android:id="@+id/button_recent_app"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:text="Recent Apps" />
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
