@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -64,15 +66,15 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupShortcuts() {
-        ImageButton phoneButton = requireView().findViewById(R.id.phoneButton);
-        ImageButton cameraButton = requireView().findViewById(R.id.cameraButton);
+        ImageView phoneButton = requireView().findViewById(R.id.phoneButton);
+        ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
 
         phoneButton.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_DIAL)));
-        cameraButton.setOnClickListener(v -> new PopupSelectApp(getContext()).show());
+        cameraButton.setOnClickListener(v -> new PopupSelectApp(getContext()).show(cameraButton));
         cameraButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                new PopupSelectApp(getContext()).show2();
+                new PopupSelectApp(getContext()).show2( cameraButton);
                 return false;
             }
         });

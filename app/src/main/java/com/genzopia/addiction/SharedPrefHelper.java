@@ -2,12 +2,18 @@ package com.genzopia.addiction;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -254,17 +260,52 @@ public class SharedPrefHelper {
     private static final String PREFS_NAME = "MyAppPrefs";
 
     // Store a string in SharedPreferences
-    public  void saveString(Context context, String key, String value) {
+    public void saveString(Context context, String key, String value) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, value);
-        editor.apply(); // or use commit() if you need immediate result
+        editor.apply();
     }
 
-    // Retrieve a string from SharedPreferences
     public String getString(Context context, String key, String defaultValue) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getString(key, defaultValue);
+    }
+
+    // Save Drawable (as Base64 string)
+    public void saveDrawableAsBase64(Context context, String key, Drawable drawable) {
+        String base64 = drawableToBase64(drawable);
+        if (base64 != null) {
+            saveString(context, key, base64);
+        }
+    }
+
+    // Retrieve Drawable from Base64 string
+    public Drawable getDrawableFromBase64(Context context, String key) {
+        String base64 = getString(context, key, "");
+        if (!base64.isEmpty()) {
+            return base64ToDrawable(context, base64);
+        }
+        return null;
+    }
+
+    // Drawable to Base64
+    private String drawableToBase64(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+            byte[] imageBytes = baos.toByteArray();
+            return Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        }
+        return null;
+    }
+
+    // Base64 to Drawable
+    private Drawable base64ToDrawable(Context context, String base64String) {
+        byte[] imageBytes = Base64.decode(base64String, Base64.DEFAULT);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+        return new BitmapDrawable(context.getResources(), bitmap);
     }
 }
 

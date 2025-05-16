@@ -9,6 +9,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Window;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,7 +33,7 @@ public class PopupSelectApp {
         this.context = context;
     }
 
-    public void show() {
+    public void show(ImageView cameraButton) {
         // Create dialog
         SharedPrefHelper ss=new SharedPrefHelper(context);
 
@@ -55,6 +57,8 @@ public class PopupSelectApp {
                     AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
                         Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
                         ss.saveString(context,"shortcut",appItem.getPackageName());
+                        ss.saveDrawableAsBase64(context, "app_icon", appItem.getIcon());
+                        cameraButton.setImageDrawable(ss.getDrawableFromBase64(context,"app_icon"));
                         dialog.dismiss();
                     });
                     recyclerView.setAdapter(adapter);
@@ -67,7 +71,7 @@ public class PopupSelectApp {
         }
 
     }
-    public void show2() {
+    public void show2(ImageView cameraButton) {
         // Create dialog
         SharedPrefHelper ss=new SharedPrefHelper(context);
 
@@ -90,6 +94,8 @@ public class PopupSelectApp {
                     AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
                         Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
                         ss.saveString(context,"shortcut",appItem.getPackageName());
+                        ss.saveDrawableAsBase64(context, "app_icon", appItem.getIcon());
+                        cameraButton.setImageDrawable(ss.getDrawableFromBase64(context,"app_icon"));
                         dialog.dismiss();
                     });
                     recyclerView.setAdapter(adapter);
