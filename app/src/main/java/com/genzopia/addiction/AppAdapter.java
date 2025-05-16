@@ -3,6 +3,8 @@ package com.genzopia.addiction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -167,6 +169,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
             super(itemView);
             textView = itemView.findViewById(R.id.app_name);
             pinIcon = itemView.findViewById(R.id.pin_icon);
+
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0); // 0 = grayscale
+            pinIcon.setColorFilter(new ColorMatrixColorFilter(matrix));
         }
     }
 

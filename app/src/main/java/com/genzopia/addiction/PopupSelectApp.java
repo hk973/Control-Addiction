@@ -58,7 +58,7 @@ public class PopupSelectApp {
                 handler.post(() -> {
                     AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
                         // UI thread (for Toast and RecyclerView updates)
-                        Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Appname :"+appItem.getAppName(), Toast.LENGTH_SHORT).show();
                         cameraButton.setImageDrawable(appItem.getIcon()); // UI update
                         dialog.dismiss();
 
@@ -105,7 +105,7 @@ public class PopupSelectApp {
             handler.post(() -> {
                 AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
                     // UI thread (for Toast and RecyclerView updates)
-                    Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Appname :"+appItem.getAppName(), Toast.LENGTH_SHORT).show();
                     cameraButton.setImageDrawable(appItem.getIcon()); // UI update
                     dialog.dismiss();
 
