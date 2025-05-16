@@ -244,6 +244,6 @@ public class SettingsActivity extends BaseActivity {
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        finish();
     }
 }

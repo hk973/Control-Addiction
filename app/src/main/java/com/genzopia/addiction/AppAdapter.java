@@ -92,11 +92,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.AppViewHolder> i
         boolean isPinned = pinnedApps.contains(appItem.getPackageName());
 
         holder.itemView.setOnClickListener(v -> {
-            if (isPinned) {
-                if (con instanceof MainContainerActivity) {
-                    ((MainContainerActivity) con).showPinnedAppOptions(appItem);
-                }
-            }
+            launchApp(holder.itemView.getContext(), appItem.getPackageName());
         });
 
 
