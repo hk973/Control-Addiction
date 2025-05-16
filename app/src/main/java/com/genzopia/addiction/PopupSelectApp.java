@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -76,6 +77,18 @@ public class PopupSelectApp {
         }
 
     }
+    public void showlock(ImageView cameraButton) {
+        // Create dialog
+        SharedPrefHelper ss=new SharedPrefHelper(context);
+
+        if(Objects.equals(ss.getString(context, "shortcut", ""), "") ||ss.getString(context,"shortcut","0")==null){
+         Toast.makeText(context,"You cannot set Shortcut from lock screen",Toast.LENGTH_SHORT).show();
+        }else{
+            openapp(ss.getString(context,"shortcut",""));
+        }
+
+    }
+
     public void show2(ImageView cameraButton) {
         SharedPrefHelper ss = new SharedPrefHelper(context);
         final Dialog dialog = new Dialog(context);
