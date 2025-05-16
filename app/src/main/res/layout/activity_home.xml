@@ -60,13 +60,14 @@
 
         <!-- Camera Shortcut -->
         <ImageView
+            android:padding="10dp"
             android:id="@+id/cameraButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Camera"
-            android:src="@android:drawable/ic_menu_camera"
-            app:tint="?android:attr/textColorPrimary" />
+            android:src="@drawable/unlock" />
+
+
+
 
     </LinearLayout>
 

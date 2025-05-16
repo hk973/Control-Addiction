@@ -51,15 +51,20 @@ public class PopupSelectApp {
 
             // Load apps in background
             executor.execute(() -> {
+                // Load apps in background
                 List<AppItem> appItems = loadInstalledApps();
 
                 handler.post(() -> {
                     AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
+                        // UI thread (for Toast and RecyclerView updates)
                         Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
-                        ss.saveString(context,"shortcut",appItem.getPackageName());
-                        ss.saveDrawableAsBase64(context, "app_icon", appItem.getIcon());
-                        cameraButton.setImageDrawable(ss.getDrawableFromBase64(context,"app_icon"));
+                        cameraButton.setImageDrawable(appItem.getIcon()); // UI update
                         dialog.dismiss();
+
+                        // Save data in background (move saving logic here)
+                        executor.execute(() -> {
+                            ss.saveString(context, "shortcut", appItem.getPackageName());
+                        });
                     });
                     recyclerView.setAdapter(adapter);
                 });
@@ -72,39 +77,35 @@ public class PopupSelectApp {
 
     }
     public void show2(ImageView cameraButton) {
-        // Create dialog
-        SharedPrefHelper ss=new SharedPrefHelper(context);
+        SharedPrefHelper ss = new SharedPrefHelper(context);
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.popup_app_selector);
 
-            final Dialog dialog = new Dialog(context);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.popup_app_selector); // You'll need to create this layout
+        RecyclerView recyclerView = dialog.findViewById(R.id.recyclerViewApps);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-            // Initialize RecyclerView
-            RecyclerView recyclerView = dialog.findViewById(R.id.recyclerViewApps);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-
-            // Show loading state if needed
-            // You can add a progress bar in your layout and show/hide it here
-
+        executor.execute(() -> {
             // Load apps in background
-            executor.execute(() -> {
-                List<AppItem> appItems = loadInstalledApps();
+            List<AppItem> appItems = loadInstalledApps();
 
-                handler.post(() -> {
-                    AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
-                        Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
-                        ss.saveString(context,"shortcut",appItem.getPackageName());
-                        ss.saveDrawableAsBase64(context, "app_icon", appItem.getIcon());
-                        cameraButton.setImageDrawable(ss.getDrawableFromBase64(context,"app_icon"));
-                        dialog.dismiss();
+            handler.post(() -> {
+                AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
+                    // UI thread (for Toast and RecyclerView updates)
+                    Toast.makeText(context, appItem.getPackageName(), Toast.LENGTH_SHORT).show();
+                    cameraButton.setImageDrawable(appItem.getIcon()); // UI update
+                    dialog.dismiss();
+
+                    // Save data in background (move saving logic here)
+                    executor.execute(() -> {
+                        ss.saveString(context, "shortcut", appItem.getPackageName());
                     });
-                    recyclerView.setAdapter(adapter);
                 });
+                recyclerView.setAdapter(adapter);
             });
+        });
 
-            dialog.show();
-
-
+        dialog.show();
     }
     private boolean openapp(String packageName) {
         PackageManager pm = context.getPackageManager();

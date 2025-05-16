@@ -3,7 +3,12 @@ package com.genzopia.addiction;
 import android.accessibilityservice.AccessibilityService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -45,6 +50,24 @@ public class HomeFragment extends Fragment {
         } else {
             Log.d("BatteryOpt", "Already whitelisted");
         }
+        ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
+        ColorMatrix matrix = new ColorMatrix();
+        matrix.setSaturation(0); // 0 = grayscale
+        cameraButton.setColorFilter(new ColorMatrixColorFilter(matrix));
+        SharedPrefHelper ss=new SharedPrefHelper(getContext());
+        String packagename = ss.getString(context,"shortcut","");
+        PackageManager pmm = context.getPackageManager();
+
+// Get app icon and label
+        try {
+            ApplicationInfo appInfo = pmm.getApplicationInfo(packagename, 0);
+            Drawable appIcon = appInfo.loadIcon(pmm); // Returns Drawable
+            // Use in ImageView/TextView
+            cameraButton.setImageDrawable(appIcon);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
     }
 
