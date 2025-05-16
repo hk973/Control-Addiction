@@ -272,41 +272,8 @@ public class SharedPrefHelper {
         return sharedPreferences.getString(key, defaultValue);
     }
 
-    // Save Drawable (as Base64 string)
-    public void saveDrawableAsBase64(Context context, String key, Drawable drawable) {
-        String base64 = drawableToBase64(drawable);
-        if (base64 != null) {
-            saveString(context, key, base64);
-        }
-    }
 
-    // Retrieve Drawable from Base64 string
-    public Drawable getDrawableFromBase64(Context context, String key) {
-        String base64 = getString(context, key, "");
-        if (!base64.isEmpty()) {
-            return base64ToDrawable(context, base64);
-        }
-        return null;
-    }
 
-    // Drawable to Base64
-    private String drawableToBase64(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            byte[] imageBytes = baos.toByteArray();
-            return Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        }
-        return null;
-    }
-
-    // Base64 to Drawable
-    private Drawable base64ToDrawable(Context context, String base64String) {
-        byte[] imageBytes = Base64.decode(base64String, Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-        return new BitmapDrawable(context.getResources(), bitmap);
-    }
 }
 
 

@@ -8,7 +8,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -344,6 +348,7 @@ public class MainFragment extends Fragment {
         }
     }
 
+    @SuppressLint("ResourceType")
     private void showTimePickerDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_time_picker, null);
         NumberPicker daysPicker = dialogView.findViewById(R.id.daysPicker);
@@ -359,6 +364,35 @@ public class MainFragment extends Fragment {
         CardView card30Min = dialogView.findViewById(R.id.card30Min);
         CardView card1Hour = dialogView.findViewById(R.id.card1Hour);
         CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
+
+        //code for grew mode
+        SharedPrefHelper ss=new SharedPrefHelper(getContext());
+         if(ss.isGrayModeEnabled()) {
+             buttonSet.setBackgroundColor(Color.parseColor("#686868"));
+             // Set progress color (#FF5722 - Orange)
+             difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#353535")));
+
+             // Set thumb color
+             difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#686868")));
+
+         }else{
+             buttonSet.setBackgroundColor(Color.parseColor("#FF5722"));
+             // Set progress color (#FF5722 - Orange)
+             difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
+
+             // Set thumb color
+             difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
+         }
+
+
+
+
+
+
+
+
+
+
 
 
         // Set picker ranges
