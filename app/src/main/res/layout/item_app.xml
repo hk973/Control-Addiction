@@ -14,8 +14,8 @@
 
     <ImageView
         android:id="@+id/pin_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="17dp"
+        android:layout_height="17dp"
         android:src="@drawable/pin"
         android:visibility="gone"/>
 
