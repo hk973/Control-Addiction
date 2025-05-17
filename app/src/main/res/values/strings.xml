@@ -33,4 +33,7 @@
     <string name="auto_rotate">Auto Rotate</string>
     <string name="brightness">Brightness</string>
     <string name="volume">Volume</string>
+    <string name="gif_description">Instruction GIF</string>
+    <string name="know_more">How to Pin Notification Tile</string>
+
 </resources>

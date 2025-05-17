@@ -42,14 +42,12 @@ public class GIFDialogFragment extends DialogFragment {
         requireActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int dialogWidth = (int) (metrics.widthPixels * 0.90);
 
-        // Set GIF dimensions to maintain square aspect ratio
-        gifImageView.getLayoutParams().width = dialogWidth - 48; // Account for padding
-        gifImageView.getLayoutParams().height = dialogWidth - 48;
+
 
         // Load GIF
         Glide.with(this)
                 .asGif()
-                .load(R.drawable.notif_tile)
+                .load(R.drawable.notif_til)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(gifImageView);
 
