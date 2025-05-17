@@ -23,4 +23,8 @@
     <color name="slider_thumb">#FFFFFF</color>
     <color name="tile_text">#FFFFFF</color>
     <color name="icon_color">#FFFFFF</color>
+    <color name="light_bg">#FFF7F5</color>
+    <color name="text_color">#333333</color>
+    <color name="primary_500">#FF5722</color>
+    <color name="secondary_500">#FFC107</color>
 </resources>

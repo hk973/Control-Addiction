@@ -1,108 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Permissions and Privacy Policy - Focus Launcher</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Permissions & Privacy Policy – Focus Launcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-pVbE+..."
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"/>
     <style>
+        /* ----------------------------------------
+           Default (Light Mode)
+        ----------------------------------------- */
+        :root {
+          --primary-color: #FF5722;
+          --accent-color: #FFC107;
+
+          --bg-page: #fff7f5;
+          --bg-card: #ffffff;
+          --text-color: #333333;
+          --note-bg: #fff3e0;
+          --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        /* ----------------------------------------
+           Dark Mode Overrides
+        ----------------------------------------- */
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --bg-page: #121212;
+            --bg-card: #1e1e1e;
+            --text-color: #e0e0e0;
+            --note-bg: #2a1300;
+            --shadow: rgba(0, 0, 0, 0.5);
+          }
+        }
+
+        /* ----------------------------------------
+           Global Reset & Base Styles
+        ----------------------------------------- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-            background-color: #f9f9f9;
-            color: #333;
+          font-family: 'Roboto', sans-serif;
+          background-color: var(--bg-page);
+          color: var(--text-color);
+          line-height: 1.6;
         }
-        h1, h2, h3 {
-            color: #2c3e50;
+        a {
+          color: var(--primary-color);
+          text-decoration: none;
         }
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
+
+        /* ----------------------------------------
+           Header
+        ----------------------------------------- */
+        header {
+          background: var(--primary-color);
+          color: #fff;
+          padding: 2rem 1rem;
+          text-align: center;
+          box-shadow: 0 2px 6px var(--shadow);
         }
+        header h1 {
+          font-size: 2rem;
+          font-weight: 500;
+        }
+        header p {
+          margin-top: 0.5rem;
+          font-size: 1rem;
+          opacity: 0.9;
+        }
+
+        /* ----------------------------------------
+           Container & Cards
+        ----------------------------------------- */
+        .container {
+          max-width: 850px;
+          margin: 2rem auto;
+          padding: 0 1rem;
+        }
+        .card {
+          background: var(--bg-card);
+          border-radius: 10px;
+          box-shadow: 0 3px 10px var(--shadow);
+          margin-bottom: 2rem;
+          padding: 1.5rem;
+        }
+
+        /* ----------------------------------------
+           Headings & Text
+        ----------------------------------------- */
         h2 {
-            margin-top: 20px;
+          color: var(--primary-color);
+          font-size: 1.4rem;
+          margin-bottom: 1rem;
+          font-weight: 600;
         }
-        p {
-            margin: 10px 0;
+        h3 {
+          margin-top: 1rem;
+          font-size: 1.1rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+        }
+        h3 i {
+          margin-right: 0.5rem;
+          color: var(--accent-color);
+        }
+        p, ul {
+          margin: 0.8rem 0;
         }
         ul {
-            margin: 10px 0;
-            padding-left: 20px;
+          padding-left: 1.2rem;
         }
-        li {
-            margin: 5px 0;
+        ul li {
+          margin-bottom: 0.5rem;
         }
+
+        /* ----------------------------------------
+           Note Highlight
+        ----------------------------------------- */
         .highlight {
-            background-color: #fffde7;
-            padding: 10px;
-            border-left: 4px solid #ffd600;
+          background-color: var(--note-bg);
+          border-left: 4px solid var(--accent-color);
+          padding: 1rem;
+          margin: 1rem 0;
+        }
+
+        /* ----------------------------------------
+           Footer
+        ----------------------------------------- */
+        footer {
+          text-align: center;
+          margin: 3rem 0 1rem;
+          font-size: 0.9rem;
+          color: var(--text-color);
+          opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
-<h1>Permissions and Privacy Policy for Focus Launcher</h1>
+<header>
+    <h1>Focus Launcher</h1>
+    <p>Enhance Your Digital Wellbeing</p>
+</header>
 
+<div class="container">
 
-<h2>Permissions Required</h2>
+    <div class="card">
+        <h2>Permissions Overview</h2>
 
-<h3>1. Accessibility Service</h3>
-<p>Focus Launcher uses the Android Accessibility Service <strong>only</strong> to:</p>
-<ul>
-    <li>Detect when a restricted app is launched.</li>
-    <li>Enforce app locking during the restricted period.</li>
-    <li>Display focus reminders (without notifications).</li>
-</ul>
-<p><strong>Note:</strong> We do not collect, log, or transmit any sensitive user data accessed through this service.</p>
+        <h3><i class="fas fa-universal-access"></i>Accessibility Service</h3>
+        <p>This service is used solely to:</p>
+        <ul>
+            <li>Monitor launch of selected restricted apps</li>
+            <li>Temporarily limit access during focus periods</li>
+            <li>Show helpful reminders to support focus goals</li>
+        </ul>
+        <div class="highlight">
+            <strong>Note:</strong> No personal or sensitive user data is accessed, collected, or transmitted through this service.
+        </div>
 
-<h3>2. Query All Packages (QUERY_ALL_PACKAGES)</h3>
-<p>This permission allows the app to:</p>
-<ul>
-    <li>Display a list of installed apps so users can select which apps to restrict.</li>
-    <li>Verify if a restricted app is launched.</li>
-</ul>
+        <h3><i class="fas fa-th-large"></i>App Usage Access</h3>
+        <p>This permission helps Focus Launcher:</p>
+        <ul>
+            <li>Display a list of installed apps for restriction setup</li>
+            <li>Check if restricted apps are in use (locally only)</li>
+        </ul>
+    </div>
 
-<h2>Premium Unlock Feature</h2>
-<p>Users may unlock restricted apps before the scheduled time by paying a fee. All payments are processed securely via Google Play Billing.</p>
+    <div class="card">
+        <h2>Premium Features</h2>
+        <p>Users can unlock access to restricted apps before the scheduled time by making a secure payment via Google Play Billing. No financial data is handled by Focus Launcher directly.</p>
+    </div>
 
-<h2>Privacy Policy</h2>
-<h3>Data Collection</h3>
-<p>Focus Launcher does <strong>not</strong> collect or store:</p>
-<ul>
-    <li>Personal user data (emails, contacts, etc.).</li>
-    <li>App usage history beyond the local device.</li>
-    <li>Accessibility service data (keystrokes, text inputs, etc.).</li>
-</ul>
+    <div class="card">
+        <h2>Privacy Policy</h2>
 
-<h3>Data Processing</h3>
-<ul>
-    <li><strong>Local-Only Processing:</strong> All app restrictions and timers are managed locally on the device.</li>
-    <li><strong>No Backups:</strong> We do not upload or sync data to external servers.</li>
-</ul>
+        <h3><i class="fas fa-database"></i>Data Collection</h3>
+        <p>We do <strong>not</strong> collect or store the following:</p>
+        <ul>
+            <li>Email addresses, contacts, or other personal identifiers</li>
+            <li>App usage data beyond the device</li>
+            <li>Accessibility data such as keystrokes or text input</li>
+        </ul>
 
-<h3>User Control</h3>
-<p>Users can:</p>
-<ul>
-    <li>Revoke permissions anytime via device settings.</li>
-    <li>Uninstall the app to remove all local data.</li>
-</ul>
+        <h3><i class="fas fa-cogs"></i>Data Processing</h3>
+        <ul>
+            <li><strong>On-Device Only:</strong> All operations run locally on your device</li>
+            <li><strong>No External Sync:</strong> Your data is never uploaded or shared</li>
+        </ul>
 
-<h2>Compliance</h2>
-<p>Focus Launcher complies with:</p>
-<ul>
-    <li>Google Play’s <a href="https://play.google.com/about/restricted-content/" target="_blank">Restricted Content Policy</a>.</li>
-    <li>GDPR and CCPA (where applicable).</li>
-</ul>
+        <h3><i class="fas fa-user-cog"></i>User Controls</h3>
+        <ul>
+            <li>You can revoke permissions at any time via system settings</li>
+            <li>Uninstalling the app removes all locally stored data</li>
+        </ul>
+    </div>
 
-<h2>Disclaimer</h2>
-<p>Focus Launcher is provided "as is." We are not liable for:</p>
-<ul>
-    <li>Device malfunctions due to misuse.</li>
-    <li>Financial losses from early unlock payments.</li>
-</ul>
+    <div class="card">
+        <h2>Compliance</h2>
+        <ul>
+            <li>Compliant with <a href="https://play.google.com/about/restricted-content/" target="_blank">Google Play’s Content Policies</a></li>
+            <li>Supports GDPR and CCPA standards where applicable</li>
+        </ul>
+    </div>
 
-<h2>Changes to This Policy</h2>
-<p>Updates will be posted in-app and on this page. Continued use constitutes acceptance.</p>
+    <div class="card">
+        <h2>Updates to This Policy</h2>
+        <p>Any future updates will be made available both within the app and on this page. Your continued use indicates acceptance of the updated terms.</p>
+    </div>
+
+    <footer>
+        &copy; 2025 Focus Launcher. Designed to respect your privacy and focus.
+    </footer>
+
+</div>
 
 </body>
 </html>
