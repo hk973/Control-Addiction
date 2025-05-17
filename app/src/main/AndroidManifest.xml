@@ -29,6 +29,8 @@
         <activity
             android:name=".MainContainerActivity2"
             android:exported="false" />
+        <activity android:name=".PinInfoActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
 
         <service
             android:name=".NotificationBarDetectorService"
@@ -46,13 +48,11 @@
         <activity
             android:name=".ReviewActivity"
             android:excludeFromRecents="true"
-            android:noHistory="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" /> <!-- Main Launcher Activity (Hidden from Recents) -->
         <activity
             android:name=".MainContainerActivity"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:noHistory="true"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
