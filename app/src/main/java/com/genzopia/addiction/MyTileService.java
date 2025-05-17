@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -104,13 +105,15 @@ public class MyTileService extends TileService {
 
     // Method to retrieve and use the saved data
     public void start_mode() {
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getBaseContext());
+        if(!sharedPrefHelper.getTimeActivateStatus()){
        ArrayList<String>savedApps=new ArrayList<>();
        savedApps=getSelectedAppMode(this);
        int savedSecMode=getSecMode(this);
        Log.e("test333", String.valueOf(savedSecMode));
 
         // If you still need to use SharedPrefHelper (though not clear why since we already have the values)
-        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getBaseContext());
+
         sharedPrefHelper.saveStartTime(System.currentTimeMillis());
         sharedPrefHelper.saveInitialDuration(savedSecMode);
         sharedPrefHelper.setTimeActivateStatus(true);
@@ -120,6 +123,9 @@ public class MyTileService extends TileService {
         Intent intent = new Intent(this, MainContainerActivity2.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+        }else{
+
+        }
     }
 
     public ArrayList<String> getSelectedAppMode(Context context) {
