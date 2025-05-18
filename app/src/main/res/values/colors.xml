@@ -27,4 +27,6 @@
     <color name="text_color">#333333</color>
     <color name="primary_500">#FF5722</color>
     <color name="secondary_500">#FFC107</color>
+    <color name="cardBackground">#2A2A2A</color>
+    <color name="colorPrimaryLight">#403F4E</color>
 </resources>

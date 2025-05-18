@@ -83,16 +83,18 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         // Add only the needed fragments (3 fragments now)
         pagerAdapter.addFragment(AccessibilityPermissionFragment.newInstance());
         pagerAdapter.addFragment(TermsFragment.newInstance());
+        pagerAdapter.addFragment(ThemeSelectionFragment.newInstance());
         pagerAdapter.addFragment(LauncherPermissionFragment.newInstance());
 
+
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(3); // Keep all fragments in memory
+        viewPager.setOffscreenPageLimit(4); // Keep all fragments in memory
     }
 
     private void setupDots() {
-        dots = new View[3]; // Only 3 dots now
+        dots = new View[4]; // Only 3 dots now
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i <= 3; i++) {
             dots[i] = new View(this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     getResources().getDimensionPixelSize(R.dimen.dot_width),

@@ -17,4 +17,7 @@
     <dimen name="slider_thumb_size">16dp</dimen>
     <dimen name="slider_icon_margin_end">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="button_elevation">4dp</dimen>
+    <dimen name="preview_image_height">200dp</dimen>
 </resources>
