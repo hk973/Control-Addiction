@@ -184,11 +184,16 @@ public class SettingsActivity extends BaseActivity {
         themeSelectionGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.darkmode_opt) {
                 // Enable Dark Mode
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                applyGrayScaleIfNeeded();
                 sharedPrefHelper.setDarkModeEnabled(true);
                 sharedPrefHelper.setGrayModeEnabled(false);
                 sharedPrefHelper.setFollowSystemThemeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                applyGrayScaleIfNeeded();
+
 
             } else if (checkedId == R.id.lightmode_opt) {
                 // Disable both Dark Mode and Gray Mode (Light Mode)
@@ -196,10 +201,15 @@ public class SettingsActivity extends BaseActivity {
                 sharedPrefHelper.setGrayModeEnabled(false);
                 sharedPrefHelper.setFollowSystemThemeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                applyGrayScaleIfNeeded();
+
 
             } else if (checkedId == R.id.gray_opt) {
                 // Enable Gray Mode along with Dark Mode
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                applyGrayScaleIfNeeded();
                 sharedPrefHelper.setDarkModeEnabled(false);
                 sharedPrefHelper.setGrayModeEnabled(true);
                 sharedPrefHelper.setFollowSystemThemeEnabled(false);
@@ -208,11 +218,16 @@ public class SettingsActivity extends BaseActivity {
 
             } else if (checkedId == R.id.grayd_opt) {
                 // Follow system theme
+                sharedPrefHelper.setDarkModeEnabled(false);
+                sharedPrefHelper.setGrayModeEnabled(false);
+                sharedPrefHelper.setFollowSystemThemeEnabled(false);
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                applyGrayScaleIfNeeded();
                 sharedPrefHelper.setFollowSystemThemeEnabled(true);
                 sharedPrefHelper.setDarkModeEnabled(false);
                 sharedPrefHelper.setGrayModeEnabled(false);
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                applyGrayScaleIfNeeded();
+
             }
         });
 
