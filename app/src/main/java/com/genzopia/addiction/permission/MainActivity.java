@@ -148,7 +148,9 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        // Disable back button
+        if(viewPager.getCurrentItem()==0){
+        super.onBackPressed();}else{
+        viewPager.setCurrentItem(0);}
     }
 
     /**
