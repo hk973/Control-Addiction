@@ -39,10 +39,8 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         if(p.getTimeLimitValue()<=0){
         p.saveTimeActivateStatus(false);}
 
-        if (!p.getReviewShown()) {
-            Intent reviewIntent = new Intent(this, ReviewActivity.class);
-            startActivity(reviewIntent);
-        }
+
+
 
         updateChecker = new AppUpdateChecker(this);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(updateChecker);
@@ -55,6 +53,19 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         if (requestCode == REQUEST_CODE && resultCode != Activity.RESULT_OK) {
             // Update cancelled or failed — optionally close app
             finish();
+        }
+    }
+    private void checkAndShowReview() {
+        SharedPrefHelper p = new SharedPrefHelper(this);
+
+        // Check if we should show review (2+ days passed since last prompt)
+        Log.e("test111", String.valueOf(p.shouldShowReview()));
+        if (p.shouldShowReview()) {
+            Intent reviewIntent = new Intent(this, ReviewActivity.class);
+            startActivity(reviewIntent);
+
+            // Update the last prompt time to now
+            p.saveLastReviewPromptTime(System.currentTimeMillis());
         }
     }
 
@@ -105,5 +116,11 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         public int getItemCount() {
             return 2;
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkAndShowReview();
     }
 }

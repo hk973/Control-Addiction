@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         window.setStatusBarColor(Color.parseColor("#000000")); // Your color
 
 
-        sp.setReviewShown(false);
+
 
         // Initialize ViewPager and dots
         viewPager = findViewById(R.id.viewPager);

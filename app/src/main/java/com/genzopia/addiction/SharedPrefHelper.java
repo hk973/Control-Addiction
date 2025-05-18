@@ -180,12 +180,36 @@ public class SharedPrefHelper {
         editor.apply();
     }
 
-    public boolean getReviewShown() {
-        return prefs.getBoolean("review_shown", false);
+
+    private static final String LAST_REVIEW_PROMPT_TIME = "last_review_prompt_time";
+    private static final int DAYS_BETWEEN_REVIEWS = 2;
+
+    // Store the last time review was prompted (in milliseconds)
+    public void saveLastReviewPromptTime(long timeInMillis) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(LAST_REVIEW_PROMPT_TIME, timeInMillis);
+        editor.apply();
     }
 
-    public void setReviewShown(boolean shown) {
-        prefs.edit().putBoolean("review_shown", shown).apply();
+    // Get the last time review was prompted
+    public long getLastReviewPromptTime() {
+        return prefs.getLong(LAST_REVIEW_PROMPT_TIME, 0);
+    }
+
+    // Check if it's time to show review again (2+ days passed)
+    public boolean shouldShowReview() {
+        long lastPromptTime = getLastReviewPromptTime();
+
+        // If never prompted before, show it
+        if (lastPromptTime == 0) {
+            return true;
+        }
+
+        // Calculate if 2 days (172800000 ms) have passed
+        long currentTime = System.currentTimeMillis();
+        long DaysInMillis = DAYS_BETWEEN_REVIEWS * 24 * 60 * 60 * 1000;
+
+        return (currentTime - lastPromptTime) >= DaysInMillis;
     }
 
     public void saveStartTime(long startTime) {
