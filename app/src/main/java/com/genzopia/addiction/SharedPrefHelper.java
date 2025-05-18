@@ -92,6 +92,14 @@ public class SharedPrefHelper {
         editor.apply();
         Log.d("SharedPrefDebug", "Gray Mode preference set to: " + enabled);
     }
+    public void setTermsAccepted(boolean accepted) {
+        prefs.edit().putBoolean("terms_accepted", accepted).apply();
+    }
+
+    public boolean isTermsAccepted() {
+        return prefs.getBoolean("terms_accepted", false);
+    }
+
 
 
     public SharedPrefHelper(Context context) {

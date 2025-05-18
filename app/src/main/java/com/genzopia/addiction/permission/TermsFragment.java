@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.SharedPrefHelper;
 
 public class TermsFragment extends BasePermissionFragment {
 
@@ -54,9 +55,18 @@ public class TermsFragment extends BasePermissionFragment {
         termsCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             proceedButton.setEnabled(isChecked);
         });
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
+        termsAccepted = sharedPrefHelper.isTermsAccepted();
+
+        if (termsAccepted) {
+            proceedButton.setEnabled(true);
+            updatePermissionGrantedUI();
+        }
 
         proceedButton.setOnClickListener(v -> {
             termsAccepted = true;
+            // Save to shared preferences
+            sharedPrefHelper.setTermsAccepted(true);
             updatePermissionGrantedUI();
         });
 

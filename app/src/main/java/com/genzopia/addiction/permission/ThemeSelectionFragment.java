@@ -1,14 +1,20 @@
 package com.genzopia.addiction.permission;
 
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import com.genzopia.addiction.R;
@@ -55,6 +61,7 @@ public class ThemeSelectionFragment extends BasePermissionFragment {
             }
         });
 
+
         return view;
     }
 
@@ -74,17 +81,25 @@ public class ThemeSelectionFragment extends BasePermissionFragment {
 
         mobileThemeCard.setCardBackgroundColor(theme == 1 ? selectedColor : defaultColor);
         greyThemeCard.setCardBackgroundColor(theme == 2 ? selectedColor : defaultColor);
+
     }
 
     private void applyTheme() {
-        SharedPrefHelper sp = new SharedPrefHelper(requireContext());
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getContext());
 
 
         // Call your existing theme functions here
         if(selectedTheme == 1) {
-            // applyMobileTheme();
+            sharedPrefHelper.setFollowSystemThemeEnabled(true);
+            sharedPrefHelper.setDarkModeEnabled(false);
+            sharedPrefHelper.setGrayModeEnabled(false);
+
         } else {
-            // applyGreyTheme();
+            sharedPrefHelper.setDarkModeEnabled(false);
+            sharedPrefHelper.setGrayModeEnabled(true);
+            sharedPrefHelper.setFollowSystemThemeEnabled(false);
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
         }
     }
 
@@ -105,5 +120,35 @@ public class ThemeSelectionFragment extends BasePermissionFragment {
         mobileThemeCard.setEnabled(false);
         greyThemeCard.setEnabled(false);
         notifyPermissionGranted();
+    }
+    // Apply grayscale effect to the root view if Gray Mode is enabled
+    private void applyGrayScaleIfNeeded() {
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
+        if (sharedPrefHelper != null && sharedPrefHelper.isGrayModeEnabled()) {
+            // Get the root view of the activity's window
+            Window window = requireActivity().getWindow();
+            View root = window.getDecorView();
+            root.setLayerType(View.LAYER_TYPE_HARDWARE, null); // Enable hardware layer for better performance
+
+            // Create a ColorMatrix for grayscale effect
+            Paint paint = new Paint();
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0); // Set saturation to 0 for grayscale
+            paint.setColorFilter(new ColorMatrixColorFilter(matrix));
+
+            // Apply the color filter to the root view
+            root.setLayerPaint(paint);
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
+        Log.e("test234",sharedPrefHelper.isFollowSystemThemeEnabled()+","+sharedPrefHelper.isGrayModeEnabled());
+        if(sharedPrefHelper.isFollowSystemThemeEnabled()||sharedPrefHelper.isGrayModeEnabled()){
+            notifyPermissionGranted();
+        }
+
     }
 }

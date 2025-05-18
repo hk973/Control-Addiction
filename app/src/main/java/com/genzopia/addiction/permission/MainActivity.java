@@ -16,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
+import com.genzopia.addiction.BaseActivity;
 import com.genzopia.addiction.MainContainerActivity;
 import com.genzopia.addiction.R;
 import com.genzopia.addiction.SharedPrefHelper;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements PermissionListener {
+public class MainActivity extends BaseActivity implements PermissionListener {
 
     private ViewPager viewPager;
     private LinearLayout dotsLayout;
