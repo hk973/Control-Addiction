@@ -55,19 +55,7 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
             finish();
         }
     }
-    private void checkAndShowReview() {
-        SharedPrefHelper p = new SharedPrefHelper(this);
 
-        // Check if we should show review (2+ days passed since last prompt)
-        Log.e("test111", String.valueOf(p.shouldShowReview()));
-        if (p.shouldShowReview()) {
-            Intent reviewIntent = new Intent(this, ReviewActivity.class);
-            startActivity(reviewIntent);
-
-            // Update the last prompt time to now
-            p.saveLastReviewPromptTime(System.currentTimeMillis());
-        }
-    }
 
     @SuppressLint("MissingSuperCall")
     @Override
@@ -116,11 +104,5 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         public int getItemCount() {
             return 2;
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkAndShowReview();
     }
 }

@@ -16,4 +16,5 @@
     <dimen name="slider_corner_radius">8dp</dimen>
     <dimen name="slider_thumb_size">16dp</dimen>
     <dimen name="slider_icon_margin_end">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

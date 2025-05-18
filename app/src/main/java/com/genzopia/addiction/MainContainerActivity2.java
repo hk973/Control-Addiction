@@ -1,6 +1,7 @@
 package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -37,5 +38,12 @@ MainFragment mainFragment;
             ((OnBack) fragment).back(viewPager); // call custom back
 
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent reviewIntent = new Intent(this, ReviewActivity.class);
+        startActivity(reviewIntent);
     }
 }
