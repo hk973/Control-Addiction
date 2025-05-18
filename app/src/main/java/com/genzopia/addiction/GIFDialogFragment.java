@@ -1,6 +1,7 @@
 package com.genzopia.addiction;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -54,7 +55,7 @@ public class GIFDialogFragment extends DialogFragment {
         // Handle know more click
         knowMoreText.setOnClickListener(v -> {
             // Add your "know more" action here
-            Toast.makeText(requireContext(), "Showing more information", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(requireContext(), PinInfoActivity.class));
         });
 
         // Set window properties
