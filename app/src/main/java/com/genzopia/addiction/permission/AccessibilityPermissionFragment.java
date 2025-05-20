@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -60,21 +61,53 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
     }
 
     private void showDisclosureDialog() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Grant Accessibility Permission")
-                .setMessage("This app needs Accessibility permission to enforce your app time limits and help you manage screen usage. No personal data is collected or shared.")
+        // Inflate custom layout with checkbox
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.accessibility_consent_dialog, null);
+
+        CheckBox consentCheckbox = dialogView.findViewById(R.id.consentCheckbox);
+        TextView messageText = dialogView.findViewById(R.id.messageText);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Accessibility Permission Required")
+                .setView(dialogView)
                 .setCancelable(false)
-                .setPositiveButton("Allow", (dialog, which) -> {
+                .setPositiveButton("Allow", null) // Set to null to override default dismissal
+                .setNegativeButton("Deny", null)
+                .create();
+
+        // Custom message with explicit details
+        messageText.setText("To help you manage screen time and digital wellbeing, this app needs Accessibility permission to:\n\n" +
+                "• Monitor app usage\n" +
+                "• Lock specific apps when time limits are reached\n" +
+                "• Enforce screen time controls\n\n" +
+                "By checking the box below, you confirm you understand these functions. No personal data will be collected or shared.");
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button allowButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button denybutton=dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            allowButton.setEnabled(false); // Initially disabled
+
+            consentCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                // Only enable Allow button when checkbox is checked
+                allowButton.setEnabled(isChecked);
+            });
+            denybutton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                }
+            });
+
+            allowButton.setOnClickListener(v -> {
+                if (consentCheckbox.isChecked()) {
                     dialog.dismiss();
                     openAccessibilitySettings();
-                })
-                .setNegativeButton("No, thanks", (dialog, which) -> {
-                    dialog.dismiss();
-                    // Leave user on the same screen
-                })
-                .show();
-    }
+                }
+            });
+        });
 
+        dialog.show();
+    }
     private void openAccessibilitySettings() {
         Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
         startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY_PERMISSION);
