@@ -1,6 +1,7 @@
-// AccessibilityPermissionFragment.java
 package com.genzopia.addiction.permission;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -43,19 +44,38 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
 
         // Set content
         titleText.setText("Accessibility Permission");
-        descriptionText.setText("We need accessibility permission to help restrict access to addictive apps when you've reached your time limits. This is essential for effectively managing your screen time.");
-        requestPermissionButton.setText("Grant Accessibility Permission");
+        descriptionText.setText("We use Accessibility service to monitor and block apps when you've exceeded your time limits. No personal data is collected. Please grant permission to continue.");
+        requestPermissionButton.setText("Grant Permission");
 
-        // Set position
+        // Set fragment position for navigation
         position = 0;
 
-        // Set click listener
-        requestPermissionButton.setOnClickListener(v -> requestAccessibilityPermission());
+        // Update UI based on current status
+        checkPermissionStatus();
+
+        // Show disclosure dialog before navigating to Settings
+        requestPermissionButton.setOnClickListener(v -> showDisclosureDialog());
 
         return view;
     }
 
-    private void requestAccessibilityPermission() {
+    private void showDisclosureDialog() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Grant Accessibility Permission")
+                .setMessage("This app needs Accessibility permission to enforce your app time limits and help you manage screen usage. No personal data is collected or shared.")
+                .setCancelable(false)
+                .setPositiveButton("Allow", (dialog, which) -> {
+                    dialog.dismiss();
+                    openAccessibilitySettings();
+                })
+                .setNegativeButton("No, thanks", (dialog, which) -> {
+                    dialog.dismiss();
+                    // Leave user on the same screen
+                })
+                .show();
+    }
+
+    private void openAccessibilitySettings() {
         Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
         startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY_PERMISSION);
     }
@@ -70,7 +90,6 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
 
     @Override
     protected void checkPermissionStatus() {
-
         if (isPermissionGranted()) {
             updatePermissionGrantedUI();
         } else {
@@ -78,9 +97,8 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
         }
     }
 
-    // In AccessibilityPermissionFragment.java
-@Override
-public boolean isPermissionGranted() {
+    @Override
+    public boolean isPermissionGranted() {
         String serviceId = getContext().getPackageName() + "/" + NotificationBarDetectorService.class.getCanonicalName();
         String enabledServices = Settings.Secure.getString(
                 getContext().getContentResolver(),
@@ -105,6 +123,7 @@ public boolean isPermissionGranted() {
         statusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.green));
         requestPermissionButton.setVisibility(View.GONE);
 
+        // Notify host activity
         notifyPermissionGranted();
     }
 
