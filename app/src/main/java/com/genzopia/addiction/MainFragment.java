@@ -1,5 +1,7 @@
 package com.genzopia.addiction;
 
+
+
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -28,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -71,6 +74,7 @@ public class MainFragment extends Fragment {
     private AppListViewModel viewModel;
     private ProgressBar progressBar;
     private SeekBar.OnSeekBarChangeListener seekBarChangeListener;
+    private static final int REQUEST_CODE_ACCESSIBILITY_PERMISSION = 102;
 
 
     @Override
@@ -561,20 +565,59 @@ public class MainFragment extends Fragment {
     }
 
     private void showAccessibilityDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Accessibility Permission Required")
-                .setMessage("To completely lock the apps, this app needs Accessibility feature to be enabled. Please enable the feature.")
-                .setPositiveButton("Enable", (dialog, which) -> {
-                    Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                })
-                .setNegativeButton("No", (dialog, which) -> {
-                    Toast.makeText(getContext(), "You can't lock apps without Accessibility access", Toast.LENGTH_LONG).show();
+      showDisclosureDialog();
+    }
+    private void showDisclosureDialog() {
+        // Inflate custom layout with checkbox
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.accessibility_consent_dialog, null);
+
+        CheckBox consentCheckbox = dialogView.findViewById(R.id.consentCheckbox);
+        TextView messageText = dialogView.findViewById(R.id.messageText);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Accessibility Permission Required")
+                .setView(dialogView)
+                .setCancelable(false)
+                .setPositiveButton("Allow", null) // Set to null to override default dismissal
+                .setNegativeButton("Deny", null)
+                .create();
+
+        // Custom message with explicit details
+        messageText.setText("To help you manage screen time and digital wellbeing, this app needs Accessibility permission to:\n\n" +
+                "• Monitor app usage\n" +
+                "• Lock specific apps when time limits are reached\n" +
+                "• Enforce screen time controls\n\n" +
+                "By checking the box below, you confirm you understand these functions. No personal data will be collected or shared.");
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button allowButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            Button denybutton=dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+            allowButton.setEnabled(false); // Initially disabled
+
+            consentCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                // Only enable Allow button when checkbox is checked
+                allowButton.setEnabled(isChecked);
+            });
+            denybutton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
                     dialog.dismiss();
-                })
-                .create()
-                .show();
+                }
+            });
+
+            allowButton.setOnClickListener(v -> {
+                if (consentCheckbox.isChecked()) {
+                    dialog.dismiss();
+                    openAccessibilitySettings();
+                }
+            });
+        });
+
+        dialog.show();
+    }
+    private void openAccessibilitySettings() {
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY_PERMISSION);
     }
     // Helper method to update picker values
     private void setTimeValues(int days, int hours, int minutes,

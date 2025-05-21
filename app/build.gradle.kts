@@ -10,8 +10,8 @@ android {
         applicationId = "com.genzopia.addiction"
         minSdk = 24
         targetSdk = 34
-        versionCode = 7
-        versionName = "7"
+        versionCode = 9
+        versionName = "9.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">Control Addiction</string>
-    <string name="accessibility_service_description">Detects notification bar swipes for app functionality.</string>
+    <string name="app_name">FocusGuard</string>
+    <string name="accessibility_service_description">
+    This service is used to block selected apps during focus sessions based on your preferences. No personal data is collected or shared.
+</string>
+
     <string name="notification_permission_title">Notification Permission</string>
     <string name="notification_permission_desc">We need notification permission to alert you when you\'ve reached your screen time limits.</string>
     <string name="usage_permission_title">Usage Access Permission</string>
