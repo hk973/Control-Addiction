@@ -1,82 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Top section: Title + Status -->
+    <TextView
+        android:id="@+id/termsTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center">
+        android:orientation="horizontal"
+        android:gravity="center"
+
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/statusImage"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_pending" />
 
         <TextView
-            android:id="@+id/termsTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"/>
-
-        <LinearLayout
+            android:id="@+id/statusText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="16dp">
+            android:text="Terms Review Required"
+            android:textColor="@color/red" />
+    </LinearLayout>
 
-            <ImageView
-                android:id="@+id/statusImage"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_pending" />
+    <!-- Middle: WebView fills remaining space -->
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="always" />
 
-            <TextView
-                android:id="@+id/statusText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Terms Review Required"
-                android:textColor="@color/red" />
-        </LinearLayout>
-
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:fillViewport="true"
-            android:layout_marginBottom="16dp">
-
-            <WebView
-                android:id="@+id/webView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </androidx.core.widget.NestedScrollView>
+    <!-- Bottom bar: Checkbox + Button -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
 
         <CheckBox
             android:id="@+id/termsCheckbox"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="I agree to the Terms and Conditions"
-            android:layout_marginBottom="16dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"/>
+            android:layout_weight="1"
+            android:text="I agree to the Terms and Conditions" />
 
         <Button
             android:id="@+id/proceedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="120dp"
             android:backgroundTint="#FF5722"
             android:textColor="@color/white"
             android:text="Proceed"
             android:enabled="false"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp" />
-
+            android:paddingHorizontal="24dp" />
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>
