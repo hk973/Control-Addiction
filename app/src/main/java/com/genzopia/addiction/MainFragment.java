@@ -2,6 +2,8 @@ package com.genzopia.addiction;
 
 
 
+import static android.app.Activity.RESULT_OK;
+
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -19,6 +21,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -60,7 +66,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class MainFragment extends Fragment {
+
 
     private RecyclerView recyclerView;
     private EditText searchBar;
@@ -75,6 +83,7 @@ public class MainFragment extends Fragment {
     private ProgressBar progressBar;
     private SeekBar.OnSeekBarChangeListener seekBarChangeListener;
     private static final int REQUEST_CODE_ACCESSIBILITY_PERMISSION = 102;
+
 
 
     @Override
@@ -696,19 +705,70 @@ public class MainFragment extends Fragment {
     }
 
 
+    // Add these imports at the top of your class
+
+
+    // Add this constant as a class member
+    private static final int REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS = 1001;
+
+    // Modified function with device credential verification
     private void proceedWithSelectedTime() {
         if (selectedApps.isEmpty()) {
             Toast.makeText(requireContext(), "Please select at least one app", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Launch device credential verification before proceeding
+        launchDeviceCredentialVerification();
+    }
+
+    private void launchDeviceCredentialVerification() {
+        KeyguardManager keyguardManager =
+                (KeyguardManager) requireContext().getSystemService(Context.KEYGUARD_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && keyguardManager != null) {
+            if (keyguardManager.isDeviceSecure()) {
+                Intent intent = keyguardManager.createConfirmDeviceCredentialIntent(
+                        "Verify Device Lock",
+                        "Confirm your PIN, pattern or password to proceed"
+                );
+
+                if (intent != null) {
+                    startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS);
+                    return;
+                }
+            }
+        }
+        // If device credential verification is not available, proceed directly
+        executeMainLogic();
+    }
+
+    // Handle the result of device credential verification
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
+            if (resultCode == RESULT_OK) {
+                // Device credential verification successful
+                Toast.makeText(requireContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
+                executeMainLogic();
+            } else {
+                // Device credential verification failed or cancelled
+                Toast.makeText(requireContext(), "Authentication failed or cancelled", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Extracted the main logic into a separate method
+    private void executeMainLogic() {
         int totalSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
 
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
         sharedPrefHelper.saveStartTime(System.currentTimeMillis());
         sharedPrefHelper.saveInitialDuration(totalSeconds);
         sharedPrefHelper.setTimeActivateStatus(true);
-        sharedPrefHelper.writeData(selectedApps,totalSeconds,true);
+        sharedPrefHelper.writeData(selectedApps, totalSeconds, true);
 
         startActivity(new Intent(requireActivity(), MainContainerActivity2.class));
         requireActivity().finish();
