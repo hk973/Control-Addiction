@@ -163,4 +163,12 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
             return 2;
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+                Intent reviewIntent = new Intent(this, ReviewActivity.class);
+        startActivity(reviewIntent);
+
+    }
 }

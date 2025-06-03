@@ -3,6 +3,7 @@ package com.genzopia.addiction;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -43,7 +44,20 @@ MainFragment mainFragment;
     @Override
     protected void onStart() {
         super.onStart();
-        Intent reviewIntent = new Intent(this, ReviewActivity.class);
-        startActivity(reviewIntent);
+        CounterManager cm=new CounterManager();
+        int counte=cm.increment(this);
+        if(counte==2){
+            if(cm.getReview(this)){
+            showReviewDialog();}
+        }
+
+    }
+    private void showReviewDialog() {
+        new Handler().postDelayed(() -> {
+            if (!isFinishing()) {
+                ReviewDialog dialog = new ReviewDialog(this);
+                dialog.show();
+            }
+        }, 2000); // Show after 2 seconds delay
     }
 }

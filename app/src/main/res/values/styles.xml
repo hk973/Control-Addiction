@@ -37,6 +37,11 @@
         <item name="android:padding">13dp</item>
         <item name="android:background">@drawable/quick_settings_tile_background_active</item>
     </style>
+    <style name="CustomDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 
     <style name="QuickSettingsTileText">
         <item name="android:layout_width">wrap_content</item>

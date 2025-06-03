@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog"
+    android:elevation="24dp">
+
+    <ImageView
+        android:id="@+id/img_emotion"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_heart"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tv_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/btn_positive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Rate 5 Stars Now"
+        android:backgroundTint="@color/green"
+        android:textColor="@color/white"
+        android:textAllCaps="false"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btn_negative"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Maybe Later"
+        android:backgroundTint="@android:color/transparent"
+        android:textColor="@color/colorGray"
+        android:textAllCaps="false"/>
+</LinearLayout>
