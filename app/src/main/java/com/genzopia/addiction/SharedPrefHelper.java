@@ -128,23 +128,69 @@ public class SharedPrefHelper {
         return new Gson().fromJson(jsonSelectedApps, type);
     }
 
-
     public ArrayList<String> appWithNoWarning() {
         ArrayList<String> selectedApp = new ArrayList<>();
+
+        // Your app and essential system apps
         selectedApp.add("com.genzopia.addiction");
         selectedApp.add("com.android.systemui");
         selectedApp.add("com.sec.android.app.launcher");
         selectedApp.add("com.android.launcher");
         selectedApp.add("android");
-        selectedApp.add("com.android.vending");
-        selectedApp.add("com.google.android.apps.nbu.paisa.user");
-        selectedApp.add("net.one97.paytm");
-        selectedApp.add("com.phonepe.app");
-        selectedApp.add("in.org.npci.upiapp");
-        selectedApp.add("com.google.android.gms");
+
+        // Google Play-related apps (required for billing)
+        selectedApp.add("com.android.vending");               // Google Play Store
+        selectedApp.add("com.google.android.gms");            // Google Play Services
+
+        // ------------------------------------------
+        // 🇮🇳 India – UPI and wallet-based payments
+        // ------------------------------------------
+        selectedApp.add("com.google.android.apps.nbu.paisa.user"); // Google Pay (India UPI)
+        selectedApp.add("net.one97.paytm");                        // Paytm
+        selectedApp.add("com.phonepe.app");                        // PhonePe
+        selectedApp.add("in.org.npci.upiapp");                     // BHIM UPI
+        selectedApp.add("com.freecharge.android");                 // Freecharge
+        selectedApp.add("com.mobikwik_new");                       // MobiKwik
+        selectedApp.add("com.airtel.money.client");                // Airtel Payments
+        selectedApp.add("com.amazon.mShop.android.shopping");      // Amazon Pay (India)
+
+        // ------------------------------------------
+        // 🇺🇸 United States
+        // ------------------------------------------
+        selectedApp.add("com.google.android.apps.walletnfcrel");   // Google Wallet (US)
+        selectedApp.add("com.squareup.cash");                      // Cash App
+        selectedApp.add("com.venmo");                              // Venmo
+        selectedApp.add("com.zellepay.zelle");                     // Zelle
+
+        // ------------------------------------------
+        // 🇪🇺 Europe
+        // ------------------------------------------
+        selectedApp.add("de.number26.android");                    // N26
+        selectedApp.add("com.revolut.revolut");                    // Revolut
+        selectedApp.add("com.klarna.android");                     // Klarna
+
+        // ------------------------------------------
+        // 🇧🇷 Brazil
+        // ------------------------------------------
+        selectedApp.add("com.mercadopago.wallet");                 // MercadoPago
+        selectedApp.add("com.nu.production");                      // Nubank
+
+        // ------------------------------------------
+        // 🌍 Africa (e.g., Nigeria, Kenya)
+        // ------------------------------------------
+        selectedApp.add("com.opay.opaycustomer");                  // OPay (Nigeria)
+        selectedApp.add("com.flutterwave.rave");                   // Flutterwave
+        selectedApp.add("com.mtn.momo");                           // MTN MoMo
+
+        // ------------------------------------------
+        // 🇨🇳 China
+        // ------------------------------------------
+        selectedApp.add("com.eg.android.AlipayGphone");            // Alipay
+        selectedApp.add("com.tencent.mm");                         // WeChat Pay
 
         return selectedApp;
     }
+
 
     public int getTimeLimitValue() {
         return prefs.getInt(KEY_TIME_LIMIT, 0);
