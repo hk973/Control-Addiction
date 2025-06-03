@@ -83,6 +83,7 @@ public class MainFragment extends Fragment {
     private ProgressBar progressBar;
     private SeekBar.OnSeekBarChangeListener seekBarChangeListener;
     private static final int REQUEST_CODE_ACCESSIBILITY_PERMISSION = 102;
+    AuthenticationManager aa;
 
 
 
@@ -113,6 +114,7 @@ public class MainFragment extends Fragment {
         // Remove progress bar since we expect instant load
         progressBar.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
+          aa = AuthenticationManager.getInstance();
 
         AppListViewModel viewModel = new ViewModelProvider(requireActivity()).get(AppListViewModel.class);
         viewModel.getAppItemsLiveData().observe(getViewLifecycleOwner(), appItems -> {
@@ -734,7 +736,9 @@ public class MainFragment extends Fragment {
                 );
 
                 if (intent != null) {
+                    aa.setState(Authentication.going);
                     startActivityForResult(intent, REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS);
+
                     return;
                 }
             }
@@ -751,11 +755,14 @@ public class MainFragment extends Fragment {
         if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
             if (resultCode == RESULT_OK) {
                 // Device credential verification successful
+                aa.setState(Authentication.notgoing);
                 Toast.makeText(requireContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
                 executeMainLogic();
             } else {
                 // Device credential verification failed or cancelled
+                aa.setState(Authentication.notgoing);
                 Toast.makeText(requireContext(), "Authentication failed or cancelled", Toast.LENGTH_SHORT).show();
+
             }
         }
     }

@@ -14,18 +14,31 @@ import java.util.ArrayList;
 public class NotificationBarDetectorService extends AccessibilityService {
     private ArrayList<String> selectedApps;
     private SharedPrefHelper sharedPrefHelper;
+    private boolean bb;
+    private AuthenticationManager authenticationManager;
+    String lock;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        authenticationManager = AuthenticationManager.getInstance();
 
+        authenticationManager.addListener(newState -> {
+            bb = (newState == Authentication.going);
+            Log.d("AuthState", "Authentication is " + newState);
+        });
     }
-
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         sharedPrefHelper = new SharedPrefHelper(getApplicationContext());
         boolean timeActive = sharedPrefHelper.getTimeActivateStatus();
         String currentPackage = String.valueOf(event.getPackageName());
+        String classNames = event.getClassName().toString();
+        if(bb){
+            Log.e("test1111",classNames.toString());
+            lock=classNames.toString();
+            bb=false;
+        }
        Log.e("test9000",event.toString());
         if (timeActive) {
             selectedApps = sharedPrefHelper.getSelectedAppValue();
@@ -49,7 +62,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
                     if(currentPackage.equals(package_i_want_tobe_app)||currentPackage.equals(i_want)||currentPackage.equals(youtube)||currentPackage.equals(chrome)||currentPackage.equals(interresolver)){
                         isApp=true;
                     }
-                    if(isApp&&!sharedPrefHelper.appWithNoWarning().contains(currentPackage)){
+                    if(isApp&&!sharedPrefHelper.appWithNoWarning().contains(currentPackage)&& !classNames.equals(lock)){
                     Log.d("AppDetection", "Blocking non-selected app: " + currentPackage);
                     triggerBlockingPopup();
                     }
@@ -63,6 +76,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
 
         }
     }
+
     private boolean isValidApplication(String packageName) {
         try {
            PackageManager packageManager = getPackageManager();
