@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -46,8 +47,10 @@ MainFragment mainFragment;
         super.onStart();
         CounterManager cm=new CounterManager();
         int counte=cm.increment(this);
+        Log.e("countee", String.valueOf(counte));
         if(counte==2){
-            if(cm.getReview(this)){
+            if(!cm.getReview(this)){
+
             showReviewDialog();}
         }
 
