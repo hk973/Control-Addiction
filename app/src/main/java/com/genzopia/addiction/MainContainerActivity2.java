@@ -48,10 +48,13 @@ MainFragment mainFragment;
         CounterManager cm=new CounterManager();
         int counte=cm.increment(this);
         Log.e("countee", String.valueOf(counte));
-        if(counte==2){
+        if(counte==2||counte==5){
             if(!cm.getReview(this)){
 
             showReviewDialog();}
+        }else if(counte==3||counte==1){
+            Intent reviewIntent = new Intent(this, ReviewActivity.class);
+            startActivity(reviewIntent);
         }
 
     }
