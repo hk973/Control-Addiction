@@ -56,6 +56,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.button.MaterialButton;
 
@@ -379,6 +380,7 @@ public class MainFragment extends Fragment {
         CardView card30Min = dialogView.findViewById(R.id.card30Min);
         CardView card1Hour = dialogView.findViewById(R.id.card1Hour);
         CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) ImageView imageView_fire=dialogView.findViewById(R.id.imageView_fire);
 
         //code for grew mode
         SharedPrefHelper ss=new SharedPrefHelper(getContext());
@@ -398,7 +400,10 @@ public class MainFragment extends Fragment {
              // Set thumb color
              difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
          }
-
+        Glide.with(this)
+                .asGif()
+                .load(R.drawable.fire)
+                .into(imageView_fire);
 
 
 
