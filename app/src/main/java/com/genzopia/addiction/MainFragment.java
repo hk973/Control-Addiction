@@ -380,23 +380,24 @@ public class MainFragment extends Fragment {
         CardView card30Min = dialogView.findViewById(R.id.card30Min);
         CardView card1Hour = dialogView.findViewById(R.id.card1Hour);
         CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
-        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) ImageView imageView_fire=dialogView.findViewById(R.id.imageView_fire);
-
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"})
+        ImageView imageView_fire=dialogView.findViewById(R.id.imageView_fire);
         //code for grew mode
         SharedPrefHelper ss=new SharedPrefHelper(getContext());
          if(ss.isGrayModeEnabled()) {
              buttonSet.setBackgroundColor(Color.parseColor("#686868"));
              // Set progress color (#FF5722 - Orange)
              difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#353535")));
-
              // Set thumb color
              difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#686868")));
-
+             ColorMatrix matrix = new ColorMatrix();
+             matrix.setSaturation(0); // 0 means grayscale
+             ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+             imageView_fire.setColorFilter(filter);
          }else{
              buttonSet.setBackgroundColor(Color.parseColor("#FF5722"));
              // Set progress color (#FF5722 - Orange)
              difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
-
              // Set thumb color
              difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
          }

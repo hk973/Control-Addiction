@@ -179,7 +179,7 @@ public class SettingsActivity extends BaseActivity {
             sharedPrefHelper.setClickToOpen(isClick);
         });
 
-        // Handle theme selection changes
+
         // Handle theme selection changes
         themeSelectionGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.darkmode_opt) {
