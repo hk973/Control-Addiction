@@ -51,16 +51,6 @@ public class HomeFragment2 extends Fragment {
         time=sp.getTimeLimitValue();
         startTime = sp.getStartTime();
         timerText= getView().findViewById(R.id.textView_time);
-
-
-
-        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-            intent.setData(Uri.parse("package:" + packageName));
-            context.startActivity(intent);
-        } else {
-            Log.d("BatteryOpt", "Already whitelisted");
-        }
         ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0); // 0 = grayscale

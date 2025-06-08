@@ -43,13 +43,6 @@ public class HomeFragment extends Fragment {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         String packageName = context.getPackageName();
 
-        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-            intent.setData(Uri.parse("package:" + packageName));
-            context.startActivity(intent);
-        } else {
-            Log.d("BatteryOpt", "Already whitelisted");
-        }
         ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0); // 0 = grayscale
