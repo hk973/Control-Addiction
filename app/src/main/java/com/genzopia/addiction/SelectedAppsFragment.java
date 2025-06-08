@@ -2,6 +2,7 @@ package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -417,25 +419,44 @@ public class SelectedAppsFragment extends Fragment {
     }
 
     private void handlePurchase(Purchase purchase) {
-        // Consume the purchase to make it "consumable"
+        // Verify this is our product
+        if (!purchase.getSkus().contains("unlock_discipline_lock_v2")) {
+            return;
+        }
+
         ConsumeParams consumeParams = ConsumeParams.newBuilder()
                 .setPurchaseToken(purchase.getPurchaseToken())
                 .build();
 
+        // Use weak reference to avoid context leaks
+        WeakReference<SelectedAppsFragment> fragmentRef = new WeakReference<>(this);
+
         billingClient.consumeAsync(consumeParams, (billingResult, purchaseToken) -> {
+            SelectedAppsFragment fragment = fragmentRef.get();
+            Context context = fragment != null ? fragment.getContext() : null;
+
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                // Save time limit after successful purchase
-                SharedPrefHelper prefHelper = new SharedPrefHelper(getContext());
+                // Always save using application context
+                Context appContext = context != null ? context.getApplicationContext() : requireContext().getApplicationContext();
+                SharedPrefHelper prefHelper = new SharedPrefHelper(appContext);
                 prefHelper.saveTimeLimitValue(0);
                 prefHelper.saveTimeActivateStatus(false);
 
-                // Show success message
-                showMessage("Unlocked successfully!");
+                // UI operations require attached fragment
+                if (fragment != null && fragment.isAdded()) {
+                    fragment.showMessage("Unlocked successfully!");
+                } else {
+                    // Fallback notification
+                    Toast.makeText(appContext, "Unlocked successfully!", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                showMessage("Purchase failed. Try again.");
+                if (fragment != null && fragment.isAdded()) {
+                    fragment.showMessage("Purchase failed. Try again.");
+                } else if (context != null) {
+                    Toast.makeText(context, "Purchase failed. Try again.", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-
     }
     private void showMessage(String msg) {
                new AlertDialog.Builder(getContext())
