@@ -1,98 +1,105 @@
 package com.genzopia.addiction;
 
 import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
-
 import java.util.ArrayList;
 
 public class NotificationBarDetectorService extends AccessibilityService {
-    private ArrayList<String> selectedApps;
-    private SharedPrefHelper sharedPrefHelper;
-    private boolean bb;
-    private AuthenticationManager authenticationManager;
-    String lock;
+    private final ArrayMap<String, Boolean> mAppValidityCache = new ArrayMap<>();
+    private volatile String mLockClassName;
+    private volatile boolean mIsAuthenticating;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        authenticationManager = AuthenticationManager.getInstance();
-
-        authenticationManager.addListener(newState -> {
-            bb = (newState == Authentication.going);
-            Log.d("AuthState", "Authentication is " + newState);
+        AuthenticationManager.getInstance().addListener(newState -> {
+            mIsAuthenticating = (newState == Authentication.going);
         });
     }
+
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
-        sharedPrefHelper = new SharedPrefHelper(getApplicationContext());
-        boolean timeActive = sharedPrefHelper.getTimeActivateStatus();
-        String currentPackage = String.valueOf(event.getPackageName());
-        String classNames = event.getClassName().toString();
-        if(bb){
-            Log.e("test1111",classNames.toString());
-            lock=classNames.toString();
-            bb=false;
-        }
-       Log.e("test9000",event.toString());
-        if (timeActive) {
-            selectedApps = sharedPrefHelper.getSelectedAppValue();
-            int eventType = event.getEventType();
-            String className = event.getClassName().toString();
+        try {
+            SharedPrefHelper prefHelper = new SharedPrefHelper(this);
+            if (!prefHelper.getTimeActivateStatus()) return;
 
-            // Only respond to window state changes in applications
-            if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                Log.d("AppDetection", "Active package: " + currentPackage);
+            final String pkg = String.valueOf(event.getPackageName());
+            final String className = event.getClassName().toString();
+            final int eventType = event.getEventType();
 
-
-                // Check if the current app is not in the allowed list
-                if (!selectedApps.contains(currentPackage)) {
-                    boolean isApp=isValidApplication(currentPackage);
-                    String package_i_want_tobe_app="com.android.settings";
-                    String i_want="com.android.vending";
-                    String youtube="com.google.android.youtube";
-                    String chrome="com.android.chrome";
-                    String interresolver="com.android.intentresolver";
-
-                    if(currentPackage.equals(package_i_want_tobe_app)||currentPackage.equals(i_want)||currentPackage.equals(youtube)||currentPackage.equals(chrome)||currentPackage.equals(interresolver)){
-                        isApp=true;
-                    }
-                    if(isApp&&!sharedPrefHelper.appWithNoWarning().contains(currentPackage)&& !classNames.equals(lock)){
-                    Log.d("AppDetection", "Blocking non-selected app: " + currentPackage);
-                    triggerBlockingPopup();
-                    }
-                    if (className.contains("RecentsActivity")) {
-                        Log.e("test22",className);
-                            performGlobalAction(GLOBAL_ACTION_HOME);
-                    }
-                }
+            if (mIsAuthenticating) {
+                mLockClassName = className;
+                mIsAuthenticating = false;
             }
 
-
+            if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                handleWindowChange(pkg, className, prefHelper);
+            }
+        } catch (Exception e) {
+            Log.e("AccessibilityService", "Exception in onAccessibilityEvent", e);
         }
     }
 
-    private boolean isValidApplication(String packageName) {
-        try {
-           PackageManager packageManager = getPackageManager();
-            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
-            return appInfo.enabled && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false; // Not a valid application
+    private void handleWindowChange(String pkg, String className, SharedPrefHelper prefHelper) {
+        ArrayList<String> allowedApps = prefHelper.getSelectedAppValue();
+
+        if (allowedApps == null || allowedApps.contains(pkg)) return;
+        if (className.equals(mLockClassName)) return;
+
+        // Fast-check common system apps
+        if (isPredefinedSystemApp(pkg)) {
+            if (!prefHelper.appWithNoWarning().contains(pkg)) {
+                triggerBlockingPopup();
+            }
+            return;
         }
+
+        // Check app validity with caching
+        if (isValidApplication(pkg) && !prefHelper.appWithNoWarning().contains(pkg)) {
+            triggerBlockingPopup();
+        }
+
+        // Handle recents screen
+        if (className.contains("RecentsActivity")) {
+            performGlobalAction(GLOBAL_ACTION_HOME);
+        }
+    }
+
+    private boolean isPredefinedSystemApp(String pkg) {
+        return pkg.equals("com.android.settings") ||
+                pkg.equals("com.android.vending") ||
+                pkg.equals("com.google.android.youtube") ||
+                pkg.equals("com.android.chrome") ||
+                pkg.equals("com.android.intentresolver");
+    }
+
+    private boolean isValidApplication(String pkg) {
+        // Check cache first
+        Boolean cached = mAppValidityCache.get(pkg);
+        if (cached != null) return cached;
+
+        // Resolve if not cached
+        boolean isValid = false;
+        try {
+            ApplicationInfo info = getPackageManager().getApplicationInfo(pkg, 0);
+            isValid = info.enabled &&
+                    ((info.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
+        } catch (PackageManager.NameNotFoundException ignored) {
+        }
+
+        mAppValidityCache.put(pkg, isValid);
+        return isValid;
     }
 
     private void triggerBlockingPopup() {
-        Intent popupIntent = new Intent(this, PopupActivity.class);
-        popupIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(popupIntent);
+        startActivity(new Intent(this, PopupActivity.class)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
-
 
     @Override
     protected void onServiceConnected() {

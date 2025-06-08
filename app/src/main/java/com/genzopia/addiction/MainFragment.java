@@ -7,6 +7,7 @@ import static android.app.Activity.RESULT_OK;
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -427,7 +428,9 @@ public class MainFragment extends Fragment {
         card15Min.setOnClickListener(v -> setTimeValues(1, 0, 0, daysPicker, hoursPicker, minutesPicker));
         card30Min.setOnClickListener(v -> setTimeValues(0, 0, 30, daysPicker, hoursPicker, minutesPicker));
         card1Hour.setOnClickListener(v -> setTimeValues(0, 1, 0, daysPicker, hoursPicker, minutesPicker));
-        card3Hours.setOnClickListener(v -> setTimeValues(0, 3, 0, daysPicker, hoursPicker, minutesPicker));
+        card3Hours.setOnClickListener(v -> challeng());
+
+
 
         // Initialize with current values
         daysPicker.setValue(selectedDays);
@@ -579,6 +582,10 @@ public class MainFragment extends Fragment {
             difficulty = "Very Hard";
         }
         label.setText(difficulty);
+    }
+    private void challeng(){
+         Dialog dialog = new ChallengeDialog(getContext());
+        dialog.show();
     }
 
     private void showAccessibilityDialog() {

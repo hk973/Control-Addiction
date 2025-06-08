@@ -29,4 +29,5 @@
     <color name="secondary_500">#FFC107</color>
     <color name="cardBackground">#2A2A2A</color>
     <color name="colorPrimaryLight">#403F4E</color>
+    <color name="success_color">#4CAF50</color>
 </resources>
