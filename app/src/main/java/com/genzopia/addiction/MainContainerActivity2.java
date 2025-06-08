@@ -15,6 +15,9 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 public class MainContainerActivity2 extends BaseActivity {
 MainFragment mainFragment;
     private ViewPager2 viewPager;
@@ -45,19 +48,25 @@ MainFragment mainFragment;
     @Override
     protected void onStart() {
         super.onStart();
-        CounterManager cm=new CounterManager();
-        int counte=cm.increment(this);
-        Log.e("countee", String.valueOf(counte));
-        if(counte==2||counte==5){
-            if(!cm.getReview(this)){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            CounterManager cm = new CounterManager();
+            int counte = cm.increment(MainContainerActivity2.this);
+            boolean reviewShown = cm.getReview(MainContainerActivity2.this);
 
-            showReviewDialog();}
-        }else if(counte==3||counte==1){
-            Intent reviewIntent = new Intent(this, ReviewActivity.class);
-            startActivity(reviewIntent);
-        }
-
+            runOnUiThread(() -> handleCounterResult(counte, reviewShown));
+        });
     }
+    private void handleCounterResult(int counte, boolean reviewShown) {
+        if (isFinishing() || isDestroyed()) return;
+
+        if (counte == 2 || counte == 5) {
+            if (!reviewShown) showReviewDialog();
+        } else if (counte == 3 || counte == 1) {
+            startActivity(new Intent(this, ReviewActivity.class));
+        }
+    }
+
     private void showReviewDialog() {
         new Handler().postDelayed(() -> {
             if (!isFinishing()) {

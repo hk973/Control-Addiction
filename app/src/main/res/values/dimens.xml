@@ -20,7 +20,6 @@
     <dimen name="card_corner_radius">16dp</dimen>
     <dimen name="button_elevation">4dp</dimen>
     <dimen name="preview_image_height">200dp</dimen>
-    <resources>
         <!-- Base dimensions -->
         <dimen name="card_margin">16dp</dimen>
 
@@ -42,4 +41,3 @@
         <dimen name="button_height">48dp</dimen>
 
     </resources>
-</resources>
