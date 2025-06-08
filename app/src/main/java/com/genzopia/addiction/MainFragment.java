@@ -428,7 +428,12 @@ public class MainFragment extends Fragment {
         card15Min.setOnClickListener(v -> setTimeValues(1, 0, 0, daysPicker, hoursPicker, minutesPicker));
         card30Min.setOnClickListener(v -> setTimeValues(0, 0, 30, daysPicker, hoursPicker, minutesPicker));
         card1Hour.setOnClickListener(v -> setTimeValues(0, 1, 0, daysPicker, hoursPicker, minutesPicker));
-        card3Hours.setOnClickListener(v -> challeng());
+        card3Hours.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setTimeValues(30, 0, 0, daysPicker, hoursPicker, minutesPicker);
+            }
+        });
 
 
 
@@ -584,6 +589,7 @@ public class MainFragment extends Fragment {
         label.setText(difficulty);
     }
     private void challeng(){
+
          Dialog dialog = new ChallengeDialog(getContext());
         dialog.show();
     }
