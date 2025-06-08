@@ -173,6 +173,7 @@ public class SelectedAppsFragment extends Fragment {
             Intent intent =new Intent(getContext(), MainContainerActivity.class);
             startActivity(intent);
         }
+        searchBar.setText("");
     }
 
 
@@ -398,6 +399,7 @@ public class SelectedAppsFragment extends Fragment {
             }
         });
     }
+
 
     private void queryProductDetails() {
         List<String> skuList = List.of("unlock_discipline_lock_v2");

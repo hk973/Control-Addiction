@@ -786,6 +786,12 @@ public class MainFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        searchBar.setText("");
+    }
+
     // Extracted the main logic into a separate method
     private void executeMainLogic() {
         int totalSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
