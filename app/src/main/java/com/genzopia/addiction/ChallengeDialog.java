@@ -4,6 +4,8 @@ package com.genzopia.addiction;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Window;
@@ -22,14 +24,16 @@ class ChallengeDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_challenge);
 
-        // Set dialog dimensions
         if (getWindow() != null) {
-            DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+            // make the dialog window itself fully transparent
+            getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
+            // then size it as before
+            DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
             getWindow().setLayout(
                     (int) (metrics.widthPixels * 0.9),
-                    (int) (metrics.heightPixels * 0.8) // 80% of screen height
+                    (int) (metrics.heightPixels * 0.8)
             );
         }
-    }
-}
+
+    }}
