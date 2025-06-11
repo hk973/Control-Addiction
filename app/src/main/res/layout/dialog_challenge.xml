@@ -8,67 +8,68 @@
     app:cardCornerRadius="@dimen/card_corner_radius"
     app:cardElevation="@dimen/card_elevation">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:scrollbars="none">
+        android:orientation="vertical">
 
+        <!-- Header Section (Fixed) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="?android:attr/colorBackground">
+            android:background="@color/primary_500"
+            android:padding="@dimen/header_padding"
+            android:paddingBottom="@dimen/header_bottom_padding">
 
-            <!-- Header Section -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/primary_500"
-                android:padding="@dimen/header_padding"
-                android:paddingBottom="@dimen/header_bottom_padding">
+                android:layout_width="@dimen/circle_size"
+                android:layout_height="@dimen/circle_size"
+                android:background="@drawable/circle_accent"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
 
-                <LinearLayout
-                    android:layout_width="@dimen/circle_size"
-                    android:layout_height="@dimen/circle_size"
-                    android:background="@drawable/circle_accent"
-                    android:gravity="center"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="@dimen/icon_size"
-                        android:layout_height="@dimen/icon_size"
-                        android:src="@drawable/ic_phone"
-                        app:tint="@android:color/white" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="30-Day Dumb Phone Challenge"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/title_text_size"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Transform your smartphone into a simple device to break digital addiction"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="@dimen/subtitle_text_size"
-                    android:gravity="center"
-                    android:maxLines="2"/>
+                <ImageView
+                    android:layout_width="@dimen/icon_size"
+                    android:layout_height="@dimen/icon_size"
+                    android:src="@drawable/ic_phone"
+                    app:tint="@android:color/white" />
             </LinearLayout>
 
-            <!-- Content Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="30-Day Dumb Phone Challenge"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/title_text_size"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Transform your smartphone into a simple device to break digital addiction"
+                android:textColor="#CCFFFFFF"
+                android:textSize="@dimen/subtitle_text_size"
+                android:gravity="center"
+                android:maxLines="2"/>
+        </LinearLayout>
+
+        <!-- Scrollable Content Area -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:background="?android:attr/colorBackground"
                 android:padding="@dimen/content_padding">
 
                 <!-- Overlap Space -->
@@ -318,45 +319,46 @@
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-
-                <!-- Buttons -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="2"
-                    android:divider="@drawable/divider"
-                    android:showDividers="middle"
-                    android:dividerPadding="8dp">
-
-                    <Button
-                        android:id="@+id/btnStart"
-                        style="?android:attr/borderlessButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/button_height"
-                        android:layout_weight="1"
-                        android:text="Start Challenge"
-                        android:textColor="?android:attr/colorAccent"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:drawablePadding="8dp"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:gravity="center"/>
-
-                    <Button
-                        android:id="@+id/btnLater"
-                        style="?android:attr/borderlessButtonStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="@dimen/button_height"
-                        android:layout_weight="1"
-                        android:text="Remind Later"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="16sp"
-                        android:drawablePadding="8dp"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:gravity="center"/>
-                </LinearLayout>
             </LinearLayout>
+        </ScrollView>
+
+        <!-- Fixed Button Footer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:divider="@drawable/divider"
+            android:showDividers="middle"
+            android:dividerPadding="8dp"
+            android:layout_marginBottom="20dp"
+            android:padding="8dp"
+            android:background="?android:attr/colorBackground">
+
+            <Button
+                android:id="@+id/btnStart"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_weight="1"
+                android:text="Start"
+                android:textColor="?android:attr/colorAccent"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"/>
+
+            <Button
+                android:id="@+id/btnLater"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_weight="1"
+                android:text="Remind "
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="16sp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"/>
         </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 </androidx.cardview.widget.CardView>

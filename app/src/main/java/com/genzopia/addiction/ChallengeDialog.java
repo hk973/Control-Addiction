@@ -1,16 +1,16 @@
-package com.genzopia.addiction;
 
-import static java.security.AccessController.getContext;
+
+package com.genzopia.addiction;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Window;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 
- class ChallengeDialog extends Dialog {
+class ChallengeDialog extends Dialog {
 
     public ChallengeDialog(@NonNull Context context) {
         super(context);
@@ -24,26 +24,12 @@ import androidx.annotation.NonNull;
 
         // Set dialog dimensions
         if (getWindow() != null) {
+            DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+
             getWindow().setLayout(
-                    (int) (getContext().getResources().getDisplayMetrics().widthPixels * 0.9),
-                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                    (int) (metrics.widthPixels * 0.9),
+                    (int) (metrics.heightPixels * 0.8) // 80% of screen height
             );
         }
-
-        // Setup buttons
-        Button btnStart = findViewById(R.id.btnStart);
-        Button btnLater = findViewById(R.id.btnLater);
-
-        btnStart.setOnClickListener(v -> {
-            // Start the challenge
-            dismiss();
-            // Add your challenge start logic here
-        });
-
-        btnLater.setOnClickListener(v -> {
-            // Dismiss and remind later
-            dismiss();
-            // Add your remind later logic here
-        });
     }
 }

@@ -432,6 +432,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 setTimeValues(30, 0, 0, daysPicker, hoursPicker, minutesPicker);
+                challeng();
             }
         });
 
