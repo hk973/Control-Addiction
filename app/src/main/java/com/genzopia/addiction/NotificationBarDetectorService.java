@@ -47,13 +47,25 @@ public class NotificationBarDetectorService extends AccessibilityService {
 
     private void handleWindowChange(String pkg, String className, SharedPrefHelper prefHelper) {
         ArrayList<String> allowedApps = prefHelper.getSelectedAppValue();
-
+        Log.e("test99",pkg+className);
         if (allowedApps == null || allowedApps.contains(pkg)) return;
         if (className.equals(mLockClassName)) return;
+        String classNameLower=className.toLowerCase();
 
         // Fast-check common system apps
+        if(className.contains("com.android.settings.password.ConfirmDeviceCredentialActivity")||
+                classNameLower.contains("confirmdevicecredential") ||
+                classNameLower.contains("keyguard") ||
+                classNameLower.contains("password") ||
+                classNameLower.contains("pin") ||
+                classNameLower.contains("pattern") ||
+                classNameLower.contains("lock") ||
+                classNameLower.contains("security") ||
+                classNameLower.contains("biometric") ||
+                classNameLower.contains("fingerprint")) return;
         if (isPredefinedSystemApp(pkg)) {
             if (!prefHelper.appWithNoWarning().contains(pkg)) {
+                Log.e("test999",pkg+className);
                 triggerBlockingPopup();
             }
             return;
@@ -61,6 +73,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
 
         // Check app validity with caching
         if (isValidApplication(pkg) && !prefHelper.appWithNoWarning().contains(pkg)) {
+            Log.e("test9999",pkg+className);
             triggerBlockingPopup();
         }
 

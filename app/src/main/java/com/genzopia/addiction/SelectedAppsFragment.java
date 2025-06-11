@@ -173,7 +173,7 @@ public class SelectedAppsFragment extends Fragment {
             Intent intent =new Intent(getContext(), MainContainerActivity.class);
             startActivity(intent);
         }
-        searchBar.setText("");
+
     }
 
 
@@ -316,6 +316,7 @@ public class SelectedAppsFragment extends Fragment {
             parent = parent.getParent();
         }
     }
+
 
 
     private void snapToNearestEdge(View view, int screenWidth, int screenHeight) {
