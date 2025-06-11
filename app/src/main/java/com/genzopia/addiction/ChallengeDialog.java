@@ -8,11 +8,15 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 
 class ChallengeDialog extends Dialog {
+    Button start;
+    Button remind;
 
     public ChallengeDialog(@NonNull Context context) {
         super(context);
@@ -23,6 +27,21 @@ class ChallengeDialog extends Dialog {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_challenge);
+        start=findViewById(R.id.btnStart);
+        remind=findViewById(R.id.btnLater);
+        start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        remind.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
+
 
         if (getWindow() != null) {
             // make the dialog window itself fully transparent
