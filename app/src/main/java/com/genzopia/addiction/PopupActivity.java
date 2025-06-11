@@ -11,14 +11,18 @@ import java.util.List;
 public class PopupActivity extends AppCompatActivity {
 
     private BillingClient billingClient;
-    private SkuDetails targetSkuDetails; // To store fetched product details
+    private SkuDetails targetSkuDetails;
+    private AlertDialog mainDialog; // Reference to main dialog
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initBillingClient(); // Setup BillingClient
+        initBillingClient();
 
-        // Create the popup dialog
+        createAndShowMainDialog();
+    }
+
+    private void createAndShowMainDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("App Usage Alert")
                 .setMessage("You cannot use this app as it is not in the approved list.")
@@ -38,7 +42,22 @@ public class PopupActivity extends AppCompatActivity {
                     }
                 });
 
-        builder.create().show();
+        // Create dialog but don't show immediately
+        mainDialog = builder.create();
+
+        // Only show if activity is active
+        if (!isFinishing() && !isDestroyed()) {
+            mainDialog.show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Dismiss dialog when activity is destroyed
+        if (mainDialog != null && mainDialog.isShowing()) {
+            mainDialog.dismiss();
+        }
     }
 
     private void initBillingClient() {
@@ -88,19 +107,15 @@ public class PopupActivity extends AppCompatActivity {
     }
 
     private void handlePurchase(Purchase purchase) {
-        // Consume the purchase to make it "consumable"
         ConsumeParams consumeParams = ConsumeParams.newBuilder()
                 .setPurchaseToken(purchase.getPurchaseToken())
                 .build();
 
         billingClient.consumeAsync(consumeParams, (billingResult, purchaseToken) -> {
             if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                // Save time limit after successful purchase
                 SharedPrefHelper prefHelper = new SharedPrefHelper(getApplicationContext());
                 prefHelper.saveTimeLimitValue(0);
                 prefHelper.saveTimeActivateStatus(false);
-
-                // Show success message
                 showMessage("Unlocked successfully!");
             } else {
                 showMessage("Purchase failed. Try again.");
@@ -108,13 +123,15 @@ public class PopupActivity extends AppCompatActivity {
         });
     }
 
-
     private void showMessage(String msg) {
-        runOnUiThread(() -> new AlertDialog.Builder(this)
-                .setMessage(msg)
-                .setPositiveButton("OK", null)
-                .show());
+        runOnUiThread(() -> {
+            // Check if activity is still valid
+            if (isFinishing() || isDestroyed()) return;
 
-
+            new AlertDialog.Builder(PopupActivity.this)
+                    .setMessage(msg)
+                    .setPositiveButton("OK", null)
+                    .show();
+        });
     }
 }

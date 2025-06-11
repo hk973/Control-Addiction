@@ -7,6 +7,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -18,6 +19,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainContainerActivity extends BaseActivity implements MainFragment.PinnedAppActionListener{
     public ViewPager2 viewPager;
@@ -48,6 +52,8 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
 
 
 
+
+
         updateChecker = new AppUpdateChecker(this);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(updateChecker);
         applyAppTheme();
@@ -70,6 +76,25 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
             // Apply the color filter to the root view
             root.setLayerPaint(paint);
         }
+    }
+
+    private void handleCounterResult(int counte, boolean reviewShown) {
+        if (isFinishing() || isDestroyed()) return;
+
+        if (counte == 10) {
+            if (!reviewShown) showReviewDialog();
+        } else if (counte == 5) {
+            startActivity(new Intent(this, ReviewActivity.class));
+        }
+    }
+
+    private void showReviewDialog() {
+        new Handler().postDelayed(() -> {
+            if (!isFinishing()) {
+                ReviewDialog dialog = new ReviewDialog(this);
+                dialog.show();
+            }
+        }, 2000); // Show after 2 seconds delay
     }
 
         private void applyAppTheme() {
@@ -167,5 +192,13 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     @Override
     protected void onStart() {
         super.onStart();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            CounterManager cm = new CounterManager();
+            int counte = cm.increment(MainContainerActivity.this);
+            boolean reviewShown = cm.getReview(MainContainerActivity.this);
+            Log.e("test555", String.valueOf(counte));
+            runOnUiThread(() -> handleCounterResult(counte, reviewShown));
+        });
     }
 }

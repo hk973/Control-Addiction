@@ -31,6 +31,7 @@ MainFragment mainFragment;
         viewPager = findViewById(R.id.view_pager);
         adapter = new MainPagerAdapter(this);
         viewPager.setAdapter(adapter);
+
     }
     @SuppressLint("MissingSuperCall")
     @Override
@@ -48,31 +49,7 @@ MainFragment mainFragment;
     @Override
     protected void onStart() {
         super.onStart();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            CounterManager cm = new CounterManager();
-            int counte = cm.increment(MainContainerActivity2.this);
-            boolean reviewShown = cm.getReview(MainContainerActivity2.this);
 
-            runOnUiThread(() -> handleCounterResult(counte, reviewShown));
-        });
-    }
-    private void handleCounterResult(int counte, boolean reviewShown) {
-        if (isFinishing() || isDestroyed()) return;
-
-        if (counte == 2 || counte == 5) {
-            if (!reviewShown) showReviewDialog();
-        } else if (counte == 3 || counte == 1) {
-            startActivity(new Intent(this, ReviewActivity.class));
-        }
     }
 
-    private void showReviewDialog() {
-        new Handler().postDelayed(() -> {
-            if (!isFinishing()) {
-                ReviewDialog dialog = new ReviewDialog(this);
-                dialog.show();
-            }
-        }, 2000); // Show after 2 seconds delay
-    }
 }
