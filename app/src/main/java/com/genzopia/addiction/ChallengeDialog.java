@@ -14,6 +14,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import java.util.ArrayList;
+
 class ChallengeDialog extends Dialog {
     Button start;
     Button remind;
@@ -86,10 +88,24 @@ class ChallengeDialog extends Dialog {
     }
 
     private void startChallenge() {
-        // Implement your challenge starting logic here
-        // This is where you would restrict access to other apps
+        // Alternative implementation when fragment is not available
+        // This is where you can implement the challenge logic without relying on the fragment
 
-        // For now, just show a toast message
+        // Example: Save challenge state to SharedPreferences
+        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getContext());
+
+        // Set 30 days challenge
+        int totalSeconds = 30 * 24 * 60 *60; // 30 days in seconds
+
+        sharedPrefHelper.saveStartTime(System.currentTimeMillis());
+        sharedPrefHelper.saveInitialDuration(totalSeconds);
+        ArrayList<String> selectedApps = new ArrayList<>();
+        sharedPrefHelper.writeData(selectedApps, totalSeconds, true);
+        Toast.makeText(getContext(), "30-day challenge activated!", Toast.LENGTH_LONG).show();
+
+        if (getOwnerActivity() != null) {
+            getOwnerActivity().finish();
+        }
         Toast.makeText(getContext(), "Challenge started! App access restricted.", Toast.LENGTH_SHORT).show();
 
 
