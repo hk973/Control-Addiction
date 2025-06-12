@@ -92,10 +92,11 @@ public class SelectedAppsFragment extends Fragment {
         Log.e("test456", Arrays.toString(selectedApps.toArray()));
 
         if (selectedApps != null && !selectedApps.isEmpty()) {
-            appNames = (ArrayList<String>) getAppNamesFromPackageNames(selectedApps);
-            adapter = new SelectedAppsAdapter(requireContext(), appNames, selectedApps);
-            recyclerView.setAdapter(adapter);
+            selectedApps = new ArrayList<>();
         }
+        appNames = (ArrayList<String>) getAppNamesFromPackageNames(selectedApps);
+        adapter = new SelectedAppsAdapter(requireContext(), appNames, selectedApps);
+        recyclerView.setAdapter(adapter);
 
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
