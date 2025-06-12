@@ -795,7 +795,7 @@ public class MainFragment extends Fragment {
 
     // Extracted the main logic into a separate method
     private void executeMainLogic() {
-        int totalSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
+        long totalSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
 
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
         sharedPrefHelper.saveStartTime(System.currentTimeMillis());

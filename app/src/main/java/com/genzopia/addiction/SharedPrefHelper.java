@@ -192,17 +192,17 @@ public class SharedPrefHelper {
     }
 
 
-    public int getTimeLimitValue() {
-        return prefs.getInt(KEY_TIME_LIMIT, 0);
+    public long getTimeLimitValue() {
+        return prefs.getLong(KEY_TIME_LIMIT, 0);
     }
 
-    public void writeData(ArrayList<String> selectedApps, int timeLimit, boolean isActive) {
+    public void writeData(ArrayList<String> selectedApps, long timeLimit, boolean isActive) {
         Gson gson = new Gson();
         String jsonSelectedApps = gson.toJson(selectedApps);
         Log.d("SharedPrefDebug", "JSON to Store: " + jsonSelectedApps);
        Log.e("test444", String.valueOf(timeLimit));
         editor.putString(KEY_SELECTED_APPS, jsonSelectedApps);
-        editor.putInt(KEY_TIME_LIMIT, timeLimit);
+        editor.putLong(KEY_TIME_LIMIT, timeLimit);
         editor.putBoolean(KEY_TIME_ACTIVE, isActive);
         editor.apply();
     }
@@ -262,19 +262,19 @@ public class SharedPrefHelper {
         return prefs.getLong("startTime", 0);
     }
 
-    public void saveInitialDuration(int duration) {
-        prefs.edit().putInt("initialDuration", duration).apply();
+    public void saveInitialDuration(long duration) {
+        prefs.edit().putLong("initialDuration", duration).apply();
     }
 
-    public int getInitialDuration() {
-        return prefs.getInt("initialDuration", 0);
+    public long getInitialDuration() {
+        return prefs.getLong("initialDuration", 0);
     }
 
     public boolean getTimeActivateStatus() {
         boolean isActive = prefs.getBoolean(KEY_TIME_ACTIVE, false);
         if (isActive) {
             long startTime = getStartTime();
-            int initialDuration = getInitialDuration();
+            long initialDuration = getInitialDuration();
             long currentTime = System.currentTimeMillis();
             long elapsed = currentTime - startTime;
             long durationMillis = initialDuration * 1000L;
@@ -289,7 +289,7 @@ public class SharedPrefHelper {
 
     public long getRemainingTimeMillis() {
         long startTime = getStartTime();
-        int initialDuration = getInitialDuration();
+        long initialDuration = getInitialDuration();
         long durationMillis = initialDuration * 1000L;
         long elapsed = System.currentTimeMillis() - startTime;
         return Math.max(durationMillis - elapsed, 0);

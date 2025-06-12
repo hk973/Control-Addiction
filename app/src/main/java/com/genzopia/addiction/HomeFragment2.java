@@ -103,7 +103,7 @@ public class HomeFragment2 extends Fragment {
     private void updateCountdown() {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
        long remaintime= sp.getRemainingTimeMillis();
-       timerText.setText(formatTime((int) remaintime/1000));
+       timerText.setText(formatTime( remaintime/1000));
     }
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
@@ -130,10 +130,10 @@ public class HomeFragment2 extends Fragment {
 
 
     }
-    public  String formatTime(int totalSeconds) {
-        int hours = totalSeconds / 3600;
-        int minutes = (totalSeconds % 3600) / 60;
-        int seconds = totalSeconds % 60;
+    public  String formatTime(long totalSeconds) {
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
 
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
