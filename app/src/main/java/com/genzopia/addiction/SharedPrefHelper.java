@@ -207,8 +207,8 @@ public class SharedPrefHelper {
         editor.apply();
     }
 
-    public void saveTimeLimitValue(int timeLimit) {
-        editor.putInt(KEY_TIME_LIMIT, timeLimit);
+    public void saveTimeLimitValue(long timeLimit) {
+        editor.putLong(KEY_TIME_LIMIT, timeLimit);
         editor.apply();
     }
 
