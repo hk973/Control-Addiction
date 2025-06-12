@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 
 public class MainContainerActivity extends BaseActivity implements MainFragment.PinnedAppActionListener{
     public ViewPager2 viewPager;
-    private MainFragment mainFragment;
+
     private AppUpdateChecker updateChecker;
     private static final int REQUEST_CODE = 123;
 
@@ -39,6 +39,7 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(new ScreenSlidePagerAdapter(this));
         viewPager.setUserInputEnabled(true);
+
 
         AppListViewModel viewModel = new ViewModelProvider(this).get(AppListViewModel.class);
         if (viewModel.getAppItemsLiveData().getValue() == null) {
@@ -58,6 +59,17 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         ProcessLifecycleOwner.get().getLifecycle().addObserver(updateChecker);
         applyAppTheme();
 
+    }
+    private MainFragment getMainFragment() {
+        if (viewPager.getCurrentItem() == 1) {
+            Fragment fragment = getSupportFragmentManager()
+                    .findFragmentByTag("f" + viewPager.getCurrentItem());
+
+            if (fragment instanceof MainFragment) {
+                return (MainFragment) fragment;
+            }
+        }
+        return null;
     }
     // Apply grayscale effect to the root view if Gray Mode is enabled
     private void applyGrayScaleIfNeeded() {
@@ -140,16 +152,24 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     }
 
 
+
     @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
-        if (viewPager.getCurrentItem() == 1 && mainFragment != null) {
-            if (mainFragment.isTimeSet()) {
-                mainFragment.resetTimeSelection();
-                Toast.makeText(this, "Time selection reset", Toast.LENGTH_SHORT).show();
+        if (viewPager.getCurrentItem() == 1) {
+            MainFragment fragment = getMainFragment();
+            if (fragment != null) {
+                if (fragment.isTimeSet()) {
+                    fragment.resetTimeSelection();
+                    Toast.makeText(this, "Time selection reset", Toast.LENGTH_SHORT).show();
+                } else {
+                    viewPager.setCurrentItem(0);
+                }
             } else {
                 viewPager.setCurrentItem(0);
             }
+        } else {
+            super.onBackPressed();
         }
     }
 
