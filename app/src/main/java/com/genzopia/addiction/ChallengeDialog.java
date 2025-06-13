@@ -1,7 +1,9 @@
 package com.genzopia.addiction;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -17,8 +19,8 @@ import androidx.appcompat.app.AlertDialog;
 import java.util.ArrayList;
 
 class ChallengeDialog extends Dialog {
-    Button start;
-    Button remind;
+    private Button start;
+    private Button remind;
 
     public ChallengeDialog(@NonNull Context context) {
         super(context);
@@ -27,8 +29,10 @@ class ChallengeDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Remove default title bar
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_challenge);
+
         start = findViewById(R.id.btnStart);
         remind = findViewById(R.id.btnLater);
 
@@ -47,10 +51,8 @@ class ChallengeDialog extends Dialog {
         });
 
         if (getWindow() != null) {
-            // make the dialog window itself fully transparent
+            // Make the dialog window itself fully transparent, then size it
             getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-            // then size it as before
             DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
             getWindow().setLayout(
                     (int) (metrics.widthPixels * 0.9),
@@ -67,47 +69,85 @@ class ChallengeDialog extends Dialog {
         builder.setPositiveButton("Start Challenge", (dialog, which) -> {
             // User confirmed, start the challenge
             startChallenge();
-            dismiss(); // Close the main dialog
+            dismiss(); // Close the main ChallengeDialog
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> {
-            // User cancelled, do nothing
             dialog.dismiss();
         });
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Customize the buttons if needed
+        // Customize button colors if desired
         Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        if (positiveButton != null && negativeButton != null) {
+        if (positiveButton != null) {
             positiveButton.setTextColor(Color.RED);
+        }
+        if (negativeButton != null) {
             negativeButton.setTextColor(Color.GRAY);
         }
     }
 
     private void startChallenge() {
-        // Alternative implementation when fragment is not available
-        // This is where you can implement the challenge logic without relying on the fragment
+        Context ctx = getContext();
+        SharedPrefHelper sharedPrefHelper = null;
 
-        // Example: Save challenge state to SharedPreferences
-        SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(getContext());
-
-        // Set 30 days challenge
-        int totalSeconds = 30 * 24 * 60 *60; // 30 days in seconds
-
-        sharedPrefHelper.saveStartTime(System.currentTimeMillis());
-        sharedPrefHelper.saveInitialDuration(totalSeconds);
-        ArrayList<String> selectedApps = new ArrayList<>();
-        sharedPrefHelper.writeData(selectedApps, totalSeconds, true);
-        Toast.makeText(getContext(), "30-day challenge activated!", Toast.LENGTH_LONG).show();
-
-        if (getOwnerActivity() != null) {
-            getOwnerActivity().finish();
+        try {
+            sharedPrefHelper = new SharedPrefHelper(ctx);
+        } catch (Exception e) {
+            Toast.makeText(ctx, "Error initializing preferences: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            return;
         }
-        Toast.makeText(getContext(), "Challenge started! App access restricted.", Toast.LENGTH_SHORT).show();
 
+        // Set 30 days challenge in seconds
+        int totalSeconds = 30 * 24 * 60 * 60;
 
+        try {
+            sharedPrefHelper.saveStartTime(System.currentTimeMillis());
+            sharedPrefHelper.saveInitialDuration(totalSeconds);
+            ArrayList<String> selectedApps = new ArrayList<>();
+            sharedPrefHelper.writeData(selectedApps, totalSeconds, true);
+        } catch (Exception e) {
+            Toast.makeText(ctx, "Error saving challenge state: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            // You might choose to abort starting the challenge here, or proceed with limited functionality
+            return;
+        }
+
+        Toast.makeText(ctx, "30-day challenge activated!", Toast.LENGTH_LONG).show();
+
+        // Prepare intent to launch MainContainerActivity2
+        Intent intent = new Intent(ctx, MainContainerActivity2.class);
+
+        // Attempt to start activity safely
+        try {
+            if (ctx instanceof Activity) {
+                ((Activity) ctx).startActivity(intent);
+            } else {
+                // If context is not an Activity (unlikely for a dialog attached to an Activity, but safe fallback)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(intent);
+            }
+        } catch (Exception e) {
+            Toast.makeText(ctx, "Error launching challenge activity: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+            // Depending on app flow, you may choose to return here or continue
+            return;
+        }
+
+        // Optionally finish the owner Activity if available
+        try {
+            if (getOwnerActivity() != null) {
+                getOwnerActivity().finish();
+            }
+        } catch (Exception e) {
+            // Log but don’t crash if finish fails
+            e.printStackTrace();
+        }
+
+        Toast.makeText(ctx, "Challenge started! App access restricted.", Toast.LENGTH_SHORT).show();
     }
 }
