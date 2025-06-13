@@ -156,7 +156,7 @@ public class SelectedAppsFragment extends Fragment {
         Log.e("status", String.valueOf(challenge_status));
         if(!status){
             if(challenge_status){
-                startActivity(new Intent(requireContext(), challenge_reward.class));
+                startActivity(new Intent(requireContext(), ChallengeReward.class));
 
             }else{
             Log.e("onresumestatus","1");
@@ -179,7 +179,7 @@ public class SelectedAppsFragment extends Fragment {
 
         if(!status){
             if(challenge_status){
-                startActivity(new Intent(requireContext(), challenge_reward.class));
+                startActivity(new Intent(requireContext(),ChallengeReward.class));
 
             }else{
                 Log.e("onresumestatus","1");
