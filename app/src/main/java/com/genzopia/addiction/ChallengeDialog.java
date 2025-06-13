@@ -103,13 +103,14 @@ class ChallengeDialog extends Dialog {
         }
 
         // Set 30 days challenge in seconds
-        int totalSeconds = 30 * 24 * 60 * 60;
+//        int totalSeconds = 30 * 24 * 60 * 60;
+        int totalSeconds=10;
 
         try {
             sharedPrefHelper.saveStartTime(System.currentTimeMillis());
             sharedPrefHelper.saveInitialDuration(totalSeconds);
-            ArrayList<String> selectedApps = new ArrayList<>();
-            sharedPrefHelper.writeData(selectedApps, totalSeconds, true);
+            ArrayList<String> selectedApp = new ArrayList<>();
+            sharedPrefHelper.writeData(selectedApp, totalSeconds, true);
             sharedPrefHelper.setChallengeStatus(getContext(),true);
         } catch (Exception e) {
             Toast.makeText(ctx, "Error saving challenge state: " + e.getMessage(), Toast.LENGTH_LONG).show();

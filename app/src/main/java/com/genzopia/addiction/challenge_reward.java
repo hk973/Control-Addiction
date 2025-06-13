@@ -20,5 +20,7 @@ public class challenge_reward extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        SharedPrefHelper sp=new SharedPrefHelper(this);
+        sp.setChallengeStatus(this,false);
     }
 }

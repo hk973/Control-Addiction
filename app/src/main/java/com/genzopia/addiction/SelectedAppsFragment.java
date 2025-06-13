@@ -66,6 +66,7 @@ public class SelectedAppsFragment extends Fragment {
     private SkuDetails targetSkuDetails; // To store fetched product details
 
     private boolean isMenuExpanded = false;
+    boolean challenge_status;
     private View overlay;
 
     @Override
@@ -86,14 +87,12 @@ public class SelectedAppsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
 
+
         packageManager = requireActivity().getPackageManager();
         sharedPrefHelper = new SharedPrefHelper(requireContext());
         selectedApps = sharedPrefHelper.getSelectedAppValue();
         Log.e("test456", Arrays.toString(selectedApps.toArray()));
 
-        if (selectedApps != null && !selectedApps.isEmpty()) {
-            selectedApps = new ArrayList<>();
-        }
         appNames = (ArrayList<String>) getAppNamesFromPackageNames(selectedApps);
         adapter = new SelectedAppsAdapter(requireContext(), appNames, selectedApps);
         recyclerView.setAdapter(adapter);
@@ -150,13 +149,20 @@ public class SelectedAppsFragment extends Fragment {
     public void onResume() {
         Log.e("onresume","1");
         super.onResume();
-        SharedPrefHelper sp=new SharedPrefHelper(getContext());
+        SharedPrefHelper sp=new SharedPrefHelper(requireContext());
         boolean status=sp.getTimeActivateStatus();
-        Log.e("status", String.valueOf(status));
+        challenge_status=sharedPrefHelper.getChallengeStatus(requireContext());
+
+        Log.e("status", String.valueOf(challenge_status));
         if(!status){
+            if(challenge_status){
+                startActivity(new Intent(requireContext(), challenge_reward.class));
+
+            }else{
             Log.e("onresumestatus","1");
             Intent intent =new Intent(getContext(), MainContainerActivity.class);
-            startActivity(intent);
+            startActivity(intent);}
+
         }
 
     }
@@ -168,11 +174,18 @@ public class SelectedAppsFragment extends Fragment {
 
         SharedPrefHelper sp=new SharedPrefHelper(getContext());
         boolean status=sp.getTimeActivateStatus();
-        Log.e("status", String.valueOf(status));
+        Log.e("status", String.valueOf(challenge_status));
+        challenge_status=sharedPrefHelper.getChallengeStatus(requireContext());
+
         if(!status){
-            Log.e("onpausestatus","1");
-            Intent intent =new Intent(getContext(), MainContainerActivity.class);
-            startActivity(intent);
+            if(challenge_status){
+                startActivity(new Intent(requireContext(), challenge_reward.class));
+
+            }else{
+                Log.e("onresumestatus","1");
+                Intent intent =new Intent(getContext(), MainContainerActivity.class);
+                startActivity(intent);}
+
         }
 
     }

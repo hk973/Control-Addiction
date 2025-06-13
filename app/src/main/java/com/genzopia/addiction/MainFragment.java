@@ -67,7 +67,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 
 public class MainFragment extends Fragment {
@@ -687,17 +686,9 @@ public class MainFragment extends Fragment {
     private void checksp() {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
         boolean status = sp.getTimeActivateStatus();
-        boolean challengestatus =sp.getChallengeStatus(requireContext());
 
         if(status){
-            if(challengestatus){
-             startActivity(new Intent(requireContext(), challenge_reward.class));
-
-
-            }else
-            {
             startActivity(new Intent(requireActivity(), MainContainerActivity2.class));
-            }
         }
     }
 
