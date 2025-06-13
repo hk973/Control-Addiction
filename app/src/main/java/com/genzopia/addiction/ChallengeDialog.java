@@ -110,6 +110,7 @@ class ChallengeDialog extends Dialog {
             sharedPrefHelper.saveInitialDuration(totalSeconds);
             ArrayList<String> selectedApps = new ArrayList<>();
             sharedPrefHelper.writeData(selectedApps, totalSeconds, true);
+            sharedPrefHelper.setChallengeStatus(getContext(),true);
         } catch (Exception e) {
             Toast.makeText(ctx, "Error saving challenge state: " + e.getMessage(), Toast.LENGTH_LONG).show();
             e.printStackTrace();

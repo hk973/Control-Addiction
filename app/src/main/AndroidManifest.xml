@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- Optional Camera Feature -->
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
-
-    <!-- Required to query all installed packages -->
+        android:required="false" /> <!-- Required to query all installed packages -->
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -22,34 +19,34 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Addiction20"
         tools:targetApi="31">
-
+        <activity
+            android:name=".challenge_reward"
+            android:exported="false" />
         <!-- Default Launcher Activity (Hidden from Recents) -->
         <activity
             android:name=".permission.MainActivity"
-            android:exported="true"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Main Container Activity (Acts like Home, Hidden from Recents) -->
+        </activity> <!-- Main Container Activity (Acts like Home, Hidden from Recents) -->
         <activity
             android:name=".MainContainerActivity"
-            android:exported="true"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-        </activity>
-
-        <!-- Other App Activities -->
+        </activity> <!-- Other App Activities -->
         <activity
             android:name=".MainContainerActivity2"
             android:exported="false"
@@ -64,22 +61,20 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".SettingsActivity"
-            android:exported="false"
             android:excludeFromRecents="true"
+            android:exported="false"
             android:screenOrientation="portrait" />
         <activity
             android:name=".PopupActivity"
-            android:launchMode="singleInstance"
             android:excludeFromRecents="true"
-            android:theme="@style/Theme.AppCompat.Dialog"
-            android:screenOrientation="portrait" />
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
             android:name=".ReviewActivity"
             android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:screenOrientation="portrait" />
-
-        <!-- Accessibility Service -->
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" /> <!-- Accessibility Service -->
         <service
             android:name=".NotificationBarDetectorService"
             android:exported="true"
@@ -87,12 +82,11 @@
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
-        </service>
-
-        <!-- Quick Settings Tile Service -->
+        </service> <!-- Quick Settings Tile Service -->
         <service
             android:name=".MyTileService"
             android:exported="true"
@@ -101,7 +95,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>

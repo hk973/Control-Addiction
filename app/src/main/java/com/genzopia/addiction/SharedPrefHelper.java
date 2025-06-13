@@ -86,6 +86,16 @@ public class SharedPrefHelper {
     public boolean isGrayModeEnabled() {
         return prefs.getBoolean(KEY_GRAY_MODE, false);
     }
+    public void setChallengeStatus(Context context, boolean status) {
+        context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("Challenge_status", status)
+                .apply();
+    }
+    public boolean getChallengeStatus(Context context) {
+        return context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                .getBoolean("Challenge_status", false); // default is false
+    }
 
     public void setGrayModeEnabled(boolean enabled) {
         editor.putBoolean(KEY_GRAY_MODE, enabled);
