@@ -25,12 +25,19 @@ public class ChallengeReward extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_challenge_reward);
-
         SharedPrefHelper sp = new SharedPrefHelper(this);
         sp.setChallengeStatus(this, false);
-        String uniqueCode = generateUniqueCode();
-        sp.set_challenge_code_List(this, uniqueCode);
+        String uniqueCode="";
+        // Retrieve reward code
+        if (getIntent().hasExtra("REWARD_CODE")) {
+             uniqueCode = getIntent().getStringExtra("REWARD_CODE");
+            // Use the code as needed
+        }else {
 
+
+             uniqueCode= generateUniqueCode();
+            sp.set_challenge_code_List(this, uniqueCode);
+        }
         // Set coupon code in UI
         TextView couponCodeView = findViewById(R.id.coupon_code);
         couponCodeView.setText(uniqueCode);
