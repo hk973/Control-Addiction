@@ -791,6 +791,9 @@ public class MainFragment extends Fragment {
 
     // Extracted the main logic into a separate method
     private void executeMainLogic(long challengeDays) {
+        if(challengeDays!=0){
+            selectedApps=new ArrayList<>();
+        }
         long pickerTimeSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
 
         // Add challenge days (converted to seconds)
