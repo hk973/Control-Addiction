@@ -39,5 +39,8 @@
         <dimen name="overlap_margin">-40dp</dimen>
         <dimen name="small_circle_size">50dp</dimen>
         <dimen name="button_height">48dp</dimen>
+    <dimen name="padding_large">32dp</dimen>
+    <dimen name="padding_medium">24dp</dimen>
+    <dimen name="margin_standard">16dp</dimen>
 
     </resources>

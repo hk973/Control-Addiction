@@ -2,9 +2,12 @@ package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,12 +25,40 @@ public class ChallengeReward extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_challenge_reward);
+
         SharedPrefHelper sp = new SharedPrefHelper(this);
         sp.setChallengeStatus(this, false);
         String uniqueCode = generateUniqueCode();
-        sp.set_challenge_code_List(this,uniqueCode);
-        Log.d("CodeGeneration", "Generated Code: " + sp.get_challenge_code_list(this));
+        sp.set_challenge_code_List(this, uniqueCode);
+
+        // Set coupon code in UI
+        TextView couponCodeView = findViewById(R.id.coupon_code);
+        couponCodeView.setText(uniqueCode);
+
+        // Setup button action
+        findViewById(R.id.visit_button).setOnClickListener(v -> {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://www.genzopia.com"));
+            startActivity(browserIntent);
+        });
+
+        // Add star animation
+        animateStar();
     }
+
+    private void animateStar() {
+        ImageView star = findViewById(R.id.star_icon);
+        star.animate()
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .setDuration(500)
+                .withEndAction(() -> star.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(500))
+                .start();
+    }
+
 
     public String generateUniqueCode() {
         try {
