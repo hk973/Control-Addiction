@@ -21,9 +21,11 @@ import java.util.ArrayList;
 class ChallengeDialog extends Dialog {
     private Button start;
     private Button remind;
+    MainFragment hostFragment;
 
-    public ChallengeDialog(@NonNull Context context) {
-        super(context);
+    public ChallengeDialog(@NonNull MainFragment fragment) {
+        super(fragment.requireContext());
+        this.hostFragment = fragment;
     }
 
     @Override
@@ -91,65 +93,9 @@ class ChallengeDialog extends Dialog {
     }
 
     private void startChallenge() {
-        Context ctx = getContext();
-        SharedPrefHelper sharedPrefHelper = null;
+        SharedPrefHelper sharedPrefHelper=new SharedPrefHelper(getContext());
+        sharedPrefHelper.setChallengeStatus(getContext(),true);
+        hostFragment.launchDeviceCredentialVerification(30);
 
-        try {
-            sharedPrefHelper = new SharedPrefHelper(ctx);
-        } catch (Exception e) {
-            Toast.makeText(ctx, "Error initializing preferences: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-            return;
-        }
-
-        // Set 30 days challenge in seconds
-//        int totalSeconds = 30 * 24 * 60 * 60;
-        int totalSeconds=10;
-
-        try {
-            sharedPrefHelper.saveStartTime(System.currentTimeMillis());
-            sharedPrefHelper.saveInitialDuration(totalSeconds);
-            ArrayList<String> selectedApp = new ArrayList<>();
-            sharedPrefHelper.writeData(selectedApp, totalSeconds, true);
-            sharedPrefHelper.setChallengeStatus(getContext(),true);
-        } catch (Exception e) {
-            Toast.makeText(ctx, "Error saving challenge state: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-            // You might choose to abort starting the challenge here, or proceed with limited functionality
-            return;
-        }
-
-        Toast.makeText(ctx, "30-day challenge activated!", Toast.LENGTH_LONG).show();
-
-        // Prepare intent to launch MainContainerActivity2
-        Intent intent = new Intent(ctx, MainContainerActivity2.class);
-
-        // Attempt to start activity safely
-        try {
-            if (ctx instanceof Activity) {
-                ((Activity) ctx).startActivity(intent);
-            } else {
-                // If context is not an Activity (unlikely for a dialog attached to an Activity, but safe fallback)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ctx.startActivity(intent);
-            }
-        } catch (Exception e) {
-            Toast.makeText(ctx, "Error launching challenge activity: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
-            // Depending on app flow, you may choose to return here or continue
-            return;
-        }
-
-        // Optionally finish the owner Activity if available
-        try {
-            if (getOwnerActivity() != null) {
-                getOwnerActivity().finish();
-            }
-        } catch (Exception e) {
-            // Log but don’t crash if finish fails
-            e.printStackTrace();
-        }
-
-        Toast.makeText(ctx, "Challenge started! App access restricted.", Toast.LENGTH_SHORT).show();
     }
 }

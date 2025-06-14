@@ -9,7 +9,6 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -18,13 +17,8 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.app.KeyguardManager;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.Editable;
@@ -63,7 +57,6 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +79,7 @@ public class MainFragment extends Fragment {
     private SeekBar.OnSeekBarChangeListener seekBarChangeListener;
     private static final int REQUEST_CODE_ACCESSIBILITY_PERMISSION = 102;
     AuthenticationManager aa;
+    int challengdays;
 
 
 
@@ -591,7 +585,7 @@ public class MainFragment extends Fragment {
     }
     private void challeng(){
 
-         Dialog dialog = new ChallengeDialog(getContext());
+         Dialog dialog = new ChallengeDialog(this);
         dialog.show();
     }
 
@@ -742,12 +736,14 @@ public class MainFragment extends Fragment {
         }
 
         // Launch device credential verification before proceeding
-        launchDeviceCredentialVerification();
+        launchDeviceCredentialVerification(0);
     }
 
-    private void launchDeviceCredentialVerification() {
+     void launchDeviceCredentialVerification(int days) {
+        challengdays=days;
         KeyguardManager keyguardManager =
                 (KeyguardManager) requireContext().getSystemService(Context.KEYGUARD_SERVICE);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && keyguardManager != null) {
             if (keyguardManager.isDeviceSecure()) {
@@ -765,7 +761,7 @@ public class MainFragment extends Fragment {
             }
         }
         // If device credential verification is not available, proceed directly
-        executeMainLogic();
+        executeMainLogic(days);
     }
 
     // Handle the result of device credential verification
@@ -778,7 +774,7 @@ public class MainFragment extends Fragment {
                 // Device credential verification successful
                 aa.setState(Authentication.notgoing);
                 Toast.makeText(requireContext(), "Authentication successful!", Toast.LENGTH_SHORT).show();
-                executeMainLogic();
+                executeMainLogic(challengdays);
             } else {
                 // Device credential verification failed or cancelled
                 aa.setState(Authentication.notgoing);
@@ -794,8 +790,14 @@ public class MainFragment extends Fragment {
     }
 
     // Extracted the main logic into a separate method
-    private void executeMainLogic() {
-        long totalSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
+    private void executeMainLogic(long challengeDays) {
+        long pickerTimeSeconds = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
+
+        // Add challenge days (converted to seconds)
+        long challengeTimeSeconds = challengeDays * 24 * 60 * 60;
+
+        // Total time is the sum of both
+        long totalSeconds = pickerTimeSeconds + challengeTimeSeconds;
 
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
         sharedPrefHelper.saveStartTime(System.currentTimeMillis());
