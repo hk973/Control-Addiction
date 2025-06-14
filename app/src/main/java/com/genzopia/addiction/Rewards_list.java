@@ -1,15 +1,21 @@
 package com.genzopia.addiction;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.divider.MaterialDividerItemDecoration;
+
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Rewards_list extends AppCompatActivity {
 
@@ -25,18 +31,31 @@ public class Rewards_list extends AppCompatActivity {
             return insets;
         });
 
-        // Initialize RecyclerView
         RecyclerView recyclerView = findViewById(R.id.rewardsRecyclerView);
+        if (recyclerView == null) {
+            Log.e("RewardsList", "RecyclerView not found!");
+            return;
+        }
 
-        // Get codes from SharedPreferences
+        // Add item decoration for spacing
+        recyclerView.addItemDecoration(new MaterialDividerItemDecoration(
+                recyclerView.getContext(),
+                DividerItemDecoration.VERTICAL
+        ));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
         SharedPrefHelper sp = new SharedPrefHelper(this);
         ArrayList<String> codeList = sp.get_challenge_code_list(this);
 
-        // Set up adapter
-        RewardsAdapter adapter = new RewardsAdapter(codeList,this);
+        // FIX: Handle null/empty list
+        if (codeList == null || codeList.isEmpty()) {
+            codeList = new ArrayList<>();
+            codeList.add("No rewards available");
+        }
+
+        RewardsAdapter adapter = new RewardsAdapter(codeList, this);
         recyclerView.setAdapter(adapter);
     }
-
-    // RecyclerView Adapter
-
 }

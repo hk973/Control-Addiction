@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,11 +16,11 @@ import java.util.ArrayList;
 class RewardsAdapter extends RecyclerView.Adapter<RewardsAdapter.ViewHolder> {
 
     private final ArrayList<String> codeList;
-    private Context conn;
+    private final Context context;
 
-    public RewardsAdapter(ArrayList<String> codeList, Context con) {
+    public RewardsAdapter(ArrayList<String> codeList, Context context) {
         this.codeList = codeList;
-        this.conn=con;
+        this.context = context;
     }
 
     @NonNull
@@ -35,12 +36,20 @@ class RewardsAdapter extends RecyclerView.Adapter<RewardsAdapter.ViewHolder> {
         String code = codeList.get(position);
         holder.codeTextView.setText(code);
 
-        // Handle item click
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(conn, ChallengeReward.class);
-            intent.putExtra("REWARD_CODE", code);
-            conn.startActivity(intent);
-        });
+        // Only make clickable if it's a real reward code
+        boolean isClickable = !code.equals("No rewards available");
+        holder.itemView.setClickable(isClickable);
+
+        if (isClickable) {
+            holder.itemView.setOnClickListener(v -> {
+                // FIX: Remove delay to prevent context issues
+                Intent intent = new Intent(context, ChallengeReward.class);
+                intent.putExtra("REWARD_CODE", code);
+                context.startActivity(intent);
+            });
+        } else {
+            holder.itemView.setOnClickListener(null);
+        }
     }
 
     @Override
@@ -48,14 +57,17 @@ class RewardsAdapter extends RecyclerView.Adapter<RewardsAdapter.ViewHolder> {
         return codeList.size();
     }
 
-    // ViewHolder Class
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView codeTextView;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        final TextView codeTextView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             codeTextView = itemView.findViewById(R.id.codeTextView);
+
+            // FIX: Add null check for critical view
+            if (codeTextView == null) {
+                throw new IllegalStateException("TextView not found in item layout");
+            }
         }
     }
 }
-

@@ -19,6 +19,8 @@
     <string name="permission_granted">Permission Granted</string>
     <string name="permission_required">Permission Required</string>
     <string name="terms_accepted">Terms Accepted</string>
+    <string name="reward_code">REWARD CODE</string>
+    <string name="tap_to_redeem">Tap to redeem</string>
     <string name="terms_required">Terms Review Required</string>
     <string name="launcher_optional">Optional but Recommended</string>
     <string name="time_remaining">Time Remaining: %s</string>
