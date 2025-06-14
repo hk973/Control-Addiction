@@ -34,6 +34,8 @@ public class SharedPrefHelper {
     private static final String KEY_GRAY_MODE = "GrayMode";
     private static final String KEY_MODE_NIGHT = "modeNight";
 
+    private static final String challenge_code ="challenge_code";
+
     private SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
@@ -50,6 +52,41 @@ public class SharedPrefHelper {
         Set<String> unique = new LinkedHashSet<>(current);
         editor.putString("pinned_apps", TextUtils.join(",", unique)).apply();
     }
+    public static void set_challenge_code_List(Context context, String newItem) {
+        SharedPreferences sharedPref = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        String json = sharedPref.getString(challenge_code, null);
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        ArrayList<String> list;
+
+        if (json != null) {
+            list = gson.fromJson(json, type);
+        } else {
+            list = new ArrayList<>();
+        }
+
+        list.add(newItem); // Append new item
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(challenge_code, gson.toJson(list));
+        editor.apply();
+    }
+    public static ArrayList<String> get_challenge_code_list(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+
+        String json = sharedPref.getString(challenge_code, null);
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+
+        if (json != null) {
+            return gson.fromJson(json, type);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+
 
     // Updated getPinnedApps()
     public List<String> getPinnedApps() {

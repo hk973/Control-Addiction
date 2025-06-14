@@ -168,8 +168,6 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
             } else {
                 viewPager.setCurrentItem(0);
             }
-        } else {
-            super.onBackPressed();
         }
     }
 

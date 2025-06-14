@@ -8,7 +8,7 @@ public class CounterManager {
     private static final String COUNTER_KEY = "counter_value";
     private static final String Review_pref = "review_fref";
     private static final String Review_key = "review_key";
-    private static final int MAX_COUNT = 10;
+    private static final int MAX_COUNT = 20;
     SharedPreferences prefs;
 
     public int getCounter(Context context) {

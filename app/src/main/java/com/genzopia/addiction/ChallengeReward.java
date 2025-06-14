@@ -1,5 +1,7 @@
 package com.genzopia.addiction;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -23,7 +25,8 @@ public class ChallengeReward extends AppCompatActivity {
         SharedPrefHelper sp = new SharedPrefHelper(this);
         sp.setChallengeStatus(this, false);
         String uniqueCode = generateUniqueCode();
-        Log.d("CodeGeneration", "Generated Code: " + uniqueCode);
+        sp.set_challenge_code_List(this,uniqueCode);
+        Log.d("CodeGeneration", "Generated Code: " + sp.get_challenge_code_list(this));
     }
 
     public String generateUniqueCode() {
@@ -64,5 +67,13 @@ public class ChallengeReward extends AppCompatActivity {
         byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
         String base64 = Base64.encodeToString(hash, Base64.NO_WRAP | Base64.URL_SAFE);
         return base64.replaceAll("[^0-9]", "");
+    }
+
+    @SuppressLint("MissingSuperCall")
+    @Override
+    public void onBackPressed() {
+        Intent intent=new Intent(this,MainContainerActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

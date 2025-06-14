@@ -157,11 +157,13 @@ public class SelectedAppsFragment extends Fragment {
         if(!status){
             if(challenge_status){
                 startActivity(new Intent(requireContext(), ChallengeReward.class));
+                requireActivity().finish();
 
             }else{
             Log.e("onresumestatus","1");
             Intent intent =new Intent(getContext(), MainContainerActivity.class);
-            startActivity(intent);}
+            startActivity(intent);
+            requireActivity().finish();}
 
         }
 
@@ -170,24 +172,6 @@ public class SelectedAppsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.e("onpause","1");
-
-        SharedPrefHelper sp=new SharedPrefHelper(getContext());
-        boolean status=sp.getTimeActivateStatus();
-        Log.e("status", String.valueOf(challenge_status));
-        challenge_status=sharedPrefHelper.getChallengeStatus(requireContext());
-
-        if(!status){
-            if(challenge_status){
-                startActivity(new Intent(requireContext(),ChallengeReward.class));
-
-            }else{
-                Log.e("onresumestatus","1");
-                Intent intent =new Intent(getContext(), MainContainerActivity.class);
-                startActivity(intent);}
-
-        }
-
     }
 
 
