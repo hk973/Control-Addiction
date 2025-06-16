@@ -2,10 +2,14 @@ package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,9 +29,20 @@ public class ChallengeReward extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_challenge_reward);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
         SharedPrefHelper sp = new SharedPrefHelper(this);
         sp.setChallengeStatus(this, false);
         String uniqueCode="";
+        if(sp.getCheatChallengeValue(this)){
+            Intent intent=new Intent(this,MainContainerActivity.class);
+            startActivity(intent);
+            finish();
+        }{
         // Retrieve reward code
         if (getIntent().hasExtra("REWARD_CODE")) {
              uniqueCode = getIntent().getStringExtra("REWARD_CODE");
@@ -50,7 +65,7 @@ public class ChallengeReward extends AppCompatActivity {
         });
 
         // Add star animation
-        animateStar();
+        animateStar();}
     }
 
     private void animateStar() {
@@ -113,5 +128,12 @@ public class ChallengeReward extends AppCompatActivity {
         Intent intent=new Intent(this,MainContainerActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPrefHelper sp=new SharedPrefHelper(this);
+        sp.setCheatChallengeValue(this,false);
     }
 }

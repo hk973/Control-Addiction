@@ -86,6 +86,17 @@ public class SharedPrefHelper {
         }
     }
 
+    public void setCheatChallengeValue(Context context, boolean value) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("cheatchallengevalue", value);
+        editor.apply();
+    }
+    public boolean getCheatChallengeValue(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean("cheatchallengevalue", false); // false is the default value
+    }
+
 
 
     // Updated getPinnedApps()

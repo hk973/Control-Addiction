@@ -442,6 +442,7 @@ public class SelectedAppsFragment extends Fragment {
                 SharedPrefHelper prefHelper = new SharedPrefHelper(appContext);
                 prefHelper.saveTimeLimitValue(0);
                 prefHelper.saveTimeActivateStatus(false);
+                prefHelper.setCheatChallengeValue(appContext,true);
 
                 // UI operations require attached fragment
                 if (fragment != null && fragment.isAdded()) {
