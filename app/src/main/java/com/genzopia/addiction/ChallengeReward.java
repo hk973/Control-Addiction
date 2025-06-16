@@ -60,7 +60,7 @@ public class ChallengeReward extends AppCompatActivity {
         // Setup button action
         findViewById(R.id.visit_button).setOnClickListener(v -> {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://www.genzopia.com"));
+                    Uri.parse("https://www.genzopia.xyz"));
             startActivity(browserIntent);
         });
 
