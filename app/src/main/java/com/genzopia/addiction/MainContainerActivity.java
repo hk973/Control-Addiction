@@ -3,6 +3,7 @@ package com.genzopia.addiction;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -20,6 +21,13 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,6 +36,8 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
 
     private AppUpdateChecker updateChecker;
     private static final int REQUEST_CODE = 123;
+    private AppUpdateManager appUpdateManager;
+    private static final int UPDATE_REQUEST_CODE = 123;
 
 
     @Override
@@ -92,11 +102,17 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
 
     private void handleCounterResult(int counte, boolean reviewShown) {
         if (isFinishing() || isDestroyed()) return;
+        Log.e("test8767",String.valueOf(counte));
+
 
         if (counte == 10) {
             if (!reviewShown) showReviewDialog();
         } else if (counte == 5) {
             startActivity(new Intent(this, ReviewActivity.class));
+        } else if (counte%5==0){
+            Log.e("test8767",String.valueOf(true));
+            checkForForceUpdate();
+
         }
     }
 
@@ -217,6 +233,26 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
             boolean reviewShown = cm.getReview(MainContainerActivity.this);
             Log.e("test555", String.valueOf(counte));
             runOnUiThread(() -> handleCounterResult(counte, reviewShown));
+        });
+    }
+    private void checkForForceUpdate() {
+        appUpdateManager = AppUpdateManagerFactory.create(this);
+
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            AppUpdateType.IMMEDIATE,
+                            this,
+                            UPDATE_REQUEST_CODE
+                    );
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+            }
         });
     }
 }
