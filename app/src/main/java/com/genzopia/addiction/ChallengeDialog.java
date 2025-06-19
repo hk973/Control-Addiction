@@ -95,7 +95,7 @@ class ChallengeDialog extends Dialog {
     private void startChallenge() {
         SharedPrefHelper sharedPrefHelper=new SharedPrefHelper(getContext());
         sharedPrefHelper.setChallengeStatus(getContext(),true);
-        hostFragment.launchDeviceCredentialVerification(0);
+        hostFragment.launchDeviceCredentialVerification(30);
 
     }
 }
