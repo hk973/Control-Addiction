@@ -11,6 +11,7 @@
         android:orientation="vertical">
 
         <!-- App Bar -->
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/settingsAppBar"
             android:layout_width="match_parent"
@@ -46,7 +47,7 @@
         <!-- App Opening Method Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_margin="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp">
@@ -61,8 +62,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="App Opening Method"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <RadioGroup
                     android:id="@+id/openMethodGroup"
@@ -74,14 +75,55 @@
                         android:id="@+id/clickOption"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Single Click"/>
+                        android:text="Single Click" />
 
                     <RadioButton
                         android:id="@+id/holdOption"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Long Press (Hold)"/>
+                        android:text="Long Press (Hold)" />
                 </RadioGroup>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Reward"
+                    android:textStyle="bold"
+                    android:textSize="16sp"/>
+                <LinearLayout
+                    android:id="@+id/rewards"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:src="@drawable/celibration"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="10dp"
+                        android:layout_gravity="center"
+                        android:text="Rewards and Coupons"
+                        android:textStyle="bold"
+                        />
+
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

@@ -44,6 +44,16 @@ public class SharedPrefHelper {
         editor.putBoolean(KEY_GRAY_MODE, enabled);
         editor.apply();
     }
+    public void setCheatChallengeValue(Context context, boolean value) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("cheatchallengevalue", value);
+        editor.apply();
+    }
+    public boolean getCheatChallengeValue(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean("cheatchallengevalue", false); // false is the default value
+    }
     public void savePinnedApps(List<String> newPinnedApps) {
         List<String> current = getPinnedApps();
         current.addAll(newPinnedApps);

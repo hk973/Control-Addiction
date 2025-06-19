@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeColor="#9E9E9E"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/codeLabelTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reward_code"
+            android:textColor="#757575"
+            android:textSize="14sp"
+            android:textAllCaps="true"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/codeTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:letterSpacing="0.2"
+
+            android:layout_marginBottom="16dp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeMaxTextSize="20sp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginVertical="8dp"/>
+
+        <TextView
+            android:id="@+id/redeemTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tap_to_redeem"
+            android:textColor="#6200EE"
+            android:textSize="14sp"
+            android:drawableStart="@drawable/ic_redeem"
+            android:drawablePadding="8dp"
+            android:drawableTint="#6200EE"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

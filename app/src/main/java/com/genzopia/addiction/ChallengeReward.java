@@ -2,9 +2,16 @@ package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,12 +29,58 @@ public class ChallengeReward extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_challenge_reward);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.TRANSPARENT);
+        }
         SharedPrefHelper sp = new SharedPrefHelper(this);
         sp.setChallengeStatus(this, false);
-        String uniqueCode = generateUniqueCode();
-        sp.set_challenge_code_List(this,uniqueCode);
-        Log.d("CodeGeneration", "Generated Code: " + sp.get_challenge_code_list(this));
+        String uniqueCode="";
+        if(sp.getCheatChallengeValue(this)){
+            Intent intent=new Intent(this,MainContainerActivity.class);
+            startActivity(intent);
+            finish();
+        }{
+            // Retrieve reward code
+            if (getIntent().hasExtra("REWARD_CODE")) {
+                uniqueCode = getIntent().getStringExtra("REWARD_CODE");
+                // Use the code as needed
+            }else {
+
+
+                uniqueCode= generateUniqueCode();
+                sp.set_challenge_code_List(this, uniqueCode);
+            }
+            // Set coupon code in UI
+            TextView couponCodeView = findViewById(R.id.coupon_code);
+            couponCodeView.setText(uniqueCode);
+
+            // Setup button action
+            findViewById(R.id.visit_button).setOnClickListener(v -> {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://www.genzopia.xyz"));
+                startActivity(browserIntent);
+            });
+
+            // Add star animation
+            animateStar();}
     }
+
+    private void animateStar() {
+        ImageView star = findViewById(R.id.star_icon);
+        star.animate()
+                .scaleX(1.2f)
+                .scaleY(1.2f)
+                .setDuration(500)
+                .withEndAction(() -> star.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(500))
+                .start();
+    }
+
 
     public String generateUniqueCode() {
         try {
@@ -75,5 +128,12 @@ public class ChallengeReward extends AppCompatActivity {
         Intent intent=new Intent(this,MainContainerActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPrefHelper sp=new SharedPrefHelper(this);
+        sp.setCheatChallengeValue(this,false);
     }
 }

@@ -1,6 +1,7 @@
 package com.genzopia.addiction;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -52,6 +53,14 @@ public class SettingsActivity extends BaseActivity {
         RadioGroup openMethodGroup = findViewById(R.id.openMethodGroup);
         RadioButton clickOption = findViewById(R.id.clickOption);
         RadioButton holdOption = findViewById(R.id.holdOption);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) LinearLayout layout=findViewById(R.id.rewards);
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(getApplicationContext(),Rewards_list.class);
+                startActivity(intent);
+            }
+        });
 
         // Theme selection views
         RadioGroup themeSelectionGroup = findViewById(R.id.themeselection_grp);

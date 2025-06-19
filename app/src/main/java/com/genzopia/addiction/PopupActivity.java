@@ -2,6 +2,8 @@ package com.genzopia.addiction;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.WindowManager;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.android.billingclient.api.*;
@@ -23,6 +25,9 @@ public class PopupActivity extends AppCompatActivity {
     }
 
     private void createAndShowMainDialog() {
+        if (isFinishing() || isDestroyed()) {
+            return;
+        }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("App Usage Alert")
                 .setMessage("You cannot use this app as it is not in the approved list.")
@@ -128,10 +133,14 @@ public class PopupActivity extends AppCompatActivity {
             // Check if activity is still valid
             if (isFinishing() || isDestroyed()) return;
 
-            new AlertDialog.Builder(PopupActivity.this)
-                    .setMessage(msg)
-                    .setPositiveButton("OK", null)
-                    .show();
+            try {
+                new AlertDialog.Builder(PopupActivity.this)
+                        .setMessage(msg)
+                        .setPositiveButton("OK", null)
+                        .show();
+            } catch (WindowManager.BadTokenException e) {
+                // Log the error or handle it gracefully
+            }
         });
     }
 }
