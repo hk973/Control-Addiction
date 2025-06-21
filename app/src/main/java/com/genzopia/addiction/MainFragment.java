@@ -589,7 +589,7 @@ public class MainFragment extends Fragment {
         dialog.show();
     }
 
-    private void showAccessibilityDialog() {
+    public void showAccessibilityDialog() {
       showDisclosureDialog();
     }
     private void showDisclosureDialog() {
@@ -815,7 +815,7 @@ public class MainFragment extends Fragment {
     private boolean isValidInput(String timeInput) {
         return !TextUtils.isEmpty(timeInput) && !timeInput.equals("0") && !selectedApps.isEmpty();
     }
-    private boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
+    public boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
         String serviceId = context.getPackageName() + "/" + service.getCanonicalName();
         String enabledServices = Settings.Secure.getString(
                 context.getContentResolver(),

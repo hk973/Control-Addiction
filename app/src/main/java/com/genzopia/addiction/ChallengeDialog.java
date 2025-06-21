@@ -1,5 +1,7 @@
 package com.genzopia.addiction;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -8,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -95,7 +98,12 @@ class ChallengeDialog extends Dialog {
     private void startChallenge() {
         SharedPrefHelper sharedPrefHelper=new SharedPrefHelper(getContext());
         sharedPrefHelper.setChallengeStatus(getContext(),true);
-        hostFragment.launchDeviceCredentialVerification(30);
+        if (!hostFragment.isAccessibilityServiceEnabled(getContext(), NotificationBarDetectorService.class)) {
+            hostFragment.showAccessibilityDialog();
+        } else {
+            hostFragment.launchDeviceCredentialVerification(30);
+        }
+
 
     }
 }
