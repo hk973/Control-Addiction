@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Rewards_list">
+    tools:context=".Launcher.Rewards_list">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rewardsRecyclerView"

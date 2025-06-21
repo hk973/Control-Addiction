@@ -20,14 +20,14 @@
         android:theme="@style/Theme.Addiction20"
         tools:targetApi="31">
         <activity
-            android:name=".Rewards_list"
+            android:name=".Launcher.Rewards_list"
             android:exported="false" />
         <activity
-            android:name=".ChallengeReward"
+            android:name=".Launcher.ChallengeReward"
             android:exported="false" />
         <!-- Default Launcher Activity (Hidden from Recents) -->
         <activity
-            android:name=".permission.MainActivity"
+            android:name=".Launcher.permission.MainActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:screenOrientation="portrait">
@@ -38,7 +38,7 @@
             </intent-filter>
         </activity> <!-- Main Container Activity (Acts like Home, Hidden from Recents) -->
         <activity
-            android:name=".MainContainerActivity"
+            android:name=".Launcher.MainContainerActivity"
             android:excludeFromRecents="true"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -51,35 +51,35 @@
             </intent-filter>
         </activity> <!-- Other App Activities -->
         <activity
-            android:name=".MainContainerActivity2"
+            android:name=".Launcher.MainContainerActivity2"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PinInfoActivity"
+            android:name=".Launcher.PinInfoActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".BaseActivity"
+            android:name=".Launcher.BaseActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".Launcher.SettingsActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PopupActivity"
+            android:name=".Launcher.PopupActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Dialog" />
         <activity
-            android:name=".ReviewActivity"
+            android:name=".Launcher.ReviewActivity"
             android:excludeFromRecents="true"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" /> <!-- Accessibility Service -->
         <service
-            android:name=".NotificationBarDetectorService"
+            android:name=".Launcher.NotificationBarDetectorService"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
@@ -91,7 +91,7 @@
                 android:resource="@xml/accessibility_service_config" />
         </service> <!-- Quick Settings Tile Service -->
         <service
-            android:name=".MyTileService"
+            android:name=".Launcher.MyTileService"
             android:exported="true"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>

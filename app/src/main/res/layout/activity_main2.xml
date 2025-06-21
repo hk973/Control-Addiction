@@ -107,7 +107,7 @@
             android:layout_gravity="center"
             android:visibility="gone"/>
 
-        <com.genzopia.addiction.FastScrollView
+        <com.genzopia.addiction.Launcher.FastScrollView
             android:id="@+id/fastScrollView"
             android:layout_width="36dp"
             android:layout_height="match_parent"
