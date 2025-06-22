@@ -31,12 +31,20 @@
             android:excludeFromRecents="true"
             android:exported="true"
             android:screenOrientation="portrait">
+
+
+        </activity>
+        <activity
+            android:name=".Alarm.Alarm_main_activity"
+            android:exported="true">
+            <!--            this is the main activity from which app starts-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Main Container Activity (Acts like Home, Hidden from Recents) -->
+        </activity>
+
         <activity
             android:name=".Launcher.MainContainerActivity"
             android:excludeFromRecents="true"
