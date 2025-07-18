@@ -52,7 +52,9 @@
                     android:id="@+id/etProfileUrl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/ic_check_circle"
                     android:inputType="textUri" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -67,16 +69,8 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- ✅ Tick Icon (Initially hidden) -->
-        <ImageView
-            android:id="@+id/imgVerifiedTick"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:layout_marginBottom="12dp"
-            android:src="@drawable/ic_check_circle"
-            android:visibility="gone"
-            app:tint="@android:color/holo_green_dark" />
+
+
 
         <!-- Minutes per Problem with Info Icon -->
         <LinearLayout
@@ -90,7 +84,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:hint="No of Hour to get per Problem (X)"
+                android:hint="Phone unlock Hours for 1 Leetcode"
                 app:boxStrokeColor="@color/primary_500"
                 app:hintTextColor="@color/primary_500"
                 app:boxBackgroundMode="outline"

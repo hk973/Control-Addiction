@@ -75,4 +75,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.5")
     debugImplementation("androidx.compose.ui:ui-tooling:1.6.5")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.5")
+// webscrapping tool
+    implementation ("org.jsoup:jsoup:1.16.1")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation ("org.json:json:20210307")
+
 }
