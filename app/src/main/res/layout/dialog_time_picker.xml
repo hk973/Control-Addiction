@@ -236,7 +236,8 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1"
+                            android:text="Coding challenge"
+                            android:gravity="center"
                             android:textSize="24sp"
                             android:textStyle="bold" />
 
@@ -272,12 +273,14 @@
                         android:gravity="center"
                         android:padding="16dp">
 
-
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
+                            android:shadowColor="@color/black"
+                            android:outlineAmbientShadowColor="@color/black"
+                            android:shadowRadius="2"
+                            android:elevation="20dp"
                             android:text="30 Days\n Challenge"
                             android:textSize="20sp"
                             android:textStyle="bold" />

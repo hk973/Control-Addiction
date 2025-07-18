@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.genzopia.addiction"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.genzopia.addiction"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 18
         versionName = "10.8"
 

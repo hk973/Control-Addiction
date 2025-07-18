@@ -374,7 +374,7 @@ public class MainFragment extends Fragment {
         Button buttonMode = dialogView.findViewById(R.id.buttonMode);
         CardView card15Min = dialogView.findViewById(R.id.card15Min);
         CardView card30Min = dialogView.findViewById(R.id.card30Min);
-        CardView card1Hour = dialogView.findViewById(R.id.card1Hour);
+        CardView coding_challenge = dialogView.findViewById(R.id.card1Hour);
         CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         ImageView imageView_fire=dialogView.findViewById(R.id.imageView_fire);
@@ -422,11 +422,14 @@ public class MainFragment extends Fragment {
         // Set click listeners for preset times
         card15Min.setOnClickListener(v -> setTimeValues(1, 0, 0, daysPicker, hoursPicker, minutesPicker));
         card30Min.setOnClickListener(v -> setTimeValues(0, 0, 30, daysPicker, hoursPicker, minutesPicker));
-        card1Hour.setOnClickListener(v -> setTimeValues(0, 1, 0, daysPicker, hoursPicker, minutesPicker));
+        coding_challenge.setOnClickListener(v -> {
+            // do some thing in ooding challenge
+            coding_challenge();
+
+        });
         card3Hours.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 challeng();
             }
         });
@@ -568,6 +571,8 @@ public class MainFragment extends Fragment {
 
         dialog.show();
     }
+
+
 
     private void updateDifficultyLabel(TextView label, int progress) {
         String difficulty;
@@ -833,6 +838,10 @@ public class MainFragment extends Fragment {
             }
         }
         return false;
+    }
+    private void coding_challenge() {
+        DSAChallengeDialog dialog = new DSAChallengeDialog(this);
+        dialog.show();
     }
 
 

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/card_margin"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Header Section (Fixed) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/primary_500"
+            android:padding="@dimen/header_padding"
+            android:paddingBottom="@dimen/header_bottom_padding">
+
+            <LinearLayout
+                android:layout_width="@dimen/circle_size"
+                android:layout_height="@dimen/circle_size"
+                android:background="@drawable/circle_accent"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size"
+                    android:layout_height="@dimen/icon_size"
+                    android:src="@drawable/ic_heart"
+                    app:tint="@android:color/white" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="DSA Challenge"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/title_text_size"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Solve algorithmic problems to earn phone‑usage time"
+                android:textColor="#CCFFFFFF"
+                android:textSize="@dimen/subtitle_text_size"
+                android:gravity="center"
+                android:maxLines="2"/>
+        </LinearLayout>
+
+        <!-- Scrollable Content Area -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="?android:attr/colorBackground"
+                android:padding="@dimen/content_padding">
+
+                <!-- Overlap Space -->
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/overlap_height"
+                    android:layout_marginTop="@dimen/overlap_margin" />
+
+                <!-- Time Counter -->
+                <LinearLayout
+                    android:layout_width="@dimen/small_circle_size"
+                    android:layout_height="@dimen/small_circle_size"
+                    android:background="@drawable/circle_accent"
+                    android:gravity="center"
+                    android:layout_gravity="end"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/tvRemainingTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="H#"
+                        android:textColor="@android:color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Rules Container -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/card_background"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Challenge Rules"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Unlock All Apps -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_check"
+                                android:layout_marginEnd="8dp"
+                                app:tint="?android:attr/colorAccent" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="1. Solve one LeetCode problem to unlock access to all apps"
+                                android:textColor="?android:attr/textColorPrimary"/>
+                        </LinearLayout>
+
+                        <!-- Proportional Time -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_check"
+                                android:layout_marginEnd="8dp"
+                                app:tint="?android:attr/colorAccent" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="2. Each solved problem grants X minutes of usage (configurable)"
+                                android:textColor="?android:attr/textColorPrimary"/>
+                        </LinearLayout>
+
+                        <!-- Automatic Lock -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="12dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_check"
+                                android:layout_marginEnd="8dp"
+                                app:tint="?android:attr/colorAccent" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="3. All apps will automatically lock when your allocated time expires"
+                                android:textColor="?android:attr/textColorPrimary"/>
+                        </LinearLayout>
+
+                        <!-- Timer Visible -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_check"
+                                android:layout_marginEnd="8dp"
+                                app:tint="?android:attr/colorAccent" />
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="4. A countdown timer shows remaining time at the top"
+                                android:textColor="?android:attr/textColorPrimary"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Reward Container -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/card_background"
+                    android:padding="16dp"
+                    android:layout_marginBottom="24dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Your Reward"
+                        android:textColor="@color/success_color"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Keep solving to keep your phone unlocked!"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="When time expires, solve another problem to continue"
+                        android:textColor="?android:attr/colorAccent"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:padding="12dp"
+                        android:background="@drawable/highlight_background"
+                        android:layout_marginVertical="8dp"/>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Fixed Button Footer -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:divider="@drawable/divider"
+            android:showDividers="middle"
+            android:dividerPadding="8dp"
+            android:layout_marginBottom="20dp"
+            android:padding="8dp"
+            android:background="?android:attr/colorBackground">
+
+            <Button
+                android:id="@+id/btnStart"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_weight="1"
+                android:text="Start"
+                android:textColor="?android:attr/colorAccent"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"/>
+
+            <Button
+                android:id="@+id/btnLater"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_weight="1"
+                android:text="Later"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="16sp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

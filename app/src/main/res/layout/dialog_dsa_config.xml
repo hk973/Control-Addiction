@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/content_padding"
+     >
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Configure DSA Challenge"
+            android:textSize="@dimen/title_text_size"
+            android:textStyle="bold"
+            android:textColor="@color/primary_500"
+            android:gravity="center"
+            android:layout_marginBottom="20dp" />
+
+        <!-- LeetCode Profile Input and Verify Button Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="LeetCode Profile URL"
+                app:boxStrokeColor="@color/primary_500"
+                app:hintTextColor="@color/primary_500"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etProfileUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnVerify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Verify"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:cornerRadius="8dp"
+                app:backgroundTint="@color/primary_500"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <!-- ✅ Tick Icon (Initially hidden) -->
+        <ImageView
+            android:id="@+id/imgVerifiedTick"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:layout_marginBottom="12dp"
+            android:src="@drawable/ic_check_circle"
+            android:visibility="gone"
+            app:tint="@android:color/holo_green_dark" />
+
+        <!-- Minutes per Problem with Info Icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="No of Hour to get per Problem (X)"
+                app:boxStrokeColor="@color/primary_500"
+                app:hintTextColor="@color/primary_500"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etMinutesPerProblem"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Info icon -->
+            <ImageView
+                android:id="@+id/infoIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_info"
+                android:contentDescription="Info"
+                app:tint="@color/primary_500" />
+        </LinearLayout>
+
+        <!-- Start Challenge Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStartChall"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:text="Start Challenge"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            app:cornerRadius="8dp"
+            app:backgroundTint="@color/primary_500"
+           />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

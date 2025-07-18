@@ -75,6 +75,7 @@ public class SharedPrefHelper {
         editor.putString(challenge_code, gson.toJson(list));
         editor.apply();
     }
+
     public static ArrayList<String> get_challenge_code_list(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
         Gson gson = new Gson();
@@ -149,7 +150,6 @@ public class SharedPrefHelper {
     public boolean isTermsAccepted() {
         return prefs.getBoolean("terms_accepted", false);
     }
-
 
 
     public SharedPrefHelper(Context context) {
@@ -382,6 +382,23 @@ public class SharedPrefHelper {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         return sharedPreferences.getString(key, defaultValue);
     }
+    public void setDSAChallengeActive(boolean active) {
+        prefs.edit().putBoolean("dsa_challenge_active", active).apply();
+    }
+
+    public boolean isDSAChallengeActive() {
+        return prefs.getBoolean("dsa_challenge_active", false);
+    }
+
+    public void setRemainingMinutes(int minutes) {
+        prefs.edit().putInt("remaining_minutes", minutes).apply();
+    }
+
+    public int getRemainingMinutes() {
+        return prefs.getInt("remaining_minutes", 0);
+    }
+
+
 
 
 

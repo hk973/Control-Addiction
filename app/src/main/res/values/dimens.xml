@@ -21,7 +21,7 @@
     <dimen name="button_elevation">4dp</dimen>
     <dimen name="preview_image_height">200dp</dimen>
         <!-- Base dimensions -->
-        <dimen name="card_margin">16dp</dimen>
+        <dimen name="card_margin">8dp</dimen>
 
         <dimen name="card_elevation">8dp</dimen>
 
