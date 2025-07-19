@@ -1,3 +1,4 @@
+// SelectedAppsFragment.java
 package com.genzopia.addiction.Launcher;
 
 import android.annotation.SuppressLint;
@@ -10,30 +11,22 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.ViewParent;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
@@ -45,53 +38,79 @@ import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.genzopia.addiction.R;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 public class SelectedAppsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private SelectedAppsAdapter adapter;
     private PackageManager packageManager;
-    private EditText searchBar;
-    private ArrayList<String> appNames;
-    private ArrayList<String> selectedApps;
     private SharedPrefHelper sharedPrefHelper;
-    private Handler timeCheckHandler = new Handler();
-    private static final long CHECK_INTERVAL = 1000;
-    private FrameLayout dragHandle;
-    private BillingClient billingClient;
-    private SkuDetails targetSkuDetails; // To store fetched product details
+    private EditText searchBar;
 
-    private boolean isMenuExpanded = false;
-    boolean challenge_status;
-    private View overlay;
+    // Billing
+    private BillingClient billingClient;
+    private SkuDetails targetSkuDetails;
+
+    // in‑memory lists
+    private final List<String> allPackages      = new ArrayList<>();
+    private final List<String> allAppNames      = new ArrayList<>();
+    private final List<String> selectedPackages = new ArrayList<>();
+    private final List<String> selectedNames    = new ArrayList<>();
+
+    // time‑check if you need to redirect on expiry
+    private final Handler timeCheckHandler = new Handler();
+    private static final long CHECK_INTERVAL = 1_000;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_main3, container, false);
-
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-
         super.onViewCreated(view, savedInstanceState);
+        packageManager   = requireActivity().getPackageManager();
+        sharedPrefHelper = new SharedPrefHelper(requireContext());
+
+        // 1) init billing & menu
         initBillingClient();
         setupCircularMenu(view);
 
-        searchBar = view.findViewById(R.id.searchBar);
+        // 2) set up RecyclerView
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        searchBar = view.findViewById(R.id.searchBar);
+        // 3) load “selected” from prefs
+        selectedPackages.clear();
+        selectedPackages.addAll(sharedPrefHelper.getSelectedAppValue());
+        selectedNames.clear();
+        selectedNames.addAll(getAppNamesFromPackageNames(selectedPackages));
 
-
-
-        packageManager = requireActivity().getPackageManager();
-        sharedPrefHelper = new SharedPrefHelper(requireContext());
-        selectedApps = sharedPrefHelper.getSelectedAppValue();
-        Log.e("test456", Arrays.toString(selectedApps.toArray()));
-
-        appNames = (ArrayList<String>) getAppNamesFromPackageNames(selectedApps);
-        adapter = new SelectedAppsAdapter(requireContext(), appNames, selectedApps);
+        // 4) create adapter starting with selected apps
+        adapter = new SelectedAppsAdapter(
+                requireContext(),
+                selectedNames,
+                selectedPackages
+        );
         recyclerView.setAdapter(adapter);
 
+        // 5) fetch all installed apps once, in background
+        new Thread(() -> {
+            List<ApplicationInfo> apps = packageManager.getInstalledApplications(0);
+            for (ApplicationInfo ai : apps) {
+                allPackages.add(ai.packageName);
+                allAppNames.add(packageManager.getApplicationLabel(ai).toString());
+            }
+            // now snap into UI
+            requireActivity().runOnUiThread(this::refreshList);
+        }).start();
+
+        // 6) hook up search bar
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -99,103 +118,158 @@ public class SelectedAppsFragment extends Fragment {
             }
             @Override public void afterTextChanged(Editable s) {}
         });
+
+        // 7) optionally start time checks
+        timeCheckHandler.postDelayed(timeCheckRunnable, CHECK_INTERVAL);
     }
-
-
-    private Runnable timeCheckRunnable = new Runnable() {
-        @Override
-        public void run() {
-            SharedPrefHelper sp = new SharedPrefHelper(getContext());
-            boolean status = sp.getTimeActivateStatus();
-
-            if (!status) {
-                // Time expired - redirect
-                Intent intent = new Intent(getContext(), MainContainerActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                requireActivity().finish(); // Close current activity
-
-
-            } else {
-                // Continue checking
-                timeCheckHandler.postDelayed(this, CHECK_INTERVAL);
-            }
-        }
-    };
-    private List<String> getAppNamesFromPackageNames(ArrayList<String> packageNames) {
-        List<String> appNames = new ArrayList<>();
-        for (String packageName : packageNames) {
-            try {
-                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
-                String appName = packageManager.getApplicationLabel(appInfo).toString();
-                appNames.add(appName);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e("MainActivity3", "Package not found: " + packageName);
-            }
-        }
-        return appNames;
-    }
-
-    @SuppressLint("MissingSuperCall")
-
-
 
     @Override
     public void onResume() {
-        Log.e("onresume","1");
         super.onResume();
-        SharedPrefHelper sp=new SharedPrefHelper(requireContext());
-        boolean status=sp.getTimeActivateStatus();
-        challenge_status=sharedPrefHelper.getChallengeStatus(requireContext());
+        refreshList();
+    }
 
-        Log.e("status", String.valueOf(challenge_status));
-        if(!status){
-            if(challenge_status){
-                startActivity(new Intent(requireContext(), ChallengeReward.class));
-                requireActivity().finish();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        timeCheckHandler.removeCallbacksAndMessages(null);
+    }
 
+    /** Runnable that you already had for time‑expiry redirect */
+    private final Runnable timeCheckRunnable = () -> {
+        boolean active = new SharedPrefHelper(requireContext()).getTimeActivateStatus();
+        if (!active) {
+            Intent it = new Intent(getContext(), MainContainerActivity.class);
+            it.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(it);
+            requireActivity().finish();
+        } else {
+            timeCheckHandler.postDelayed(this.timeCheckRunnable, CHECK_INTERVAL);
+        }
+    };
+
+    /** Core toggle logic:
+     *  if remainingTime <= 0 → show only “selected”
+     *  else             → show all installed
+     */
+    private void refreshList() {
+        long remaining = sharedPrefHelper.getDSAChallengeRemainingTime();
+        if (remaining <= 0) {
+            if(sharedPrefHelper.isDSAChallengeActive()){
+                ArrayList<String> k=new ArrayList<>();
+                adapter.updateData(k,k);
+                sharedPrefHelper.set_selectedApps(k);
             }else{
-            Log.e("onresumestatus","1");
-            Intent intent =new Intent(getContext(), MainContainerActivity.class);
-            startActivity(intent);
-            requireActivity().finish();}
+            adapter.updateData(selectedNames, selectedPackages);
+            sharedPrefHelper.set_selectedApps((ArrayList<String>) selectedPackages);
+            }
+        } else {
+            adapter.updateData(allAppNames, allPackages);
+            sharedPrefHelper.set_selectedApps((ArrayList<String>) allPackages);
 
         }
-
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
+    //─── billing helpers ─────────────────────────────────────────────────────────
+
+    private void initBillingClient() {
+        billingClient = BillingClient.newBuilder(getContext())
+                .enablePendingPurchases()
+                .setListener((billingResult, purchases) -> {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK
+                            && purchases != null) {
+                        for (Purchase p : purchases) {
+                            handlePurchase(p);
+                        }
+                    }
+                })
+                .build();
+
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override public void onBillingSetupFinished(@NonNull BillingResult br) {
+                if (br.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    queryProductDetails();
+                }
+            }
+            @Override public void onBillingServiceDisconnected() {
+                // retry logic if you want
+            }
+        });
     }
 
+    private void queryProductDetails() {
+        List<String> skuList = List.of("unlock_discipline_lock_v2");
+        SkuDetailsParams params = SkuDetailsParams.newBuilder()
+                .setSkusList(skuList)
+                .setType(BillingClient.SkuType.INAPP)
+                .build();
 
-    @Override
-    public  void onDestroy() {
-        super.onDestroy();
-        // Remove callbacks to prevent leaks
-        timeCheckHandler.removeCallbacks(timeCheckRunnable);
+        billingClient.querySkuDetailsAsync(params, (br, list) -> {
+            if (br.getResponseCode() == BillingClient.BillingResponseCode.OK
+                    && list != null) {
+                for (SkuDetails d : list) {
+                    if ("unlock_discipline_lock_v2".equals(d.getSku())) {
+                        targetSkuDetails = d;
+                        break;
+                    }
+                }
+            }
+        });
     }
 
+    private void handlePurchase(Purchase purchase) {
+        if (!purchase.getSkus().contains("unlock_discipline_lock_v2")) return;
+
+        ConsumeParams cp = ConsumeParams.newBuilder()
+                .setPurchaseToken(purchase.getPurchaseToken())
+                .build();
+
+        WeakReference<SelectedAppsFragment> ref = new WeakReference<>(this);
+        billingClient.consumeAsync(cp, (br, token) -> {
+            SelectedAppsFragment frag = ref.get();
+            Context ctx = frag != null ? frag.getContext() : null;
+            if (br.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                Context appCtx = ctx != null
+                        ? ctx.getApplicationContext()
+                        : requireContext().getApplicationContext();
+
+                SharedPrefHelper ph = new SharedPrefHelper(appCtx);
+                ph.saveTimeLimitValue(0);
+                ph.setDSAChallengeRemainingTime(0);
+                ph.setDSAChallengeActive(false);
+                ph.saveTimeActivateStatus(false);
+                ph.setCheatChallengeValue(appCtx, true);
+
+                if (frag != null && frag.isAdded()) {
+                    frag.showMessage("Unlocked successfully!");
+                }
+            } else {
+                if (frag != null && frag.isAdded()) {
+                    frag.showMessage("Purchase failed. Try again.");
+                }
+            }
+        });
+    }
+
+    private void showMessage(String msg) {
+        new AlertDialog.Builder(getContext())
+                .setMessage(msg)
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
+    //─── circular‑drag menu ──────────────────────────────────────────────────────
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupCircularMenu(View rootView) {
-        dragHandle = rootView.findViewById(R.id.drag_handle);
+        View dragHandle = rootView.findViewById(R.id.drag_handle);
 
-
-        // Position the handle at the right middle edge initially
+        // initial position
         rootView.post(() -> {
-            int screenWidth = rootView.getWidth();
-            int screenHeight = rootView.getHeight();
-            int handleWidth = dragHandle.getWidth();
-            int handleHeight = dragHandle.getHeight();
-
-            // Calculate right middle position
-            float x = screenWidth - handleWidth;
-            float y = (screenHeight - handleHeight) / 2f;
-
-            dragHandle.setX(x);
-            dragHandle.setY(y);
+            int w = rootView.getWidth(), h = rootView.getHeight();
+            int hw = dragHandle.getWidth(), hh = dragHandle.getHeight();
+            dragHandle.setX(w - hw);
+            dragHandle.setY((h - hh) / 2f);
         });
 
         final int[] screenSize = new int[2];
@@ -204,265 +278,128 @@ public class SelectedAppsFragment extends Fragment {
             screenSize[1] = rootView.getHeight();
         });
 
-        // Add separate click listener for reliable click detection
+        // click → unlock dialog
         dragHandle.setOnClickListener(v -> {
-            Dialog dialog = new Dialog(getContext());
-            dialog.setContentView(R.layout.dialog_unlock);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-            Button payToUnlockBtn = dialog.findViewById(R.id.payToUnlockBtn);
-            payToUnlockBtn.setOnClickListener(view -> {
-                // Trigger your payment flow here
-
-                dialog.dismiss();
+            Dialog d = new Dialog(getContext());
+            d.setContentView(R.layout.dialog_unlock);
+            d.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            Button btn = d.findViewById(R.id.payToUnlockBtn);
+            btn.setOnClickListener(x -> {
+                d.dismiss();
                 if (targetSkuDetails != null) {
-                    BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+                    BillingFlowParams f = BillingFlowParams.newBuilder()
                             .setSkuDetails(targetSkuDetails)
                             .build();
-                    billingClient.launchBillingFlow(getActivity(), flowParams);
+                    billingClient.launchBillingFlow(getActivity(), f);
                 } else {
-                    showMessage("Product not ready yet. Try again in a moment.");
+                    showMessage("Product not ready yet. Try again later.");
                 }
             });
-
-            dialog.show();
+            d.show();
         });
 
-
+        // drag logic
         dragHandle.setOnTouchListener(new View.OnTouchListener() {
-            private float dX, dY;
-            private float startX, startY;
-            private boolean isDragging = false;
-            private static final float CLICK_DISTANCE_THRESHOLD = 10f; // In pixels
+            private float dX, dY, startX, startY;
+            private boolean dragging = false;
+            private final float THRESH = 10f;
 
             @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                switch (event.getActionMasked()) {
+            public boolean onTouch(View view, MotionEvent ev) {
+                switch (ev.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        dX = view.getX() - event.getRawX();
-                        dY = view.getY() - event.getRawY();
-                        startX = event.getRawX();
-                        startY = event.getRawY();
-                        isDragging = false;
+                        dX = view.getX() - ev.getRawX();
+                        dY = view.getY() - ev.getRawY();
+                        startX = ev.getRawX();
+                        startY = ev.getRawY();
+                        dragging = false;
                         return true;
-
                     case MotionEvent.ACTION_MOVE:
-                        // Calculate absolute movement
-                        float deltaX = Math.abs(event.getRawX() - startX);
-                        float deltaY = Math.abs(event.getRawY() - startY);
-
-                        // Only consider as dragging if moved beyond threshold
-                        if (!isDragging && (deltaX > CLICK_DISTANCE_THRESHOLD || deltaY > CLICK_DISTANCE_THRESHOLD)) {
-                            isDragging = true;
-                            // Disable ViewPager scrolling
-                            requestDisallowParentIntercept(true);
+                        float dx = Math.abs(ev.getRawX() - startX);
+                        float dy = Math.abs(ev.getRawY() - startY);
+                        if (!dragging && (dx > THRESH || dy > THRESH)) {
+                            dragging = true;
+                            requestDisallowParentIntercept(view, true);
                         }
-
-                        // Only move if we're dragging
-                        if (isDragging) {
-                            // Calculate new coordinates
-                            float newX = event.getRawX() + dX;
-                            float newY = event.getRawY() + dY;
-
-                            // Constrain to screen boundaries
-                            newX = Math.max(0, Math.min(newX, screenSize[0] - view.getWidth()));
-                            newY = Math.max(0, Math.min(newY, screenSize[1] - view.getHeight()));
-
-                            view.animate()
-                                    .x(newX)
-                                    .y(newY)
-                                    .setDuration(0)
-                                    .start();
+                        if (dragging) {
+                            float nx = ev.getRawX() + dX;
+                            float ny = ev.getRawY() + dY;
+                            nx = clamp(nx, 0, screenSize[0] - view.getWidth());
+                            ny = clamp(ny, 0, screenSize[1] - view.getHeight());
+                            view.animate().x(nx).y(ny).setDuration(0).start();
                         }
                         return true;
-
                     case MotionEvent.ACTION_UP:
-                        requestDisallowParentIntercept(false);
-
-                        if (isDragging) {
+                        requestDisallowParentIntercept(view, false);
+                        if (dragging) {
                             snapToNearestEdge(view, screenSize[0], screenSize[1]);
                             return true;
                         } else {
-                            // Check if it's a small movement (potential click)
-                            float totalMovement = Math.abs(event.getRawX() - startX) + Math.abs(event.getRawY() - startY);
-                            if (totalMovement < CLICK_DISTANCE_THRESHOLD) {
-                                // Let the click listener handle it
-                                view.performClick();
-                            }
+                            float total = Math.abs(ev.getRawX() - startX)
+                                    + Math.abs(ev.getRawY() - startY);
+                            if (total < THRESH) view.performClick();
                         }
                         return true;
-
                     case MotionEvent.ACTION_CANCEL:
-                        requestDisallowParentIntercept(false);
+                        requestDisallowParentIntercept(view, false);
                         return true;
-
                     default:
                         return false;
                 }
             }
         });
     }
-    private void requestDisallowParentIntercept(boolean disallow) {
-        ViewParent parent = dragHandle.getParent();
-        while (parent != null) {
-            parent.requestDisallowInterceptTouchEvent(disallow);
-            parent = parent.getParent();
+
+    private void requestDisallowParentIntercept(View v, boolean disallow) {
+        ViewParent p = v.getParent();
+        while (p != null) {
+            p.requestDisallowInterceptTouchEvent(disallow);
+            p = p.getParent();
         }
     }
 
-
-
-    private void snapToNearestEdge(View view, int screenWidth, int screenHeight) {
-        // current position
-        float curX = view.getX();
-        float curY = view.getY();
-        float vw = view.getWidth();
-        float vh = view.getHeight();
-
-        // Define the 4 candidate snap‐points by projecting onto each edge:
-        //   Top edge:    x stays within [0, screenWidth-vw], y = 0
-        //   Bottom edge: x stays within [0, screenWidth-vw], y = screenHeight-vh
-        //   Left edge:   x = 0, y stays within [0, screenHeight-vh]
-        //   Right edge:  x = screenWidth-vw, y stays within [0, screenHeight-vh]
-        float[][] candidates = new float[4][2];
+    private void snapToNearestEdge(View v, int w, int h) {
+        float x = v.getX(), y = v.getY();
+        float vw = v.getWidth(), vh = v.getHeight();
+        float[][] c = new float[4][2];
 
         // top
-        candidates[0][0] = clamp(curX, 0, screenWidth - vw);
-        candidates[0][1] = 0;
-
+        c[0][0] = clamp(x, 0, w - vw); c[0][1] = 0;
         // bottom
-        candidates[1][0] = clamp(curX, 0, screenWidth - vw);
-        candidates[1][1] = screenHeight - vh;
-
+        c[1][0] = clamp(x, 0, w - vw); c[1][1] = h - vh;
         // left
-        candidates[2][0] = 0;
-        candidates[2][1] = clamp(curY, 0, screenHeight - vh);
-
+        c[2][0] = 0;                    c[2][1] = clamp(y, 0, h - vh);
         // right
-        candidates[3][0] = screenWidth - vw;
-        candidates[3][1] = clamp(curY, 0, screenHeight - vh);
+        c[3][0] = w - vw;               c[3][1] = clamp(y, 0, h - vh);
 
-        // find the closest of the four
-        float minDist = Float.MAX_VALUE;
-        int   best   = 0;
-        for (int i = 0; i < candidates.length; i++) {
-            float dx = curX - candidates[i][0];
-            float dy = curY - candidates[i][1];
-            float dist = (float) Math.hypot(dx, dy);
-            if (dist < minDist) {
-                minDist = dist;
-                best = i;
-            }
+        int best = 0;
+        float minD = Float.MAX_VALUE;
+        for (int i = 0; i < 4; i++) {
+            float dx = x - c[i][0], dy = y - c[i][1];
+            float dist = (float)Math.hypot(dx, dy);
+            if (dist < minD) { minD = dist; best = i; }
         }
-
-        // animate to it
-        view.animate()
-                .x(candidates[best][0])
-                .y(candidates[best][1])
+        v.animate()
+                .x(c[best][0])
+                .y(c[best][1])
                 .setDuration(200)
                 .start();
     }
 
-    /** simple clamp helper **/
     private float clamp(float val, float min, float max) {
         return Math.max(min, Math.min(max, val));
     }
-    private void initBillingClient() {
-        billingClient = BillingClient.newBuilder(getContext())
-                .enablePendingPurchases()
-                .setListener((billingResult, purchases) -> {
-                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
-                        for (Purchase purchase : purchases) {
-                            handlePurchase(purchase);
-                        }
-                    }
-                })
-                .build();
 
-        billingClient.startConnection(new BillingClientStateListener() {
-            @Override
-            public void onBillingSetupFinished(BillingResult billingResult) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    queryProductDetails();
-                }
-            }
+    //─── helper to map packages → labels ────────────────────────────────────────
 
-            @Override
-            public void onBillingServiceDisconnected() {
-                // Retry connection if needed
-            }
-        });
-    }
-
-
-    private void queryProductDetails() {
-        List<String> skuList = List.of("unlock_discipline_lock_v2");
-
-        SkuDetailsParams params = SkuDetailsParams.newBuilder()
-                .setSkusList(skuList)
-                .setType(BillingClient.SkuType.INAPP)
-                .build();
-
-        billingClient.querySkuDetailsAsync(params, (billingResult, skuDetailsList) -> {
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
-                for (SkuDetails skuDetails : skuDetailsList) {
-                    if (skuDetails.getSku().equals("unlock_discipline_lock_v2")) {
-                        targetSkuDetails = skuDetails;
-                    }
-                }
-            }
-        });
-    }
-
-    private void handlePurchase(Purchase purchase) {
-        // Verify this is our product
-        if (!purchase.getSkus().contains("unlock_discipline_lock_v2")) {
-            return;
+    private List<String> getAppNamesFromPackageNames(List<String> pkgs) {
+        List<String> labels = new ArrayList<>();
+        for (String pkg : pkgs) {
+            try {
+                ApplicationInfo ai = packageManager.getApplicationInfo(pkg, 0);
+                labels.add(packageManager.getApplicationLabel(ai).toString());
+            } catch (PackageManager.NameNotFoundException ignored) {}
         }
-
-        ConsumeParams consumeParams = ConsumeParams.newBuilder()
-                .setPurchaseToken(purchase.getPurchaseToken())
-                .build();
-
-        // Use weak reference to avoid context leaks
-        WeakReference<SelectedAppsFragment> fragmentRef = new WeakReference<>(this);
-
-        billingClient.consumeAsync(consumeParams, (billingResult, purchaseToken) -> {
-            SelectedAppsFragment fragment = fragmentRef.get();
-            Context context = fragment != null ? fragment.getContext() : null;
-
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                // Always save using application context
-                Context appContext = context != null ? context.getApplicationContext() : requireContext().getApplicationContext();
-                SharedPrefHelper prefHelper = new SharedPrefHelper(appContext);
-                prefHelper.saveTimeLimitValue(0);
-                prefHelper.saveTimeActivateStatus(false);
-                prefHelper.setCheatChallengeValue(appContext,true);
-                // UI operations require attached fragment
-                if (fragment != null && fragment.isAdded()) {
-                    fragment.showMessage("Unlocked successfully!");
-                } else {
-                    // Fallback notification
-                    Toast.makeText(appContext, "Unlocked successfully!", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                if (fragment != null && fragment.isAdded()) {
-                    fragment.showMessage("Purchase failed. Try again.");
-                } else if (context != null) {
-                    Toast.makeText(context, "Purchase failed. Try again.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        return labels;
     }
-    private void showMessage(String msg) {
-               new AlertDialog.Builder(getContext())
-                .setMessage(msg)
-                .setPositiveButton("OK", null)
-                .show();
-
-
-    }
-
-
-
 }

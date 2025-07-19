@@ -1,3 +1,4 @@
+// SelectedAppsAdapter.java
 package com.genzopia.addiction.Launcher;
 
 import android.content.Context;
@@ -7,25 +8,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SelectedAppsAdapter extends RecyclerView.Adapter<SelectedAppsAdapter.ViewHolder> {
     private final Context context;
-    private ArrayList<String> selectedAppNames;
-    private ArrayList<String> selectedAppPackages;
-    private final ArrayList<String> fullAppNames;
-    private final ArrayList<String> fullAppPackages;
+    private final List<String> fullAppNames;        // backup of the current list (all or selected)
+    private final List<String> fullAppPackages;
+    private List<String> displayAppNames;           // what’s actually shown
+    private List<String> displayAppPackages;
     private final SharedPrefHelper sharedPrefHelper;
 
-    public SelectedAppsAdapter(Context context, ArrayList<String> selectedAppNames, ArrayList<String> selectedAppPackages) {
+    public SelectedAppsAdapter(Context context,
+                               List<String> initialNames,
+                               List<String> initialPackages) {
         this.context = context;
-        this.selectedAppNames = new ArrayList<>(selectedAppNames);
-        this.fullAppNames = new ArrayList<>(selectedAppNames);
-        this.selectedAppPackages = new ArrayList<>(selectedAppPackages);
-        this.fullAppPackages = new ArrayList<>(selectedAppPackages);
+        this.fullAppNames    = new ArrayList<>(initialNames);
+        this.fullAppPackages = new ArrayList<>(initialPackages);
+        this.displayAppNames    = new ArrayList<>(initialNames);
+        this.displayAppPackages = new ArrayList<>(initialPackages);
         this.sharedPrefHelper = new SharedPrefHelper(context);
     }
 
@@ -33,27 +38,25 @@ public class SelectedAppsAdapter extends RecyclerView.Adapter<SelectedAppsAdapte
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
+                .inflate(android.R.layout.simple_list_item_1,
+                        parent,
+                        false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String appName = selectedAppNames.get(position);
-        String packageName = selectedAppPackages.get(position);
+        String appName     = displayAppNames.get(position);
+        String packageName = displayAppPackages.get(position);
         holder.appNameTextView.setText(appName);
 
-        // Clear previous listeners
         holder.itemView.setOnClickListener(null);
         holder.itemView.setOnLongClickListener(null);
 
-        boolean isClickToOpen = sharedPrefHelper.isClickToOpen();
-
-        if (isClickToOpen) {
-            // Click to open app
+        boolean clickToOpen = sharedPrefHelper.isClickToOpen();
+        if (clickToOpen) {
             holder.itemView.setOnClickListener(v -> launchApp(packageName));
         } else {
-            // Long press to open app
             holder.itemView.setOnLongClickListener(v -> {
                 launchApp(packageName);
                 return true;
@@ -63,41 +66,55 @@ public class SelectedAppsAdapter extends RecyclerView.Adapter<SelectedAppsAdapte
 
     @Override
     public int getItemCount() {
-        return selectedAppNames.size();
+        return displayAppNames.size();
     }
 
-    private void launchApp(String packageName) {
-        Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
-        if (launchIntent != null) {
-            context.startActivity(launchIntent);
+    private void launchApp(String pkg) {
+        Intent intent = context.getPackageManager().getLaunchIntentForPackage(pkg);
+        if (intent != null) {
+            context.startActivity(intent);
         } else {
-            Log.e("SelectedAppsAdapter", "Unable to launch app: " + packageName);
+            Log.e("Adapter", "Cannot launch: " + pkg);
         }
     }
 
-    // Filter method to update the RecyclerView based on search query
+    /** Replace the adapter’s data with a new set of names/packages */
+    public void updateData(List<String> newNames, List<String> newPackages) {
+        fullAppNames.clear();
+        fullAppNames.addAll(newNames);
+        fullAppPackages.clear();
+        fullAppPackages.addAll(newPackages);
+
+        displayAppNames.clear();
+        displayAppNames.addAll(newNames);
+        displayAppPackages.clear();
+        displayAppPackages.addAll(newPackages);
+
+        notifyDataSetChanged();
+    }
+
+    /** Filter current display list by a search query */
     public void filter(String query) {
-        selectedAppNames.clear();
-        selectedAppPackages.clear();
+        displayAppNames.clear();
+        displayAppPackages.clear();
+
         if (query.isEmpty()) {
-            selectedAppNames.addAll(fullAppNames); // Reset to full list
-            selectedAppPackages.addAll(fullAppPackages); // Reset to full package list
+            displayAppNames.addAll(fullAppNames);
+            displayAppPackages.addAll(fullAppPackages);
         } else {
-            String lowerCaseQuery = query.toLowerCase();
+            String q = query.toLowerCase();
             for (int i = 0; i < fullAppNames.size(); i++) {
-                String appName = fullAppNames.get(i);
-                if (appName.toLowerCase().contains(lowerCaseQuery)) {
-                    selectedAppNames.add(appName);
-                    selectedAppPackages.add(fullAppPackages.get(i)); // Add corresponding package name
+                if (fullAppNames.get(i).toLowerCase().contains(q)) {
+                    displayAppNames.add(fullAppNames.get(i));
+                    displayAppPackages.add(fullAppPackages.get(i));
                 }
             }
         }
-        notifyDataSetChanged(); // Refresh the list
+        notifyDataSetChanged();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView appNameTextView;
-
         ViewHolder(View itemView) {
             super(itemView);
             appNameTextView = itemView.findViewById(android.R.id.text1);

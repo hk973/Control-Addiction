@@ -19,6 +19,7 @@ public class SharedPrefHelper {
 
     private static final String PREF_NAME = "AddictionPrefs";
     private static final String KEY_SELECTED_APPS = "selectedApp";
+    private static final String KEY_SELECTED_APPSS = "selectedApps";
     private static final String KEY_TIME_LIMIT = "timeLimit";
     private static final String KEY_TIME_ACTIVE = "timeActive";
     private static final String CLICK_TO_OPEN = "click_to_open";
@@ -177,6 +178,17 @@ public class SharedPrefHelper {
         Type type = new TypeToken<ArrayList<String>>() {}.getType();
         return new Gson().fromJson(jsonSelectedApps, type);
     }
+    public ArrayList<String> tempgetSelectedAppValue() {
+        String jsonSelectedApps = prefs.getString(KEY_SELECTED_APPSS, null);
+        Log.d("SharedPrefDebug", "Retrieved JSON: " + jsonSelectedApps);
+
+        if (jsonSelectedApps == null || jsonSelectedApps.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        return new Gson().fromJson(jsonSelectedApps, type);
+    }
 
     public ArrayList<String> appWithNoWarning() {
         ArrayList<String> selectedApp = new ArrayList<>();
@@ -256,6 +268,19 @@ public class SharedPrefHelper {
         editor.putBoolean(KEY_TIME_ACTIVE, isActive);
         editor.apply();
     }
+    public void set_selectedApps(ArrayList<String> selectedApps){
+        Gson gson = new Gson();
+        String jsonSelectedApps = gson.toJson(selectedApps);
+        editor.putString(KEY_SELECTED_APPS, jsonSelectedApps);
+        editor.apply();
+    }
+    public void temp_set_selectedApps(ArrayList<String> selectedApps){
+        Gson gson = new Gson();
+        String jsonSelectedApps = gson.toJson(selectedApps);
+        editor.putString(KEY_SELECTED_APPSS, jsonSelectedApps);
+        editor.apply();
+    }
+
 
     public void saveTimeLimitValue(long timeLimit) {
         editor.putLong(KEY_TIME_LIMIT, timeLimit);

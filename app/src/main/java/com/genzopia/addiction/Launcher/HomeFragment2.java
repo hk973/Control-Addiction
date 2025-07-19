@@ -23,6 +23,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -52,6 +54,7 @@ public class HomeFragment2 extends Fragment {
     private LinearLayout dsaInactiveLayout;
     private LinearLayout bottomBar;
     private ImageButton syncButton;
+    private SharedPrefHelper spp;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -71,9 +74,43 @@ public class HomeFragment2 extends Fragment {
         dsaInactiveLayout = view.findViewById(R.id.dsaInactiveLayout);
         bottomBar = view.findViewById(R.id.bottomBar);
         syncButton = view.findViewById(R.id.syncButton);
+        spp = new SharedPrefHelper(getContext());
 
         // Setup sync button
-        syncButton.setOnClickListener(v -> fetchLeetcodeScore());
+        syncButton.setOnClickListener(v -> {
+
+            long initialScore = spp.get_current_leetcode();
+
+            if (spp.isDSAChallengeActive()) {
+                fetchLeetcodeScore(new LeetcodeScoreCallback() {
+                    @Override
+                    public void onSuccess(int fetchedScore) {
+                        if (fetchedScore > initialScore) {
+                            // ✅ Do something on improvement
+                            Toast.makeText(getContext(), "Score improved! 🎉", Toast.LENGTH_SHORT).show();
+                            long diff=fetchedScore-initialScore;
+                            long secs=diff*spp.getPerQuestionTime();
+                            long remaingsec=spp.getDSAChallengeRemainingTime();
+                            spp.setDSAChallengeRemainingTime(remaingsec+secs);
+                            spp.set_current_leetcode(fetchedScore);
+
+
+                        } else {
+                            // ❌ No improvement
+                            Toast.makeText(getContext(), "No improvement in score.", Toast.LENGTH_SHORT).show();
+                        }
+                        leetcodeScoreText.setText("LeetCode Score: " + fetchedScore);
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
+                        leetcodeScoreText.setText("Error");
+                    }
+                });
+            }
+        });
+
         // Check DSA challenge status
         checkDsaChallengeStatus();
         ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
@@ -108,9 +145,20 @@ public class HomeFragment2 extends Fragment {
             setupChallengeActiveState();
         } else {
             // Show challenge active UI
-            timerText.setVisibility(View.GONE);
+            timerText.setVisibility(View.VISIBLE);
             dsaInactiveLayout.setVisibility(View.VISIBLE);
-            fetchLeetcodeScore();
+            leetcodeScoreText.setText("Loading");
+            fetchLeetcodeScore(new LeetcodeScoreCallback() {
+                @Override
+                public void onSuccess(int fetchedScore) {
+                    leetcodeScoreText.setText("LeetCode Score: " + fetchedScore);
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    leetcodeScoreText.setText("Fetching failed ...");
+                }
+            });
         }
     }
 
@@ -137,13 +185,12 @@ public class HomeFragment2 extends Fragment {
         }
     }
 
-    private void fetchLeetcodeScore() {
-        leetcodeScoreText.setText("Loading...");
+    private void fetchLeetcodeScore(LeetcodeScoreCallback callback) {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
-        String username = sp.getLeetCodeUsername(); // Implement this in SharedPrefHelper
+        String username = sp.getLeetCodeUsername();
 
         if (username == null || username.isEmpty()) {
-            leetcodeScoreText.setText("Username not set");
+            callback.onFailure("Username not set");
             return;
         }
 
@@ -170,13 +217,13 @@ public class HomeFragment2 extends Fragment {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                updateScoreText("Network error");
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Unable to fetch data. Please check your internet connection."));
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    updateScoreText("Server error");
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Server error"));
                     return;
                 }
 
@@ -199,14 +246,24 @@ public class HomeFragment2 extends Fragment {
                             }
                         }
                     }
-                    updateScoreText(totalSolved >= 0 ? "Score: " + totalSolved : "User not found");
+
+                    int finalScore = totalSolved;
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        if (finalScore >= 0) {
+                            callback.onSuccess(finalScore);
+                        } else {
+                            callback.onFailure("User not found");
+                        }
+                    });
+
                 } catch (Exception e) {
                     Log.e("LeetCode", "Parsing error", e);
-                    updateScoreText("Error loading data");
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error parsing data"));
                 }
             }
         });
     }
+
 
     private void updateScoreText(String text) {
         new Handler(Looper.getMainLooper()).post(() ->
@@ -224,7 +281,25 @@ public class HomeFragment2 extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if( spp.isDSAChallengeActive()){
+            startRealtimeUpdatesdsa();
+        }else{
+        startRealtimeUpdates();}
     }
+
+    private void startRealtimeUpdatesdsa() {
+        handler = new Handler();
+        updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                updateCountdowndsa();
+                handler.postDelayed(this, 1000);
+            }
+        };
+        handler.post(updateRunnable);
+    }
+
+
 
     @Override
     public void onPause() {
@@ -254,6 +329,21 @@ public class HomeFragment2 extends Fragment {
         SharedPrefHelper sp = new SharedPrefHelper(requireContext());
         long remaintime = sp.getRemainingTimeMillis();
         timerText.setText(formatTime(remaintime / 1000));
+    }
+    private void updateCountdowndsa() {
+
+        long remaintime=spp.getDSAChallengeRemainingTime()-1L;
+        if(remaintime>=0){
+        spp.setDSAChallengeRemainingTime(remaintime);
+        timerText.setText(formatTimedsa(remaintime));
+        }
+    }
+
+    private String formatTimedsa(long totalSeconds) {
+        long hours = totalSeconds / 3600;
+        long minutes = (totalSeconds % 3600) / 60;
+        long seconds = totalSeconds % 60;
+        return String.format("App will be non accessable after: %02d:%02d:%02d", hours, minutes, seconds);
     }
 
     public String formatTime(long totalSeconds) {
@@ -288,4 +378,9 @@ public class HomeFragment2 extends Fragment {
 
 
     }
+    public interface LeetcodeScoreCallback {
+        void onSuccess(int fetchedScore);
+        void onFailure(String errorMessage); // To handle no internet/server error
+    }
+
 }

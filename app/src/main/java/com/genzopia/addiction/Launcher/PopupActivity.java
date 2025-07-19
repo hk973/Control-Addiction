@@ -121,6 +121,8 @@ public class PopupActivity extends AppCompatActivity {
                 SharedPrefHelper prefHelper = new SharedPrefHelper(getApplicationContext());
                 prefHelper.saveTimeLimitValue(0);
                 prefHelper.saveTimeActivateStatus(false);
+                prefHelper.setDSAChallengeRemainingTime(0);
+                prefHelper.setDSAChallengeActive(false);
                 showMessage("Unlocked successfully!");
             } else {
                 showMessage("Purchase failed. Try again.");

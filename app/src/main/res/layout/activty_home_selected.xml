@@ -42,7 +42,6 @@
         android:text="Time Remaining: 00:00:00"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/dateDisplay"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -54,9 +53,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/dateDisplay"
+        app:layout_constraintTop_toBottomOf="@id/textView_time"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
