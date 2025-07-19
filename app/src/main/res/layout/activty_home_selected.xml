@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Time Display -->
+    <!-- Common Top Section -->
     <TextClock
         android:id="@+id/timeDisplay"
         android:layout_width="wrap_content"
@@ -15,13 +16,12 @@
         android:format24Hour="HH:mm"
         android:textSize="48sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/dateDisplay"
+        app:layout_constraintBottom_toTopOf="@+id/bottomBar"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <!-- Date and Day Display -->
     <TextClock
         android:id="@+id/dateDisplay"
         android:layout_width="wrap_content"
@@ -32,19 +32,62 @@
         android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/timeDisplay"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0" />
+        app:layout_constraintTop_toBottomOf="@id/timeDisplay" />
+
+    <!-- DSA Challenge Active UI -->
+    <TextView
+        android:id="@+id/textView_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Time Remaining: 00:00:00"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/dateDisplay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- DSA Challenge Inactive UI -->
+    <LinearLayout
+        android:id="@+id/dsaInactiveLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/dateDisplay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/leetcodeScoreText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LeetCode Score: Loading..."
+            android:textSize="20sp"
+            android:textStyle="bold"
+           />
+
+        <ImageButton
+            android:id="@+id/syncButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_sync"
+            android:text="Sync Score"
+
+            />
+    </LinearLayout>
 
     <!-- Bottom Shortcuts -->
     <LinearLayout
+        android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="16dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Phone Shortcut -->
         <ImageButton
             android:id="@+id/phoneButton"
             android:layout_width="56dp"
@@ -59,29 +102,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1" />
 
-        <!-- Camera Shortcut -->
         <ImageView
-
-            android:padding="10dp"
             android:id="@+id/cameraButton"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:src="@drawable/ic_plus"
-
-            />
-
+            android:padding="10dp"
+            android:src="@drawable/ic_plus" />
     </LinearLayout>
-
-    <TextView
-        android:layout_margin="12dp"
-        android:id="@+id/textView_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Time Remaining : 00:05:49"
-        android:textSize="18dp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/dateDisplay"
-        app:layout_constraintStart_toStartOf="@+id/dateDisplay"
-        app:layout_constraintTop_toBottomOf="@+id/dateDisplay" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

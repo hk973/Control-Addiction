@@ -1,10 +1,9 @@
 package com.genzopia.addiction.Launcher;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
-import android.graphics.Color;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,11 +32,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class InfoDsaDialog extends Dialog {
     private final MainFragment hostFragment;
     private boolean isProfileVerified = false;
+    int leetcodescore=0;
 
     public InfoDsaDialog(@NonNull MainFragment fragment) {
         super(fragment.requireContext());
@@ -89,6 +91,7 @@ public class InfoDsaDialog extends Dialog {
                     Toast.makeText(getContext(),
                             "LeetCode solved count: " + score,
                             Toast.LENGTH_SHORT).show();
+                     leetcodescore = score;
                 } else {
                     Toast.makeText(getContext(),
                             "Wrong profile name entered",
@@ -164,8 +167,24 @@ public class InfoDsaDialog extends Dialog {
     }
 
     private void startChallenge(String username, int hoursPerProblem) {
-        // TODO: implement start logic
+        executeMainLogic(hoursPerProblem,username);
     }
+    private ArrayList<String> getAllLaunchableAppPackageNames() {
+        ArrayList<String> packageNameList = new ArrayList<>();
+
+        PackageManager pm = getContext().getPackageManager();
+        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+
+        for (ApplicationInfo app : apps) {
+            // Only include apps that can be launched (i.e., have a launcher intent)
+            if (pm.getLaunchIntentForPackage(app.packageName) != null) {
+                packageNameList.add(app.packageName);
+            }
+        }
+
+        return packageNameList;
+    }
+
 
     private void fetchLeetcodeScore(String username, LeetcodeScoreCallback callback) {
         OkHttpClient client = new OkHttpClient.Builder()
@@ -237,4 +256,15 @@ public class InfoDsaDialog extends Dialog {
     public interface LeetcodeScoreCallback {
         void onScoreFetched(int score);
     }
+    private void executeMainLogic(long challengeHours, String username) {
+     SharedPrefHelper sp=new SharedPrefHelper(getContext());
+     sp.setDSAChallengeActive(true);
+     sp.set_current_leetcode(leetcodescore);
+     sp.setDSAChallengeRemainingTime(0);
+     sp.setPerQuestionTime(challengeHours*60L*60L);
+     sp.setLeetCodeUsername(username);
+     hostFragment.launchDeviceCredentialVerification(30);
+    }
+
+
 }

@@ -389,16 +389,40 @@ public class SharedPrefHelper {
     public boolean isDSAChallengeActive() {
         return prefs.getBoolean("dsa_challenge_active", false);
     }
-
-    public void setRemainingMinutes(int minutes) {
-        prefs.edit().putInt("remaining_minutes", minutes).apply();
+    public void set_current_leetcode(long score){
+        prefs.edit().putLong("leetcode_score",score).apply();
+    }
+    public long get_current_leetcode(){
+        return prefs.getLong("leetcode_score",-1);
+    }
+    // Store LeetCode username
+    public void setLeetCodeUsername(String username) {
+        prefs.edit().putString("leetcode_username", username).apply();
     }
 
-    public int getRemainingMinutes() {
-        return prefs.getInt("remaining_minutes", 0);
+    // Retrieve LeetCode username
+    public String getLeetCodeUsername() {
+        return prefs.getString("leetcode_username", null);
+    }
+    // Store DSA Challenge remaining time (in seconds)
+    public void setDSAChallengeRemainingTime(long seconds) {
+        prefs.edit().putLong("dsa_challenge_remaining_time", seconds).apply();
     }
 
+    // Retrieve DSA Challenge remaining time (in seconds)
+    public long getDSAChallengeRemainingTime() {
+        return prefs.getLong("dsa_challenge_remaining_time", 0);
+    }
 
+    // Store time allocated per question (in seconds)
+    public void setPerQuestionTime(long seconds) {
+        prefs.edit().putLong("per_question_time", seconds).apply();
+    }
+
+    // Retrieve time allocated per question (in seconds)
+    public long getPerQuestionTime() {
+        return prefs.getLong("per_question_time", 0);
+    }
 
 
 
