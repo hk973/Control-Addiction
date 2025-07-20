@@ -49,7 +49,7 @@ public class TermsFragment extends BasePermissionFragment {
         webView.loadUrl("file:///android_asset/tandc.html");
 
         // Set position
-        position = 1;
+        position = 2;
 
         // Set listeners
         termsCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {

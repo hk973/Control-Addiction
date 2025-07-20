@@ -18,6 +18,7 @@ import com.genzopia.addiction.Launcher.BaseActivity;
 import com.genzopia.addiction.Launcher.MainContainerActivity;
 import com.genzopia.addiction.R;
 import com.genzopia.addiction.Launcher.SharedPrefHelper;
+import com.genzopia.addiction.Launcher.permission.OverlayPermissionFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,8 @@ public class MainActivity extends BaseActivity implements PermissionListener {
     private void setupViewPager() {
         pagerAdapter = new PermissionPagerAdapter(getSupportFragmentManager());
 
-        // Add only the needed fragments (3 fragments now)
+        // Add all fragments in order
+        pagerAdapter.addFragment(OverlayPermissionFragment.newInstance());
         pagerAdapter.addFragment(AccessibilityPermissionFragment.newInstance());
         pagerAdapter.addFragment(TermsFragment.newInstance());
         pagerAdapter.addFragment(ThemeSelectionFragment.newInstance());
@@ -87,13 +89,13 @@ public class MainActivity extends BaseActivity implements PermissionListener {
 
 
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(4); // Keep all fragments in memory
+        viewPager.setOffscreenPageLimit(5); // Keep all fragments in memory
     }
 
     private void setupDots() {
-        dots = new View[4]; // Only 3 dots now
+        dots = new View[5]; // 5 dots now
 
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i <= 4; i++) {
             dots[i] = new View(this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     getResources().getDimensionPixelSize(R.dimen.dot_width),
