@@ -150,7 +150,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
     }
 
     private boolean isAppInfoScreen(AccessibilityNodeInfo rootNode, String yourAppName) {
-        boolean foundDangerousAction = containsKeyword(rootNode, "uninstall", "force stop","clear data","clear cache");
+        boolean foundDangerousAction = containsKeyword(rootNode, "uninstall", "force stop","clear data","clear cache","accessibility","talkback");
         boolean foundAppName = containsKeyword(rootNode, yourAppName);
         Log.e("testinfoscreen", "action=" + foundDangerousAction + " appname=" + foundAppName);
         return foundAppName & foundDangerousAction;
