@@ -8,6 +8,7 @@
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,13 @@
         <activity
             android:name=".Launcher.Rewards_list"
             android:exported="false" />
+        <service
+            android:name=".Launcher.OverlayService"
+            android:exported="false"
+            android:enabled="true"
+            android:permission="android.permission.SYSTEM_ALERT_WINDOW" />
+        <activity android:name=".Launcher.BillingActivity" />
+
 
         <activity
             android:name=".Launcher.ChallengeReward"
@@ -42,10 +50,7 @@
 
 
         </activity>
-        <activity
-            android:name=".Alarm.Alarm_main_activity"
-            android:exported="true">
-        </activity>
+
 
         <activity
             android:name=".Launcher.MainContainerActivity"

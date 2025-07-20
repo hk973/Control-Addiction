@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
@@ -201,6 +203,20 @@ public class NotificationBarDetectorService extends AccessibilityService {
     }
 
     private void triggerBlockingPopup() {
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (Settings.canDrawOverlays(this)) {
+                try {
+                    Intent intent = new Intent(this, OverlayService.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startService(intent);
+                } catch (Exception e) {
+                    Log.e("PopupTriggerError", "Failed to show overlay: " + e.getMessage(), e);
+                }
+            } else {
+                // No overlay permission — silently skip
+                Log.w("PopupTrigger", "Overlay permission not granted. Skipping popup.");
+            }
+        });
         startActivity(new Intent(this, PopupActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
