@@ -1,19 +1,19 @@
-// SelectedAppsFragment.java
 package com.genzopia.addiction.Launcher;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,13 +21,11 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.EditText;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
@@ -37,7 +35,6 @@ import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.SkuDetails;
 import com.android.billingclient.api.SkuDetailsParams;
 import com.genzopia.addiction.R;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,14 +98,25 @@ public class SelectedAppsFragment extends Fragment {
 
         // 5) fetch all installed apps once, in background
         new Thread(() -> {
-            List<ApplicationInfo> apps = packageManager.getInstalledApplications(0);
-            for (ApplicationInfo ai : apps) {
-                allPackages.add(ai.packageName);
-                allAppNames.add(packageManager.getApplicationLabel(ai).toString());
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(intent, 0);
+
+            allAppNames.clear();
+            allPackages.clear();
+
+            for (ResolveInfo resolveInfo : resolveInfos) {
+                ActivityInfo activityInfo = resolveInfo.activityInfo;
+                String packageName = activityInfo.packageName;
+                String appName = resolveInfo.loadLabel(packageManager).toString();
+
+                allPackages.add(packageName);
+                allAppNames.add(appName);
             }
-            // now snap into UI
+
             requireActivity().runOnUiThread(this::refreshList);
         }).start();
+
 
         // 6) hook up search bar
         searchBar.addTextChangedListener(new TextWatcher() {

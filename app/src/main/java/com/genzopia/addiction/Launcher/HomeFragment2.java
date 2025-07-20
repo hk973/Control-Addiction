@@ -89,7 +89,7 @@ public class HomeFragment2 extends Fragment {
                             // ✅ Do something on improvement
                             Toast.makeText(getContext(), "Score improved! 🎉", Toast.LENGTH_SHORT).show();
                             long diff=fetchedScore-initialScore;
-                            long milisecs=diff*spp.getPerQuestionTime()*1000L;
+                            long milisecs=diff*spp.getPerQuestionTime();
                             long remaingsec=spp.getDSAChallengeRemainingTime();
                             spp.setDSAChallengeRemainingTime(remaingsec+milisecs);
                             spp.set_current_leetcode(fetchedScore);
