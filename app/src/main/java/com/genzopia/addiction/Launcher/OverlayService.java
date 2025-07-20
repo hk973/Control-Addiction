@@ -1,19 +1,15 @@
 package com.genzopia.addiction.Launcher;
 
-import android.app.Activity;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.*;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.billingclient.api.*;
@@ -27,8 +23,6 @@ public class OverlayService extends Service {
     private WindowManager windowManager;
     private View overlayView;
 
-    private BillingClient billingClient;
-    private SkuDetails targetSkuDetails;
 
     @Override
     public void onCreate() {
