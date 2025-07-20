@@ -260,9 +260,10 @@ public class InfoDsaDialog extends Dialog {
      SharedPrefHelper sp=new SharedPrefHelper(getContext());
      sp.setDSAChallengeActive(true);
      sp.set_current_leetcode(leetcodescore);
-     sp.setDSAChallengeRemainingTime(0);
-     sp.setPerQuestionTime(challengeHours*60L*60L);
+     sp.setDSAChallengeRemainingTime(System.currentTimeMillis());
+     sp.setPerQuestionTime(challengeHours*60L*60L*1000L);
      sp.setLeetCodeUsername(username);
+     sp.settimmerzero(true);
      hostFragment.launchDeviceCredentialVerification(30);
     }
 

@@ -89,9 +89,9 @@ public class HomeFragment2 extends Fragment {
                             // ✅ Do something on improvement
                             Toast.makeText(getContext(), "Score improved! 🎉", Toast.LENGTH_SHORT).show();
                             long diff=fetchedScore-initialScore;
-                            long secs=diff*spp.getPerQuestionTime();
+                            long milisecs=diff*spp.getPerQuestionTime()*1000L;
                             long remaingsec=spp.getDSAChallengeRemainingTime();
-                            spp.setDSAChallengeRemainingTime(remaingsec+secs);
+                            spp.setDSAChallengeRemainingTime(remaingsec+milisecs);
                             spp.set_current_leetcode(fetchedScore);
 
 
@@ -331,20 +331,32 @@ public class HomeFragment2 extends Fragment {
         timerText.setText(formatTime(remaintime / 1000));
     }
     private void updateCountdowndsa() {
+        long now = System.currentTimeMillis();
+        long endTime = spp.getDSAChallengeRemainingTime();
+        long remainingMillis = endTime - now;
 
-        long remaintime=spp.getDSAChallengeRemainingTime()-1L;
-        if(remaintime>=0){
-        spp.setDSAChallengeRemainingTime(remaintime);
-        timerText.setText(formatTimedsa(remaintime));
+        if (remainingMillis > 0) {
+            timerText.setText(formatTimeDSA(remainingMillis));
+            spp.settimmerzero(false);
+        } else {
+            timerText.setText("00:00");
+            spp.setDSAChallengeRemainingTime(System.currentTimeMillis());
+            spp.settimmerzero(true);
         }
     }
 
-    private String formatTimedsa(long totalSeconds) {
-        long hours = totalSeconds / 3600;
-        long minutes = (totalSeconds % 3600) / 60;
-        long seconds = totalSeconds % 60;
-        return String.format("App will be non accessable after: %02d:%02d:%02d", hours, minutes, seconds);
+
+    private String formatTimeDSA(long millis) {
+        long seconds = millis / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+
+        seconds %= 60;
+        minutes %= 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
+
 
     public String formatTime(long totalSeconds) {
         long hours = totalSeconds / 3600;

@@ -268,9 +268,13 @@ public class SharedPrefHelper {
         editor.putBoolean(KEY_TIME_ACTIVE, isActive);
         editor.apply();
     }
-    public void set_selectedApps(ArrayList<String> selectedApps){
+    public void set_selectedApps(ArrayList<String> selectedApps) {
+        // Clone the list to avoid ConcurrentModificationException
+        ArrayList<String> safeList = new ArrayList<>(selectedApps);
+
         Gson gson = new Gson();
-        String jsonSelectedApps = gson.toJson(selectedApps);
+        String jsonSelectedApps = gson.toJson(safeList);
+
         editor.putString(KEY_SELECTED_APPS, jsonSelectedApps);
         editor.apply();
     }
@@ -447,6 +451,13 @@ public class SharedPrefHelper {
     // Retrieve time allocated per question (in seconds)
     public long getPerQuestionTime() {
         return prefs.getLong("per_question_time", 0);
+    }
+
+    public boolean istimmerzero(){
+        return prefs.getBoolean("is_timmer_zero", true);
+    }
+    public void settimmerzero(boolean b){
+       prefs.edit().putBoolean("is_timmer_zero",b).apply();
     }
 
 

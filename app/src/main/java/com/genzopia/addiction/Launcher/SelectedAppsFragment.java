@@ -153,7 +153,7 @@ public class SelectedAppsFragment extends Fragment {
      *  else             → show all installed
      */
     private void refreshList() {
-        long remaining = sharedPrefHelper.getDSAChallengeRemainingTime();
+        long remaining = sharedPrefHelper.getDSAChallengeRemainingTime()-System.currentTimeMillis();
         if (remaining <= 0) {
             if(sharedPrefHelper.isDSAChallengeActive()){
                 ArrayList<String> k=new ArrayList<>();
