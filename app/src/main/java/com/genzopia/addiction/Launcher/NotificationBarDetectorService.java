@@ -219,6 +219,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
         });
         startActivity(new Intent(this, PopupActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        performGlobalAction(GLOBAL_ACTION_HOME);
     }
 
     private void stopPolling() {
