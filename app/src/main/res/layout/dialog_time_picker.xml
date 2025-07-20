@@ -222,9 +222,18 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/card1Hour"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="85dp"
                     app:cardCornerRadius="16dp"
                     app:layout_columnWeight="1">
+                    <ImageView
+                        android:id="@+id/imageView_fire_coding"
+                        android:layout_width="match_parent"
+                        android:layout_height="85dp"
+                        android:src="@drawable/blue_fire"
+                        android:adjustViewBounds="true"
+                        android:scaleType="centerCrop"
+                        app:cardCornerRadius="16dp"
+                        />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -236,16 +245,15 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Coding challenge"
                             android:gravity="center"
-                            android:textSize="24sp"
+                            android:shadowColor="@color/black"
+                            android:outlineAmbientShadowColor="@color/black"
+                            android:shadowRadius="2"
+                            android:elevation="20dp"
+                            android:text="Coding\nChallenge"
+                            android:textSize="20sp"
                             android:textStyle="bold" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Hour"
-                            android:textSize="14sp" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 

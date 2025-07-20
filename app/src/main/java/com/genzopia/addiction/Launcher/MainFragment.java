@@ -378,6 +378,8 @@ public class MainFragment extends Fragment {
         CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         ImageView imageView_fire=dialogView.findViewById(R.id.imageView_fire);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"})
+        ImageView imageView_fire_coding=dialogView.findViewById(R.id.imageView_fire_coding);
         //code for grew mode
         SharedPrefHelper ss=new SharedPrefHelper(getContext());
          if(ss.isGrayModeEnabled()) {
@@ -390,6 +392,7 @@ public class MainFragment extends Fragment {
              matrix.setSaturation(0); // 0 means grayscale
              ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
              imageView_fire.setColorFilter(filter);
+             imageView_fire_coding.setColorFilter(filter);
          }else{
              buttonSet.setBackgroundColor(Color.parseColor("#FF5722"));
              // Set progress color (#FF5722 - Orange)
@@ -401,6 +404,10 @@ public class MainFragment extends Fragment {
                 .asGif()
                 .load(R.drawable.fire)
                 .into(imageView_fire);
+        Glide.with(this)
+                .asGif()
+                .load(R.drawable.blue_fire)
+                .into(imageView_fire_coding);
 
 
 
