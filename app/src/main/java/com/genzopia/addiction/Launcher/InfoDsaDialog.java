@@ -89,9 +89,9 @@ public class InfoDsaDialog extends Dialog {
                             0, 0, R.drawable.ic_check_circle, 0
                     );
                     Toast.makeText(getContext(),
-                            "LeetCode solved count: " + score,
+                            "LeetCode solved count: " + score/2,
                             Toast.LENGTH_SHORT).show();
-                     leetcodescore = score;
+                     leetcodescore = score/2;
                 } else {
                     Toast.makeText(getContext(),
                             "Wrong profile name entered",

@@ -247,7 +247,7 @@ public class HomeFragment2 extends Fragment {
                         }
                     }
 
-                    int finalScore = totalSolved;
+                    int finalScore = totalSolved/2;
                     new Handler(Looper.getMainLooper()).post(() -> {
                         if (finalScore >= 0) {
                             callback.onSuccess(finalScore);
