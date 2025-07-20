@@ -78,6 +78,12 @@ public class OverlayService extends Service {
         Button okButton = overlayView.findViewById(R.id.ok_button);
         okButton.setOnClickListener(v -> {
             stopSelf();
+            NotificationBarDetectorService service = NotificationBarDetectorService.getInstance();
+            if (service != null) {
+                service.goToHomeScreen();
+            } else {
+                Toast.makeText(this, "AccessibilityService not running", Toast.LENGTH_SHORT).show();
+            }
             Intent intent = new Intent(this, MainContainerActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);

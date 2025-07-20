@@ -35,7 +35,7 @@ public class PopupActivity extends AppCompatActivity {
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("App Usage Alert")
-                .setMessage("You cannot use this app or feature when you are are either in challenge mode or lock mode .")
+                .setMessage("You cannot Uninstall this App when on Lock or Challenge Mode")
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {
                     startActivity(new Intent(PopupActivity.this, MainContainerActivity.class));

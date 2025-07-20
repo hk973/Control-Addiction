@@ -201,6 +201,11 @@ public class NotificationBarDetectorService extends AccessibilityService {
         mAppValidityCache.put(pkg, isValid);
         return isValid;
     }
+    private static NotificationBarDetectorService instance;
+
+    public static NotificationBarDetectorService getInstance() {
+        return instance;
+    }
 
     private void triggerBlockingPopup() {
         new Handler(Looper.getMainLooper()).post(() -> {
@@ -219,7 +224,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
         });
         startActivity(new Intent(this, PopupActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        performGlobalAction(GLOBAL_ACTION_HOME);
+
     }
 
     private void stopPolling() {
@@ -228,7 +233,9 @@ public class NotificationBarDetectorService extends AccessibilityService {
         }
         isPollingAppInfo = false;
     }
-
+    public void goToHomeScreen() {
+        performGlobalAction(GLOBAL_ACTION_HOME);
+    }
     @Override
     protected void onServiceConnected() {
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
