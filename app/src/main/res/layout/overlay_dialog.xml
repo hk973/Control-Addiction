@@ -10,7 +10,7 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-       android:background="@drawable/bg_gradient"
+       android:background="@drawable/bg_dialog"
         android:orientation="vertical"
         android:padding="20dp">
 
@@ -18,16 +18,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Warning"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
             android:gravity="center"/>
 
         <TextView
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="You are not allowed to use this app."
+            android:text="You are not allowed to use this feature."
             android:gravity="center"
             android:layout_marginTop="10dp"/>
 
@@ -36,7 +36,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OK"
-            android:backgroundTint="@color/primary_500"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/black"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"/>
     </LinearLayout>
