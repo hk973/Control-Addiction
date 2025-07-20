@@ -19,9 +19,14 @@ public class PopupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        initBillingClient();
+        SharedPrefHelper sp=new SharedPrefHelper(this) ;
 
+        if(sp.isDSAChallengeActive()||sp.getTimeActivateStatus()){
+        initBillingClient();
         createAndShowMainDialog();
+        }
+
+
     }
 
     private void createAndShowMainDialog() {
@@ -30,7 +35,7 @@ public class PopupActivity extends AppCompatActivity {
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("App Usage Alert")
-                .setMessage("You cannot use this app as it is not in the approved list.")
+                .setMessage("You cannot use this app or feature when you are are either in challenge mode or lock mode .")
                 .setCancelable(false)
                 .setPositiveButton("OK", (dialog, which) -> {
                     startActivity(new Intent(PopupActivity.this, MainContainerActivity.class));
