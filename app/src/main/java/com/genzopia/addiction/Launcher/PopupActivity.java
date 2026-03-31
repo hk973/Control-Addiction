@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.android.billingclient.api.*;
@@ -14,6 +15,7 @@ public class PopupActivity extends AppCompatActivity {
 
     private BillingClient billingClient;
     private SkuDetails targetSkuDetails;
+    private ProductDetails targetProductDetails;
     private AlertDialog mainDialog; // Reference to main dialog
 
     @Override
@@ -72,44 +74,51 @@ public class PopupActivity extends AppCompatActivity {
 
     private void initBillingClient() {
         billingClient = BillingClient.newBuilder(this)
-                .enablePendingPurchases()
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .setListener((billingResult, purchases) -> {
-                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
-                        for (Purchase purchase : purchases) {
-                            handlePurchase(purchase);
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK
+                            && purchases != null) {
+                        for (Purchase p : purchases) {
+                            handlePurchase(p);
                         }
                     }
                 })
                 .build();
 
         billingClient.startConnection(new BillingClientStateListener() {
-            @Override
-            public void onBillingSetupFinished(BillingResult billingResult) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+            @Override public void onBillingSetupFinished(@NonNull BillingResult br) {
+                if (br.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     queryProductDetails();
                 }
             }
-
-            @Override
-            public void onBillingServiceDisconnected() {
-                // Retry connection if needed
+            @Override public void onBillingServiceDisconnected() {
+                // retry logic if you want
             }
         });
     }
-
     private void queryProductDetails() {
-        List<String> skuList = List.of("unlock_discipline_lock_v2");
+        List<QueryProductDetailsParams.Product> productList = List.of(
+                QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId("unlock_discipline_lock_v2")
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+        );
 
-        SkuDetailsParams params = SkuDetailsParams.newBuilder()
-                .setSkusList(skuList)
-                .setType(BillingClient.SkuType.INAPP)
+        QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+                .setProductList(productList)
                 .build();
 
-        billingClient.querySkuDetailsAsync(params, (billingResult, skuDetailsList) -> {
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && skuDetailsList != null) {
-                for (SkuDetails skuDetails : skuDetailsList) {
-                    if (skuDetails.getSku().equals("unlock_discipline_lock_v2")) {
-                        targetSkuDetails = skuDetails;
+        // ✅ Anonymous class avoids lambda type-inference ambiguity entirely
+        billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
+            @Override
+            public void onProductDetailsResponse(@NonNull BillingResult billingResult,
+                                                 @NonNull QueryProductDetailsResult result) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    for (ProductDetails details : result.getProductDetailsList()) {
+                        if ("unlock_discipline_lock_v2".equals(details.getProductId())) {
+                            targetProductDetails = details;
+                            break;
+                        }
                     }
                 }
             }

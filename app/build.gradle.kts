@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.genzopia.addiction"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.genzopia.addiction"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 19
         versionName = "10.9"
 
@@ -33,8 +33,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
 
     buildFeatures {
@@ -60,24 +62,24 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.gson)
-    implementation("androidx.viewpager2:viewpager2:1.0.0")
-    implementation("com.github.bumptech.glide:glide:4.12.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
-    implementation("com.android.billingclient:billing:7.1.1")
-    implementation("com.google.android.play:review:2.0.2")
-    implementation("com.google.android.play:app-update:2.1.0")
-    implementation("androidx.lifecycle:lifecycle-process:2.6.2")
+    implementation(libs.viewpager2)
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
+    implementation(libs.billing)
+    implementation(libs.review)
+    implementation(libs.app.update)
+    implementation(libs.lifecycle.process)
 
     // ✅ Jetpack Compose dependencies
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("androidx.compose.ui:ui:1.6.5")
-    implementation("androidx.compose.material:material:1.6.5")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.6.5")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.6.5")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.5")
+    implementation(libs.activity.compose)
+    implementation(libs.ui)
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 // webscrapping tool
-    implementation ("org.jsoup:jsoup:1.16.1")
-    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation ("org.json:json:20210307")
+    implementation (libs.jsoup)
+    implementation (libs.okhttp)
+    implementation (libs.json)
 
 }

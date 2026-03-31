@@ -3,6 +3,10 @@ package com.genzopia.addiction.Launcher;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+
+import com.android.billingclient.api.PendingPurchasesParams;
+import com.android.billingclient.api.ProductDetailsResponseListener;
+import com.android.billingclient.api.QueryProductDetailsResult;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -31,9 +35,9 @@ import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ConsumeParams;
+import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.QueryProductDetailsParams;
 import com.genzopia.addiction.R;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -49,7 +53,7 @@ public class SelectedAppsFragment extends Fragment {
 
     // Billing
     private BillingClient billingClient;
-    private SkuDetails targetSkuDetails;
+    private ProductDetails targetProductDetails;
 
     // in‑memory lists
     private final List<String> allPackages      = new ArrayList<>();
@@ -182,7 +186,7 @@ public class SelectedAppsFragment extends Fragment {
 
     private void initBillingClient() {
         billingClient = BillingClient.newBuilder(getContext())
-                .enablePendingPurchases()
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .setListener((billingResult, purchases) -> {
                     if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK
                             && purchases != null) {
@@ -206,27 +210,36 @@ public class SelectedAppsFragment extends Fragment {
     }
 
     private void queryProductDetails() {
-        List<String> skuList = List.of("unlock_discipline_lock_v2");
-        SkuDetailsParams params = SkuDetailsParams.newBuilder()
-                .setSkusList(skuList)
-                .setType(BillingClient.SkuType.INAPP)
+        List<QueryProductDetailsParams.Product> productList = List.of(
+                QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId("unlock_discipline_lock_v2")
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+        );
+
+        QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+                .setProductList(productList)
                 .build();
 
-        billingClient.querySkuDetailsAsync(params, (br, list) -> {
-            if (br.getResponseCode() == BillingClient.BillingResponseCode.OK
-                    && list != null) {
-                for (SkuDetails d : list) {
-                    if ("unlock_discipline_lock_v2".equals(d.getSku())) {
-                        targetSkuDetails = d;
-                        break;
+        // ✅ Anonymous class avoids lambda type-inference ambiguity entirely
+        billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
+            @Override
+            public void onProductDetailsResponse(@NonNull BillingResult billingResult,
+                                                 @NonNull QueryProductDetailsResult result) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    for (ProductDetails details : result.getProductDetailsList()) {
+                        if ("unlock_discipline_lock_v2".equals(details.getProductId())) {
+                            targetProductDetails = details;
+                            break;
+                        }
                     }
                 }
             }
         });
     }
-
     private void handlePurchase(Purchase purchase) {
-        if (!purchase.getSkus().contains("unlock_discipline_lock_v2")) return;
+        // ✅ Fix: use purchase.getProducts() instead of purchase.getSkus()
+        if (!purchase.getProducts().contains("unlock_discipline_lock_v2")) return;
 
         ConsumeParams cp = ConsumeParams.newBuilder()
                 .setPurchaseToken(purchase.getPurchaseToken())
@@ -258,7 +271,6 @@ public class SelectedAppsFragment extends Fragment {
             }
         });
     }
-
     private void showMessage(String msg) {
         new AlertDialog.Builder(getContext())
                 .setMessage(msg)
@@ -294,11 +306,20 @@ public class SelectedAppsFragment extends Fragment {
             Button btn = d.findViewById(R.id.payToUnlockBtn);
             btn.setOnClickListener(x -> {
                 d.dismiss();
-                if (targetSkuDetails != null) {
-                    BillingFlowParams f = BillingFlowParams.newBuilder()
-                            .setSkuDetails(targetSkuDetails)
+                if (targetProductDetails != null) {
+                    // ✅ Fix: use ProductDetailsParams instead of setSkuDetails()
+                    List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
+                            List.of(
+                                    BillingFlowParams.ProductDetailsParams.newBuilder()
+                                            .setProductDetails(targetProductDetails)
+                                            .build()
+                            );
+
+                    BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+                            .setProductDetailsParamsList(productDetailsParamsList)
                             .build();
-                    billingClient.launchBillingFlow(getActivity(), f);
+
+                    billingClient.launchBillingFlow(getActivity(), flowParams);
                 } else {
                     showMessage("Product not ready yet. Try again later.");
                 }
