@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FocusGuard</string>
+    <string name="app_name">Control Addiction</string>
     <string name="accessibility_service_description">
     This service is used to block selected apps during focus sessions based on your preferences. No personal data is collected or shared.
 </string>
