@@ -1,5 +1,7 @@
 [versions]
 activityCompose = "1.13.0"
+jqwik = "1.9.3"
+robolectric = "4.13"
 agp = "8.13.2"
 appUpdate = "2.1.0"
 billing = "8.3.0"
@@ -27,6 +29,9 @@ viewpager2 = "1.1.0"
 
 [libraries]
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+androidx-test-core = { module = "androidx.test:core", version = "1.6.1" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "ui" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "ui" }

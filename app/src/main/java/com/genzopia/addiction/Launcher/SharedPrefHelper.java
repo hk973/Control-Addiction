@@ -399,6 +399,32 @@ public class SharedPrefHelper {
     }
     private static final String PREFS_NAME = "MyAppPrefs";
 
+    // FCM keys
+    private static final String KEY_FCM_TOKEN = "fcm_token";
+    private static final String KEY_NOTIF_PERMISSION_GRANTED = "notif_permission_granted";
+
+    /** Save the latest FCM registration token. */
+    public void saveFcmToken(Context context, String token) {
+        saveString(context, KEY_FCM_TOKEN, token);
+    }
+
+    /** Retrieve the latest FCM registration token, or null if not yet stored. */
+    public String getFcmToken(Context context) {
+        return getString(context, KEY_FCM_TOKEN, null);
+    }
+
+    /** Persist whether the POST_NOTIFICATIONS permission has been granted. */
+    public void setNotifPermissionGranted(Context context, boolean granted) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences.edit().putBoolean(KEY_NOTIF_PERMISSION_GRANTED, granted).apply();
+    }
+
+    /** Returns true if the POST_NOTIFICATIONS permission was previously granted. */
+    public boolean isNotifPermissionGranted(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean(KEY_NOTIF_PERMISSION_GRANTED, false);
+    }
+
     // Store a string in SharedPreferences
     public void saveString(Context context, String key, String value) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

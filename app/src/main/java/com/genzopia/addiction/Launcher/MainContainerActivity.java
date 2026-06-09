@@ -2,7 +2,10 @@ package com.genzopia.addiction.Launcher;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
@@ -39,6 +42,11 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     private AppUpdateManager appUpdateManager;
     private static final int UPDATE_REQUEST_CODE = 123;
 
+    /** Action broadcast by DataPayloadHandler when a force_update FCM message is received. */
+    public static final String ACTION_FORCE_UPDATE = "com.genzopia.addiction.ACTION_FORCE_UPDATE";
+
+    private ForceUpdateReceiver forceUpdateReceiver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,19 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         ProcessLifecycleOwner.get().getLifecycle().addObserver(updateChecker);
         applyAppTheme();
 
+        NotificationHelper.createChannel(this);
+
+        // Subscribe every device to the "all_users" topic so broadcast notifications
+        // sent from the FCM dashboard reach all installed instances of this app.
+        com.google.firebase.messaging.FirebaseMessaging.getInstance()
+                .subscribeToTopic("all_users")
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("FCM", "Topic subscription failed: " + task.getException());
+                    } else {
+                        Log.d("FCM", "Subscribed to topic: all_users");
+                    }
+                });
     }
     private MainFragment getMainFragment() {
         if (viewPager.getCurrentItem() == 1) {
@@ -226,6 +247,12 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Register receiver for FCM force_update messages (Requirement 3.1)
+        forceUpdateReceiver = new ForceUpdateReceiver();
+        IntentFilter filter = new IntentFilter(ACTION_FORCE_UPDATE);
+        registerReceiver(forceUpdateReceiver, filter);
+
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             CounterManager cm = new CounterManager();
@@ -235,6 +262,29 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
             runOnUiThread(() -> handleCounterResult(counte, reviewShown));
         });
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (forceUpdateReceiver != null) {
+            unregisterReceiver(forceUpdateReceiver);
+            forceUpdateReceiver = null;
+        }
+    }
+    /**
+     * Inner BroadcastReceiver that listens for ACTION_FORCE_UPDATE broadcasts
+     * sent by DataPayloadHandler when a force_update FCM data message is received.
+     * Requirement 3.1
+     */
+    private class ForceUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_FORCE_UPDATE.equals(intent.getAction())) {
+                checkForForceUpdate();
+            }
+        }
+    }
+
     private void checkForForceUpdate() {
         appUpdateManager = AppUpdateManagerFactory.create(this);
 

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -47,6 +48,13 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
@@ -81,5 +89,13 @@ dependencies {
     implementation (libs.jsoup)
     implementation (libs.okhttp)
     implementation (libs.json)
+    // firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.14.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging")
 
+    // property-based testing
+    testImplementation(libs.jqwik)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }

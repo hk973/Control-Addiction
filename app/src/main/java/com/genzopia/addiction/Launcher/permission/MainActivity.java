@@ -2,6 +2,7 @@
 package com.genzopia.addiction.Launcher.permission;
 
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 
 import com.genzopia.addiction.Launcher.BaseActivity;
 import com.genzopia.addiction.Launcher.MainContainerActivity;
+import com.genzopia.addiction.Launcher.NotificationPermissionHelper;
 import com.genzopia.addiction.R;
 import com.genzopia.addiction.Launcher.SharedPrefHelper;
 import com.genzopia.addiction.Launcher.permission.OverlayPermissionFragment;
@@ -75,6 +77,9 @@ public class MainActivity extends BaseActivity implements PermissionListener {
             @Override
             public void onPageScrollStateChanged(int state) {}
         });
+
+        // Request POST_NOTIFICATIONS permission on Android 13+ (Requirement 2.1)
+        NotificationPermissionHelper.requestIfNeeded(this);
     }
 
     private void setupViewPager() {
@@ -146,6 +151,22 @@ public class MainActivity extends BaseActivity implements PermissionListener {
         android.content.Intent intent = new android.content.Intent(this, MainContainerActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    /**
+     * Stores the POST_NOTIFICATIONS grant/deny result in SharedPreferences.
+     * Requirements: 2.2, 2.3
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NotificationPermissionHelper.REQUEST_CODE) {
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            new SharedPrefHelper(this).setNotifPermissionGranted(this, granted);
+        }
     }
 
     @SuppressLint("MissingSuperCall")
