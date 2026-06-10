@@ -48,7 +48,7 @@ public class OverlayPermissionFragment extends BasePermissionFragment {
         requestPermissionButton.setText("Grant Permission");
 
         // Set fragment position for navigation
-        position = 0;
+        position = 1;
 
         // Update UI based on current status
         checkPermissionStatus();

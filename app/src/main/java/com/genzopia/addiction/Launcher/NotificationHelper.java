@@ -26,7 +26,9 @@ public class NotificationHelper {
     private static final String TAG = "NotificationHelper";
 
     public static final String CHANNEL_ID = "fcm_default_channel";
+    public static final String TIMER_CHANNEL_ID = "timer_channel";
     private static final String CHANNEL_NAME = "App Notifications";
+    private static final String TIMER_CHANNEL_NAME = "Timer";
 
     /**
      * Creates the notification channel required on Android 8.0+ (API 26+).
@@ -35,20 +37,48 @@ public class NotificationHelper {
      */
     public static void createChannel(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
             NotificationManager manager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            } else {
+            if (manager == null) {
                 Log.w(TAG, "NotificationManager is null; channel not created.");
+                return;
             }
+            // FCM channel
+            NotificationChannel fcmChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            manager.createNotificationChannel(fcmChannel);
+
+            // Timer / foreground service channel — low importance so it's silent but visible
+            NotificationChannel timerChannel = new NotificationChannel(
+                    TIMER_CHANNEL_ID,
+                    TIMER_CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            timerChannel.setDescription("Shows remaining lock-mode time");
+            manager.createNotificationChannel(timerChannel);
         }
     }
+
+    /**
+     * Builds a timer notification for use with startForeground().
+     * Pass this to startForeground(TIMER_NOTIF_ID, buildTimerNotification(...)).
+     */
+    public static android.app.Notification buildTimerNotification(Context context, String timeRemaining) {
+        return new NotificationCompat.Builder(context, TIMER_CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Lock Mode Active")
+                .setContentText("Time remaining: " + timeRemaining)
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build();
+    }
+
+    /** Fixed notification ID for the timer foreground notification. */
+    public static final int TIMER_NOTIF_ID = 1001;
 
     /**
      * Builds and posts a notification with an optional big picture image.

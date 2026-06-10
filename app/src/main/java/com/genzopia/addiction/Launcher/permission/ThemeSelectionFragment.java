@@ -45,7 +45,7 @@ public class ThemeSelectionFragment extends BasePermissionFragment {
         proceedButton = view.findViewById(R.id.proceedButton);
 
         // Set position
-        position = 3;
+        position = 4;
         proceedButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.primary_500));
         proceedButton.setEnabled(false);
         proceedButton.setAlpha(0.5f);

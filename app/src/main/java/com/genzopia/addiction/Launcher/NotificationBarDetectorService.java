@@ -1,6 +1,8 @@
 package com.genzopia.addiction.Launcher;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,9 +39,14 @@ public class NotificationBarDetectorService extends AccessibilityService {
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
                 isScreenOn = true;
+                // Resume notification ticker — value is always accurate since it's
+                // derived from System.currentTimeMillis(), same as HomeFragment2
+                startTimerNotification();
             } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
                 isScreenOn = false;
                 stopPolling();
+                // Stop the ticker to save battery — notification will refresh on screen-on
+                stopTimerNotifTicker();
             }
         }
     };
@@ -207,6 +214,67 @@ public class NotificationBarDetectorService extends AccessibilityService {
         return instance;
     }
 
+    // ---- Timer notification ----
+    private Handler timerNotifHandler;
+    private Runnable timerNotifRunnable;
+
+    private void startTimerNotification() {
+        SharedPrefHelper sp = new SharedPrefHelper(this);
+        if (!sp.getTimeActivateStatus()) return;
+
+        // Stop any existing ticker before starting a new one
+        stopTimerNotifTicker();
+
+        NotificationHelper.createChannel(this);
+        Notification notif = NotificationHelper.buildTimerNotification(this, getFormattedRemaining());
+        startForeground(NotificationHelper.TIMER_NOTIF_ID, notif);
+
+        timerNotifHandler = new Handler(Looper.getMainLooper());
+        timerNotifRunnable = new Runnable() {
+            @Override
+            public void run() {
+                SharedPrefHelper sp = new SharedPrefHelper(NotificationBarDetectorService.this);
+                if (sp.getTimeActivateStatus()) {
+                    NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    if (nm != null) {
+                        nm.notify(NotificationHelper.TIMER_NOTIF_ID,
+                                NotificationHelper.buildTimerNotification(
+                                        NotificationBarDetectorService.this,
+                                        getFormattedRemaining()));
+                    }
+                    timerNotifHandler.postDelayed(this, 1000);
+                } else {
+                    // Lock mode ended — dismiss notification entirely
+                    stopTimerNotification();
+                }
+            }
+        };
+        timerNotifHandler.postDelayed(timerNotifRunnable, 1000);
+    }
+
+    /** Stops only the ticker — notification stays visible with last value. */
+    private void stopTimerNotifTicker() {
+        if (timerNotifHandler != null && timerNotifRunnable != null) {
+            timerNotifHandler.removeCallbacks(timerNotifRunnable);
+        }
+    }
+
+    /** Stops the ticker AND removes the notification (lock mode ended). */
+    private void stopTimerNotification() {
+        stopTimerNotifTicker();
+        stopForeground(true);
+    }
+
+    private String getFormattedRemaining() {
+        SharedPrefHelper sp = new SharedPrefHelper(this);
+        long remainMillis = sp.getRemainingTimeMillis();
+        long totalSecs = remainMillis / 1000;
+        long h = totalSecs / 3600;
+        long m = (totalSecs % 3600) / 60;
+        long s = totalSecs % 60;
+        return String.format("%02d:%02d:%02d", h, m, s);
+    }
+
     private void triggerBlockingPopup() {
         new Handler(Looper.getMainLooper()).post(() -> {
             if (Settings.canDrawOverlays(this)) {
@@ -238,11 +306,13 @@ public class NotificationBarDetectorService extends AccessibilityService {
     }
     @Override
     protected void onServiceConnected() {
+        instance = this;
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             Log.e("AccessibilityCrash", "CRASH: " + Log.getStackTraceString(throwable));
             Intent intent = new Intent(this, NotificationBarDetectorService.class);
             startService(intent);
         });
+        startTimerNotification();
     }
 
     @Override
@@ -250,6 +320,8 @@ public class NotificationBarDetectorService extends AccessibilityService {
         super.onDestroy();
         unregisterReceiver(screenReceiver);
         stopPolling();
+        stopTimerNotification();
+        instance = null;
         Log.d("accessibilty_test", "Service DESTROYED");
     }
 

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
@@ -24,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.Launcher.NotificationPermissionHelper;
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
@@ -78,18 +81,6 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         applyAppTheme();
 
         NotificationHelper.createChannel(this);
-
-        // Subscribe every device to the "all_users" topic so broadcast notifications
-        // sent from the FCM dashboard reach all installed instances of this app.
-        com.google.firebase.messaging.FirebaseMessaging.getInstance()
-                .subscribeToTopic("all_users")
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.w("FCM", "Topic subscription failed: " + task.getException());
-                    } else {
-                        Log.d("FCM", "Subscribed to topic: all_users");
-                    }
-                });
     }
     private MainFragment getMainFragment() {
         if (viewPager.getCurrentItem() == 1) {
@@ -185,6 +176,21 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         if (requestCode == REQUEST_CODE && resultCode != Activity.RESULT_OK) {
             // Update cancelled or failed — optionally close app
             finish();
+        }
+    }
+
+    /**
+     * Stores the POST_NOTIFICATIONS grant/deny result in SharedPreferences.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NotificationPermissionHelper.REQUEST_CODE) {
+            boolean granted = grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            new SharedPrefHelper(this).setNotifPermissionGranted(this, granted);
         }
     }
 

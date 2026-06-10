@@ -48,7 +48,7 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
         requestPermissionButton.setText("Grant Permission");
 
         // Set fragment position for navigation
-        position = 1;
+        position = 2;
 
         // Update UI based on current status
         checkPermissionStatus();

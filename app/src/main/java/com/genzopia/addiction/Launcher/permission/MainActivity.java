@@ -2,7 +2,6 @@
 package com.genzopia.addiction.Launcher.permission;
 
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -17,7 +16,6 @@ import android.widget.LinearLayout;
 
 import com.genzopia.addiction.Launcher.BaseActivity;
 import com.genzopia.addiction.Launcher.MainContainerActivity;
-import com.genzopia.addiction.Launcher.NotificationPermissionHelper;
 import com.genzopia.addiction.R;
 import com.genzopia.addiction.Launcher.SharedPrefHelper;
 import com.genzopia.addiction.Launcher.permission.OverlayPermissionFragment;
@@ -79,28 +77,28 @@ public class MainActivity extends BaseActivity implements PermissionListener {
         });
 
         // Request POST_NOTIFICATIONS permission on Android 13+ (Requirement 2.1)
-        NotificationPermissionHelper.requestIfNeeded(this);
+        // Handled by NotificationPermissionFragment — first page of the onboarding pager
     }
 
     private void setupViewPager() {
         pagerAdapter = new PermissionPagerAdapter(getSupportFragmentManager());
 
         // Add all fragments in order
-        pagerAdapter.addFragment(OverlayPermissionFragment.newInstance());
-        pagerAdapter.addFragment(AccessibilityPermissionFragment.newInstance());
-        pagerAdapter.addFragment(TermsFragment.newInstance());
-        pagerAdapter.addFragment(ThemeSelectionFragment.newInstance());
-        pagerAdapter.addFragment(LauncherPermissionFragment.newInstance());
-
+        pagerAdapter.addFragment(NotificationPermissionFragment.newInstance()); // position 0
+        pagerAdapter.addFragment(OverlayPermissionFragment.newInstance());       // position 1
+        pagerAdapter.addFragment(AccessibilityPermissionFragment.newInstance()); // position 2
+        pagerAdapter.addFragment(TermsFragment.newInstance());                   // position 3
+        pagerAdapter.addFragment(ThemeSelectionFragment.newInstance());          // position 4
+        pagerAdapter.addFragment(LauncherPermissionFragment.newInstance());      // position 5
 
         viewPager.setAdapter(pagerAdapter);
-        viewPager.setOffscreenPageLimit(5); // Keep all fragments in memory
+        viewPager.setOffscreenPageLimit(6); // Keep all fragments in memory
     }
 
     private void setupDots() {
-        dots = new View[5]; // 5 dots now
+        dots = new View[6]; // 6 dots now
 
-        for (int i = 0; i <= 4; i++) {
+        for (int i = 0; i <= 5; i++) {
             dots[i] = new View(this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     getResources().getDimensionPixelSize(R.dimen.dot_width),
@@ -151,22 +149,6 @@ public class MainActivity extends BaseActivity implements PermissionListener {
         android.content.Intent intent = new android.content.Intent(this, MainContainerActivity.class);
         startActivity(intent);
         finish();
-    }
-
-    /**
-     * Stores the POST_NOTIFICATIONS grant/deny result in SharedPreferences.
-     * Requirements: 2.2, 2.3
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == NotificationPermissionHelper.REQUEST_CODE) {
-            boolean granted = grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED;
-            new SharedPrefHelper(this).setNotifPermissionGranted(this, granted);
-        }
     }
 
     @SuppressLint("MissingSuperCall")
