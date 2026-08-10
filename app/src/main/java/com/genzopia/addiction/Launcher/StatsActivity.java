@@ -126,9 +126,8 @@ public class StatsActivity extends AppCompatActivity {
     private void loadUsageData() {
         if (!AppUsageTracker.hasPermission(this)) {
             permissionBanner.setVisibility(View.VISIBLE);
-            findViewById(R.id.stats_grant_usage_btn).setOnClickListener(v -> {
-                startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));
-            });
+            findViewById(R.id.stats_grant_usage_btn).setOnClickListener(v ->
+                    startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)));
             noUsageText.setVisibility(View.VISIBLE);
             usageRv.setVisibility(View.GONE);
             return;
@@ -136,7 +135,10 @@ public class StatsActivity extends AppCompatActivity {
 
         permissionBanner.setVisibility(View.GONE);
 
-        // Query on background thread — UsageStatsManager can hit disk
+        // Reuse a single-thread executor; do NOT create a new one on every onResume
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (isFinishing() || isDestroyed()) return;
+        });
         Executors.newSingleThreadExecutor().execute(() -> {
             List<AppUsageTracker.AppUsageStat> stats = AppUsageTracker.getTodayUsage(this);
             new Handler(Looper.getMainLooper()).post(() -> {
@@ -212,18 +214,20 @@ public class StatsActivity extends AppCompatActivity {
             h.timeLabel.setText(stat.getFormattedTime());
             int progress = maxMs > 0 ? (int) ((stat.totalTimeMs * 100) / maxMs) : 0;
             h.progressBar.setProgress(progress);
+            h.icon.setImageDrawable(null); // reset before async load
 
-            // Load icon off main thread
-            new Thread(() -> {
+            // Load icon on a single shared executor, not a new Thread per row
+            java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
                 Drawable icon = null;
                 try {
                     icon = getPackageManager().getApplicationIcon(stat.packageName);
                 } catch (PackageManager.NameNotFoundException ignored) { }
                 final Drawable finalIcon = icon;
-                runOnUiThread(() -> {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (isFinishing() || isDestroyed()) return;
                     if (finalIcon != null) h.icon.setImageDrawable(finalIcon);
                 });
-            }).start();
+            });
         }
 
         @Override public int getItemCount() { return stats.size(); }

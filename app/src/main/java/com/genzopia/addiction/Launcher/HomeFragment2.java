@@ -271,10 +271,12 @@ public class HomeFragment2 extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if( spp.isDSAChallengeActive()){
+        if (spp == null) return; // view not yet created (e.g. rotation)
+        if (spp.isDSAChallengeActive()) {
             startRealtimeUpdatesdsa();
-        }else{
-        startRealtimeUpdates();}
+        } else {
+            startRealtimeUpdates();
+        }
     }
 
     private void startRealtimeUpdatesdsa() {

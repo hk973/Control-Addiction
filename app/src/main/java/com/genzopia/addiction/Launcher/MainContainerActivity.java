@@ -13,6 +13,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -145,12 +146,12 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     }
 
     private void showReviewDialog() {
-        new Handler().postDelayed(() -> {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!isFinishing()) {
                 ReviewDialog dialog = new ReviewDialog(this);
                 dialog.show();
             }
-        }, 2000); // Show after 2 seconds delay
+        }, 2000);
     }
 
     private void applyAppTheme() {

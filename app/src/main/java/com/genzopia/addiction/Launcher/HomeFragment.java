@@ -76,34 +76,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    // ─── Gamification bar ────────────────────────────────────────────────────
-
-    /** Updates the streak / level labels and wires the Stats button. */
-    private void refreshGamBar(View root) {
-        Context ctx = getContext();
-        if (ctx == null) return;
-
-        TextView streakTv = root.findViewById(R.id.gam_streak_text);
-        TextView levelTv  = root.findViewById(R.id.gam_level_text);
-        ImageView statsBtn = root.findViewById(R.id.gam_stats_btn);
-
-        if (streakTv != null) {
-            int streak = GamificationManager.getStreak(ctx);
-            streakTv.setText(streak + " day" + (streak == 1 ? "" : "s"));
-        }
-        if (levelTv != null) {
-            int level = GamificationManager.getLevel(ctx);
-            levelTv.setText("Lvl " + level);
-        }
-        if (statsBtn != null) {
-            statsBtn.setOnClickListener(v -> {
-                if (isAdded()) {
-                    startActivity(new Intent(requireContext(), StatsActivity.class));
-                }
-            });
-        }
-    }
-
     // ─── Shortcut icon ───────────────────────────────────────────────────────
 
     /** Paints the shortcut button with the icon of the app the user assigned, if any. */
@@ -112,6 +84,8 @@ public class HomeFragment extends Fragment {
         if (context == null) return;
 
         ImageView shortcutButton = view.findViewById(R.id.cameraButton);
+        if (shortcutButton == null) return; // layout variant without FAB
+
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0);
         shortcutButton.setColorFilter(new ColorMatrixColorFilter(matrix));
