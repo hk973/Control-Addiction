@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Circle ring (stroke via two filled circles with even-odd) -->
+    <path
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M54,10 A44,44 0 1,1 53.9,10 Z M54,20 A34,34 0 1,0 54.1,20 Z" />
+
+    <!-- Slash: top-left to bottom-right, clipped to stay inside the circle.
+         The circle has center 54,54 radius 34 (inner edge).
+         At 45°, chord endpoints on the inner circle:
+         top-left:  54 - 34*cos45 ≈ 54-24 = 30,  54 - 34*sin45 ≈ 30  → (30, 30)
+         bot-right: 54 + 24 = 78,  54 + 24 = 78  → (78, 78)
+         Thicken with half-width ~5 perpendicular. -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M25,30 L30,25 L83,78 L78,83 Z" />
+
+</vector>
