@@ -580,8 +580,7 @@ public class MainFragment extends Fragment {
             }
 
             int totalsec = ((selectedDays * 24 * 60) + (selectedHours * 60) + selectedMinutes) * 60;
-            MyTileService mt = new MyTileService();
-            mt.savePreferences_mode(getContext(), selectedApps, totalsec);
+            MyTileService.savePreferencesModeStatic(getContext(), selectedApps, totalsec);
 
             Toast.makeText(requireContext(), "Mode has been set successfully", Toast.LENGTH_SHORT).show();
             dialog.dismiss();

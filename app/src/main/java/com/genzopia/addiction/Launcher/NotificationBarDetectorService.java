@@ -29,6 +29,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
     private volatile String mLockClassName;
     private volatile boolean mIsAuthenticating;
     private boolean isPollingAppInfo = false;
+    private volatile boolean mWasLockActive = false;
 
     /** Interval of the anti-tamper node-tree scan. */
     private static final long POLL_INTERVAL_MS = 400L;
@@ -105,7 +106,17 @@ public class NotificationBarDetectorService extends AccessibilityService {
                 }
             }
 
-            if (!prefHelper.getTimeActivateStatus()) return;
+            boolean isActive = prefHelper.getTimeActivateStatus();
+
+            // Detect natural timer expiry and award session XP
+            if (mWasLockActive && !isActive) {
+                GamificationManager.onSessionCompleted(getApplicationContext());
+            }
+            mWasLockActive = isActive;
+
+            if (!isActive) {
+                return;
+            }
 
             final String pkg = String.valueOf(event.getPackageName());
             final String className = event.getClassName().toString();
@@ -177,7 +188,9 @@ public class NotificationBarDetectorService extends AccessibilityService {
         }
 
         String classNameLower = className.toLowerCase();
-        if (className.contains("com.android.settings.password.ConfirmDeviceCredentialActivity") ||
+        // Only skip credential/lock screens — but not if it's Settings (which should be blocked)
+        boolean isAuthScreen = !pkg.equals("com.android.settings") && (
+                className.contains("com.android.settings.password.ConfirmDeviceCredentialActivity") ||
                 classNameLower.contains("confirmdevicecredential") ||
                 classNameLower.contains("keyguard") ||
                 classNameLower.contains("password") ||
@@ -186,7 +199,8 @@ public class NotificationBarDetectorService extends AccessibilityService {
                 classNameLower.contains("lock") ||
                 classNameLower.contains("security") ||
                 classNameLower.contains("biometric") ||
-                classNameLower.contains("fingerprint")) return;
+                classNameLower.contains("fingerprint"));
+        if (isAuthScreen) return;
 
         if (isPredefinedSystemApp(pkg)) {
             if (!prefHelper.appWithNoWarning().contains(pkg)) {

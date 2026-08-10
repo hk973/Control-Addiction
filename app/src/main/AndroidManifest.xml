@@ -50,8 +50,7 @@
         <service
             android:name=".Launcher.OverlayService"
             android:exported="false"
-            android:enabled="true"
-            android:permission="android.permission.SYSTEM_ALERT_WINDOW" />
+            android:enabled="true" />
 
         <activity android:name=".Launcher.BillingActivity" />
 

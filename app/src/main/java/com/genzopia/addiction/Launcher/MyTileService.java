@@ -88,8 +88,19 @@ public class MyTileService extends TileService {
             }
         }, 2000);
     }
-    // Method to save data to SharedPreferences
-    public  void savePreferences_mode(Context context,
+    public static void savePreferencesModeStatic(Context context,
+                                      ArrayList<String> selectedAppMode,
+                                      int secMode) {
+        SharedPreferences sharedPref = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        Set<String> set = new HashSet<>(selectedAppMode);
+        editor.putStringSet("selected_app_mode", set);
+        editor.putInt("sec_mode", secMode);
+        editor.apply();
+    }
+
+    // Instance variant kept for TileService internal use
+    public void savePreferences_mode(Context context,
                                        ArrayList<String> selectedAppMode,
                                        int secMode) {
         SharedPreferences sharedPref = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);

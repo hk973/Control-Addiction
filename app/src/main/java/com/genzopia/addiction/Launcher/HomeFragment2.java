@@ -348,7 +348,7 @@ public class HomeFragment2 extends Fragment {
             spp.settimmerzero(false);
         } else {
             timerText.setText("00:00");
-            spp.setDSAChallengeRemainingTime(System.currentTimeMillis());
+            spp.setDSAChallengeRemainingTime(0);
             spp.settimmerzero(true);
         }
     }
