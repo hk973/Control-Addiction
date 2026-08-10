@@ -135,7 +135,7 @@ public class MainFragment extends Fragment {
                             SharedPrefHelper helper = new SharedPrefHelper(requireContext());
                             List<String> pinned = new ArrayList<>(helper.getPinnedApps());
                             pinned.remove(appItem.getPackageName());
-                            helper.savePinnedApps(pinned);
+                            helper.setPinnedApps(pinned); // use set (replace), not save (append)
                             refreshPinnedApps();
                             break;
 

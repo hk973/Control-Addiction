@@ -38,21 +38,15 @@
                     app:tint="@color/text_primary" />
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="311dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="📊 Stats &amp; Progress"
+                    android:textColor="@color/text_primary"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/text_primary" />
+                    android:textStyle="bold" />
 
-                <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_star"
-                    android:contentDescription="Crown"
-                    app:tint="@color/star_yellow" />
             </LinearLayout>
 
             <!-- Gamification Card -->
