@@ -15,6 +15,28 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Single access point to every persisted setting of the app.
+ *
+ * <p>State is spread over four preference files, kept as-is for backwards compatibility
+ * with installed versions:</p>
+ * <ul>
+ *     <li><b>AddictionPrefs</b> ({@link #PREF_NAME}) — lock state ({@code timeActive},
+ *     {@code timeLimit}, {@code startTime}, {@code initialDuration}), the allowed-app lists
+ *     ({@code selectedApp}, {@code selectedApps}), home-screen {@code pinned_apps}, theming
+ *     ({@code DarkMode}, {@code GrayMode}, {@code modeNight}, {@code FollowSystemTheme}),
+ *     onboarding ({@code terms_accepted}), the review throttle and the whole LeetCode/DSA
+ *     challenge state.</li>
+ *     <li><b>MyPrefs</b> — challenge flags ({@code Challenge_status}, {@code cheatchallengevalue}).</li>
+ *     <li><b>MySharedPref</b> — earned reward codes ({@code challenge_code}, JSON list).</li>
+ *     <li><b>MyAppPrefs</b> ({@link #PREFS_NAME}) — FCM token, notification-permission flag and
+ *     the home-screen {@code shortcut}.</li>
+ * </ul>
+ *
+ * <p>Every write obtains a fresh {@link SharedPreferences.Editor}. A single editor shared by
+ * all setters used to be cached here, which could publish or drop unrelated pending changes
+ * when two writes interleaved.</p>
+ */
 public class SharedPrefHelper {
 
     private static final String PREF_NAME = "AddictionPrefs";
@@ -30,13 +52,15 @@ public class SharedPrefHelper {
 
     private static final String challenge_code ="challenge_code";
 
-    private SharedPreferences prefs;
-    private SharedPreferences.Editor editor;
+    private final SharedPreferences prefs;
 
-    // Save if Gray Mode with Dark Mode is enabled
+    /**
+     * Enables gray mode as part of the "grey theme" choice. Writes the very same
+     * {@code GrayMode} flag as {@link #setGrayModeEnabled(boolean)}; both are kept because
+     * the onboarding flow and the settings screen each call their own variant.
+     */
     public void setGrayModeWithDarkMode(boolean enabled) {
-        editor.putBoolean(KEY_GRAY_MODE, enabled);
-        editor.apply();
+        prefs.edit().putBoolean(KEY_GRAY_MODE, enabled).apply();
     }
     public void setCheatChallengeValue(Context context, boolean value) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
@@ -54,7 +78,7 @@ public class SharedPrefHelper {
 
         // Remove duplicates while preserving order
         Set<String> unique = new LinkedHashSet<>(current);
-        editor.putString("pinned_apps", TextUtils.join(",", unique)).apply();
+        prefs.edit().putString("pinned_apps", TextUtils.join(",", unique)).apply();
     }
     public static void set_challenge_code_List(Context context, String newItem) {
         SharedPreferences sharedPref = context.getSharedPreferences("MySharedPref", Context.MODE_PRIVATE);
@@ -107,7 +131,7 @@ public class SharedPrefHelper {
         Set<String> unique = new LinkedHashSet<>(pinnedApps);
         // Remove any accidental empty strings
         unique.removeIf(TextUtils::isEmpty);
-        editor.putString("pinned_apps", TextUtils.join(",", unique)).apply();
+        prefs.edit().putString("pinned_apps", TextUtils.join(",", unique)).apply();
     }
     // Get if Gray Mode with Dark Mode is enabled
     public boolean isGrayModeWithDarkModeEnabled() {
@@ -116,8 +140,7 @@ public class SharedPrefHelper {
 
     // Save Mode Night Preference (Yes or No)
     public void setModeNight(boolean isNight) {
-        editor.putBoolean(KEY_MODE_NIGHT, isNight);
-        editor.apply();
+        prefs.edit().putBoolean(KEY_MODE_NIGHT, isNight).apply();
     }
 
     // Get Mode Night Preference
@@ -139,10 +162,9 @@ public class SharedPrefHelper {
                 .getBoolean("Challenge_status", false); // default is false
     }
 
+    /** Settings-screen variant of {@link #setGrayModeWithDarkMode(boolean)}; same stored flag. */
     public void setGrayModeEnabled(boolean enabled) {
-        editor.putBoolean(KEY_GRAY_MODE, enabled);
-        editor.apply();
-        Log.d("SharedPrefDebug", "Gray Mode preference set to: " + enabled);
+        prefs.edit().putBoolean(KEY_GRAY_MODE, enabled).apply();
     }
     public void setTermsAccepted(boolean accepted) {
         prefs.edit().putBoolean("terms_accepted", accepted).apply();
@@ -155,12 +177,10 @@ public class SharedPrefHelper {
 
     public SharedPrefHelper(Context context) {
         prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        editor = prefs.edit();
     }
 
     public void setClickToOpen(boolean isClick) {
-        editor.putBoolean(CLICK_TO_OPEN, isClick);
-        editor.apply();
+        prefs.edit().putBoolean(CLICK_TO_OPEN, isClick).apply();
     }
 
     public boolean isClickToOpen() {
@@ -168,26 +188,27 @@ public class SharedPrefHelper {
     }
 
     public ArrayList<String> getSelectedAppValue() {
-        String jsonSelectedApps = prefs.getString(KEY_SELECTED_APPS, null);
-        Log.d("SharedPrefDebug", "Retrieved JSON: " + jsonSelectedApps);
-
-        if (jsonSelectedApps == null || jsonSelectedApps.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        Type type = new TypeToken<ArrayList<String>>() {}.getType();
-        return new Gson().fromJson(jsonSelectedApps, type);
+        return readPackageList(KEY_SELECTED_APPS);
     }
-    public ArrayList<String> tempgetSelectedAppValue() {
-        String jsonSelectedApps = prefs.getString(KEY_SELECTED_APPSS, null);
-        Log.d("SharedPrefDebug", "Retrieved JSON: " + jsonSelectedApps);
 
-        if (jsonSelectedApps == null || jsonSelectedApps.isEmpty()) {
+    public ArrayList<String> tempgetSelectedAppValue() {
+        return readPackageList(KEY_SELECTED_APPSS);
+    }
+
+    /** Reads a Gson-encoded package list; a corrupt value is treated as "no apps". */
+    private ArrayList<String> readPackageList(String key) {
+        String json = prefs.getString(key, null);
+        if (json == null || json.isEmpty()) {
             return new ArrayList<>();
         }
-
-        Type type = new TypeToken<ArrayList<String>>() {}.getType();
-        return new Gson().fromJson(jsonSelectedApps, type);
+        try {
+            Type type = new TypeToken<ArrayList<String>>() {}.getType();
+            ArrayList<String> stored = new Gson().fromJson(json, type);
+            return stored == null ? new ArrayList<>() : stored;
+        } catch (RuntimeException e) {
+            Log.e("SharedPrefHelper", "Corrupt package list for " + key, e);
+            return new ArrayList<>();
+        }
     }
 
     public ArrayList<String> appWithNoWarning() {
@@ -259,41 +280,34 @@ public class SharedPrefHelper {
     }
 
     public void writeData(ArrayList<String> selectedApps, long timeLimit, boolean isActive) {
-        Gson gson = new Gson();
-        String jsonSelectedApps = gson.toJson(selectedApps);
-        Log.d("SharedPrefDebug", "JSON to Store: " + jsonSelectedApps);
-       Log.e("test444", String.valueOf(timeLimit));
-        editor.putString(KEY_SELECTED_APPS, jsonSelectedApps);
-        editor.putLong(KEY_TIME_LIMIT, timeLimit);
-        editor.putBoolean(KEY_TIME_ACTIVE, isActive);
-        editor.apply();
+        String jsonSelectedApps = new Gson().toJson(selectedApps);
+        // One atomic write: the allowed apps and the lock flag must never be published apart.
+        prefs.edit()
+                .putString(KEY_SELECTED_APPS, jsonSelectedApps)
+                .putLong(KEY_TIME_LIMIT, timeLimit)
+                .putBoolean(KEY_TIME_ACTIVE, isActive)
+                .apply();
     }
     public void set_selectedApps(ArrayList<String> selectedApps) {
         // Clone the list to avoid ConcurrentModificationException
         ArrayList<String> safeList = new ArrayList<>(selectedApps);
 
-        Gson gson = new Gson();
-        String jsonSelectedApps = gson.toJson(safeList);
-
-        editor.putString(KEY_SELECTED_APPS, jsonSelectedApps);
-        editor.apply();
+        String jsonSelectedApps = new Gson().toJson(safeList);
+        prefs.edit().putString(KEY_SELECTED_APPS, jsonSelectedApps).apply();
     }
+
     public void temp_set_selectedApps(ArrayList<String> selectedApps){
-        Gson gson = new Gson();
-        String jsonSelectedApps = gson.toJson(selectedApps);
-        editor.putString(KEY_SELECTED_APPSS, jsonSelectedApps);
-        editor.apply();
+        String jsonSelectedApps = new Gson().toJson(new ArrayList<>(selectedApps));
+        prefs.edit().putString(KEY_SELECTED_APPSS, jsonSelectedApps).apply();
     }
 
 
     public void saveTimeLimitValue(long timeLimit) {
-        editor.putLong(KEY_TIME_LIMIT, timeLimit);
-        editor.apply();
+        prefs.edit().putLong(KEY_TIME_LIMIT, timeLimit).apply();
     }
 
     public void saveTimeActivateStatus(boolean isActive) {
-        editor.putBoolean(KEY_TIME_ACTIVE, isActive);
-        editor.apply();
+        prefs.edit().putBoolean(KEY_TIME_ACTIVE, isActive).apply();
     }
 
 
@@ -302,9 +316,7 @@ public class SharedPrefHelper {
 
     // Store the last time review was prompted (in milliseconds)
     public void saveLastReviewPromptTime(long timeInMillis) {
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putLong(LAST_REVIEW_PROMPT_TIME, timeInMillis);
-        editor.apply();
+        prefs.edit().putLong(LAST_REVIEW_PROMPT_TIME, timeInMillis).apply();
     }
 
     // Get the last time review was prompted
@@ -333,8 +345,7 @@ public class SharedPrefHelper {
     }
 
     public void setTimeActivateStatus(boolean status) {
-        editor.putBoolean(KEY_TIME_ACTIVE, status);
-        editor.apply();
+        prefs.edit().putBoolean(KEY_TIME_ACTIVE, status).apply();
     }
 
     public long getStartTime() {
@@ -378,9 +389,7 @@ public class SharedPrefHelper {
 
     // Save Follow System Preference
     public void setFollowSystemThemeEnabled(boolean isEnabled) {
-        editor.putBoolean(KEY_FOLLOW_SYSTEM_THEME, isEnabled);
-        editor.apply();
-        Log.d("SharedPrefDebug", "Follow System Theme preference set to: " + isEnabled);
+        prefs.edit().putBoolean(KEY_FOLLOW_SYSTEM_THEME, isEnabled).apply();
     }
 
     // Get Follow System Preference
@@ -393,9 +402,7 @@ public class SharedPrefHelper {
     }
 
     public void setDarkModeEnabled(boolean isEnabled) {
-        editor.putBoolean(KEY_DARK_MODE, isEnabled);
-        editor.apply();
-        Log.d("SharedPrefDebug", "Dark Mode preference set to: " + isEnabled);
+        prefs.edit().putBoolean(KEY_DARK_MODE, isEnabled).apply();
     }
     private static final String PREFS_NAME = "MyAppPrefs";
 

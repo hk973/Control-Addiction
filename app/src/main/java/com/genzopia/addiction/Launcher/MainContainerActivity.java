@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.data.model.AppInfo;
 import com.genzopia.addiction.Launcher.NotificationPermissionHelper;
 import com.google.android.gms.tasks.Task;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -50,6 +51,7 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     public static final String ACTION_FORCE_UPDATE = "com.genzopia.addiction.ACTION_FORCE_UPDATE";
 
     private ForceUpdateReceiver forceUpdateReceiver;
+    private AppListViewModel appListViewModel;
 
     /**
      * Single shared background executor for the short counter/review lookup.
@@ -76,10 +78,10 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
         viewPager.setUserInputEnabled(true);
 
 
-        AppListViewModel viewModel = new ViewModelProvider(this).get(AppListViewModel.class);
-        if (viewModel.getAppItemsLiveData().getValue() == null) {
-            viewModel.loadApps(getApplicationContext());
-        }
+        // The list is refreshed here and in onStart(); AppRepository only publishes a new
+        // value when the installed apps actually changed, so this is cheap.
+        appListViewModel = new ViewModelProvider(this).get(AppListViewModel.class);
+        appListViewModel.refresh();
 
         SharedPrefHelper p = new SharedPrefHelper(this);
         if(p.getTimeLimitValue()<=0){
@@ -230,7 +232,7 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
 
 
     @Override
-    public void showPinnedAppOptions(AppItem_Dataclass appItem) {
+    public void showPinnedAppOptions(AppInfo appItem) {
         // Get existing fragment from ViewPager adapter
         Fragment fragment = getSupportFragmentManager()
                 .findFragmentByTag("f" + viewPager.getCurrentItem());
@@ -268,6 +270,12 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     protected void onStart() {
         super.onStart();
 
+        // Catch up on apps installed or removed while the launcher was in the background
+        // (the package receiver covers the rest).
+        if (appListViewModel != null) {
+            appListViewModel.refresh();
+        }
+
         // Register receiver for FCM force_update messages (Requirement 3.1).
         // The action is app-private, so the receiver MUST be registered as
         // RECEIVER_NOT_EXPORTED — starting with Android 14 (API 34) registering an
@@ -294,6 +302,17 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
                 Log.e("MainContainerActivity", "Counter update failed", e);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // The observer lives on the process lifecycle, so without this the destroyed
+        // activity would stay referenced for as long as the process runs.
+        if (updateChecker != null) {
+            ProcessLifecycleOwner.get().getLifecycle().removeObserver(updateChecker);
+            updateChecker = null;
+        }
     }
 
     @Override

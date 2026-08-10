@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.data.AppRepository;
 
 public class MainContainerActivity2 extends BaseActivity {
 MainFragment mainFragment;
@@ -39,7 +40,8 @@ MainFragment mainFragment;
     @Override
     protected void onStart() {
         super.onStart();
-
+        // Keep the restricted drawer in sync with apps installed/removed in the meantime.
+        AppRepository.getInstance(this).refresh();
     }
 
 }

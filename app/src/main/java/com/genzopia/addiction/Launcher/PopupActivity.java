@@ -2,6 +2,7 @@ package com.genzopia.addiction.Launcher;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -13,22 +14,26 @@ import java.util.List;
 
 public class PopupActivity extends AppCompatActivity {
 
+    private static final String TAG = "PopupActivity";
+    private static final String PRODUCT_ID = "unlock_discipline_lock_v2";
+    private static final int MAX_RECONNECT_ATTEMPTS = 3;
+
     private BillingClient billingClient;
-    private SkuDetails targetSkuDetails;
     private ProductDetails targetProductDetails;
     private AlertDialog mainDialog; // Reference to main dialog
+    private int reconnectAttempts = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPrefHelper sp=new SharedPrefHelper(this) ;
+        SharedPrefHelper sp = new SharedPrefHelper(this);
 
-        if(sp.isDSAChallengeActive()||sp.getTimeActivateStatus()){
-        initBillingClient();
-        createAndShowMainDialog();
+        if (sp.isDSAChallengeActive() || sp.getTimeActivateStatus()) {
+            initBillingClient();
+            createAndShowMainDialog();
+        } else {
+            finish();
         }
-
-
     }
 
     private void createAndShowMainDialog() {
@@ -43,16 +48,7 @@ public class PopupActivity extends AppCompatActivity {
                     startActivity(new Intent(PopupActivity.this, MainContainerActivity.class));
                     finish();
                 })
-                .setNegativeButton("Unlock All Apps", (dialog, which) -> {
-                    if (targetSkuDetails != null) {
-                        BillingFlowParams flowParams = BillingFlowParams.newBuilder()
-                                .setSkuDetails(targetSkuDetails)
-                                .build();
-                        billingClient.launchBillingFlow(this, flowParams);
-                    } else {
-                        showMessage("Product not ready yet. Try again in a moment.");
-                    }
-                });
+                .setNegativeButton("Unlock All Apps", (dialog, which) -> launchPurchase());
 
         // Create dialog but don't show immediately
         mainDialog = builder.create();
@@ -63,13 +59,40 @@ public class PopupActivity extends AppCompatActivity {
         }
     }
 
+    /** Starts the billing flow for the unlock product; no-op when the activity is going away. */
+    private void launchPurchase() {
+        if (isFinishing() || isDestroyed()) return;
+
+        if (targetProductDetails == null || billingClient == null || !billingClient.isReady()) {
+            showMessage("Product not ready yet. Try again in a moment.");
+            return;
+        }
+
+        BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(List.of(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                                .setProductDetails(targetProductDetails)
+                                .build()))
+                .build();
+
+        BillingResult result = billingClient.launchBillingFlow(this, flowParams);
+        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+            showMessage("Unable to start purchase. Try again later.");
+        }
+    }
+
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         // Dismiss dialog when activity is destroyed
         if (mainDialog != null && mainDialog.isShowing()) {
             mainDialog.dismiss();
         }
+        mainDialog = null;
+        if (billingClient != null) {
+            billingClient.endConnection();
+            billingClient = null;
+        }
+        super.onDestroy();
     }
 
     private void initBillingClient() {
@@ -85,21 +108,37 @@ public class PopupActivity extends AppCompatActivity {
                 })
                 .build();
 
+        connectBillingClient();
+    }
+
+    private void connectBillingClient() {
+        if (billingClient == null) return;
         billingClient.startConnection(new BillingClientStateListener() {
             @Override public void onBillingSetupFinished(@NonNull BillingResult br) {
+                if (isFinishing() || isDestroyed()) return;
                 if (br.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    reconnectAttempts = 0;
                     queryProductDetails();
                 }
             }
             @Override public void onBillingServiceDisconnected() {
-                // retry logic if you want
+                // Bounded retry — an unbounded reconnect loop would spin forever offline.
+                if (isFinishing() || isDestroyed()) return;
+                if (reconnectAttempts++ < MAX_RECONNECT_ATTEMPTS) {
+                    connectBillingClient();
+                } else {
+                    Log.w(TAG, "Billing service unavailable after " + MAX_RECONNECT_ATTEMPTS + " retries");
+                }
             }
         });
     }
+
     private void queryProductDetails() {
+        if (billingClient == null) return;
+
         List<QueryProductDetailsParams.Product> productList = List.of(
                 QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId("unlock_discipline_lock_v2")
+                        .setProductId(PRODUCT_ID)
                         .setProductType(BillingClient.ProductType.INAPP)
                         .build()
         );
@@ -108,14 +147,15 @@ public class PopupActivity extends AppCompatActivity {
                 .setProductList(productList)
                 .build();
 
-        // ✅ Anonymous class avoids lambda type-inference ambiguity entirely
+        // Anonymous class avoids lambda type-inference ambiguity entirely
         billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
             @Override
             public void onProductDetailsResponse(@NonNull BillingResult billingResult,
                                                  @NonNull QueryProductDetailsResult result) {
+                if (isFinishing() || isDestroyed()) return;
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     for (ProductDetails details : result.getProductDetailsList()) {
-                        if ("unlock_discipline_lock_v2".equals(details.getProductId())) {
+                        if (PRODUCT_ID.equals(details.getProductId())) {
                             targetProductDetails = details;
                             break;
                         }
@@ -126,6 +166,8 @@ public class PopupActivity extends AppCompatActivity {
     }
 
     private void handlePurchase(Purchase purchase) {
+        if (billingClient == null) return;
+
         ConsumeParams consumeParams = ConsumeParams.newBuilder()
                 .setPurchaseToken(purchase.getPurchaseToken())
                 .build();
@@ -155,7 +197,7 @@ public class PopupActivity extends AppCompatActivity {
                         .setPositiveButton("OK", null)
                         .show();
             } catch (WindowManager.BadTokenException e) {
-                // Log the error or handle it gracefully
+                Log.w(TAG, "Unable to show message dialog", e);
             }
         });
     }

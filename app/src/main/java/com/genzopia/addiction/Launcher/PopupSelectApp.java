@@ -4,10 +4,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -16,82 +15,71 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.data.AppRepository;
+import com.genzopia.addiction.data.model.AppInfo;
+import com.genzopia.addiction.ui.common.AppListAdapter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+/**
+ * Home-screen shortcut: opens the app the user assigned, or shows a picker.
+ * The installed-app list comes from {@link AppRepository} so it is shared with the drawer.
+ */
 public class PopupSelectApp {
 
-    private Context context;
-    private Executor executor = Executors.newSingleThreadExecutor();
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private static final String KEY_SHORTCUT = "shortcut";
+
+    private static final Executor EXECUTOR = Executors.newSingleThreadExecutor(runnable -> {
+        Thread thread = new Thread(runnable, "ShortcutPicker");
+        thread.setDaemon(true);
+        return thread;
+    });
+
+    private final Context context;
+    private final SharedPrefHelper prefHelper;
+    private final AppRepository repository;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public PopupSelectApp(Context context) {
         this.context = context;
+        this.prefHelper = new SharedPrefHelper(context);
+        this.repository = AppRepository.getInstance(context);
     }
 
-    public void show(ImageView cameraButton) {
-        // Create dialog
-        SharedPrefHelper ss=new SharedPrefHelper(context);
-
-        if(ss.getString(context,"shortcut","")==""||ss.getString(context,"shortcut","0")==null){
-            final Dialog dialog = new Dialog(context);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.popup_app_selector); // You'll need to create this layout
-
-            // Initialize RecyclerView
-            RecyclerView recyclerView = dialog.findViewById(R.id.recyclerViewApps);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-
-            // Show loading state if needed
-            // You can add a progress bar in your layout and show/hide it here
-
-            // Load apps in background
-            executor.execute(() -> {
-                // Load apps in background
-                List<AppItem> appItems = loadInstalledApps();
-
-                handler.post(() -> {
-                    AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
-                        // UI thread (for Toast and RecyclerView updates)
-                        Toast.makeText(context, "Appname :"+appItem.getAppName(), Toast.LENGTH_SHORT).show();
-                        cameraButton.setImageDrawable(appItem.getIcon()); // UI update
-                        dialog.dismiss();
-
-                        // Save data in background (move saving logic here)
-                        executor.execute(() -> {
-                            ss.saveString(context, "shortcut", appItem.getPackageName());
-                        });
-                    });
-                    recyclerView.setAdapter(adapter);
-                });
-            });
-
-            dialog.show();
-        }else{
-            openapp(ss.getString(context,"shortcut",""));
+    /** Opens the saved shortcut; asks the user to pick one when nothing is saved yet. */
+    public void show(ImageView shortcutButton) {
+        String saved = savedShortcut();
+        if (TextUtils.isEmpty(saved)) {
+            showPicker(shortcutButton);
+        } else {
+            openApp(saved);
         }
-
     }
-    public void showlock(ImageView cameraButton) {
-        // Create dialog
-        SharedPrefHelper ss=new SharedPrefHelper(context);
 
-        if(Objects.equals(ss.getString(context, "shortcut", ""), "") ||ss.getString(context,"shortcut","0")==null){
-         Toast.makeText(context,"You cannot set Shortcut from lock screen",Toast.LENGTH_SHORT).show();
-        }else{
-            openapp(ss.getString(context,"shortcut",""));
+    /** Same as {@link #show} but never allows assigning a new shortcut while locked. */
+    public void showlock(ImageView shortcutButton) {
+        String saved = savedShortcut();
+        if (TextUtils.isEmpty(saved)) {
+            Toast.makeText(context, "You cannot set Shortcut from lock screen", Toast.LENGTH_SHORT).show();
+        } else {
+            openApp(saved);
         }
-
     }
 
-    public void show2(ImageView cameraButton) {
-        SharedPrefHelper ss = new SharedPrefHelper(context);
+    /** Always shows the picker, used to reassign the shortcut on long press. */
+    public void show2(ImageView shortcutButton) {
+        showPicker(shortcutButton);
+    }
+
+    private String savedShortcut() {
+        // NOTE: this used to compare the stored value with ==, so a saved shortcut was
+        // never recognised and the picker opened every single time.
+        return prefHelper.getString(context, KEY_SHORTCUT, "");
+    }
+
+    private void showPicker(ImageView shortcutButton) {
         final Dialog dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.popup_app_selector);
@@ -99,78 +87,51 @@ public class PopupSelectApp {
         RecyclerView recyclerView = dialog.findViewById(R.id.recyclerViewApps);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        executor.execute(() -> {
-            // Load apps in background
-            List<AppItem> appItems = loadInstalledApps();
-
-            handler.post(() -> {
-                AppListAdapter adapter = new AppListAdapter(appItems, appItem -> {
-                    // UI thread (for Toast and RecyclerView updates)
-                    Toast.makeText(context, "Appname :"+appItem.getAppName(), Toast.LENGTH_SHORT).show();
-                    cameraButton.setImageDrawable(appItem.getIcon()); // UI update
+        AppListAdapter adapter = new AppListAdapter(context, new AppListAdapter.Config()
+                .showIcon(true)
+                .onClick(app -> {
+                    Toast.makeText(context, "Appname :" + app.getLabel(), Toast.LENGTH_SHORT).show();
+                    if (app.getIcon() != null) {
+                        shortcutButton.setImageDrawable(app.getIcon());
+                    }
                     dialog.dismiss();
+                    EXECUTOR.execute(() -> prefHelper.saveString(context, KEY_SHORTCUT, app.getPackageName()));
+                }));
+        recyclerView.setAdapter(adapter);
 
-                    // Save data in background (move saving logic here)
-                    executor.execute(() -> {
-                        ss.saveString(context, "shortcut", appItem.getPackageName());
-                    });
+        List<AppInfo> cached = repository.getCachedApps();
+        if (!cached.isEmpty()) {
+            adapter.submitAppList(cached);
+        } else {
+            // First launch: the cache is not filled yet, so load it off the main thread.
+            EXECUTOR.execute(() -> {
+                List<AppInfo> apps = repository.getAppsBlocking();
+                mainHandler.post(() -> {
+                    if (dialog.isShowing()) {
+                        adapter.submitAppList(apps);
+                    }
                 });
-                recyclerView.setAdapter(adapter);
             });
-        });
+        }
 
         dialog.show();
     }
-    private boolean openapp(String packageName) {
+
+    private boolean openApp(String packageName) {
         PackageManager pm = context.getPackageManager();
-
         try {
-            // Check if the package exists
-            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-
-            // Launch the app
             Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
-            if (launchIntent != null) {
-                // Add flags to clear the back stack if needed
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(launchIntent);
-                return true;
-            } else {
-                // No launcher activity found (might be a service or other component)
+            if (launchIntent == null) {
+                // Installed but without a launcher activity, or uninstalled meanwhile.
                 Toast.makeText(context, "App doesn't have a launcher activity", Toast.LENGTH_SHORT).show();
                 return false;
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            // App not found
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(launchIntent);
+            return true;
+        } catch (Exception e) {
             Toast.makeText(context, "App not installed", Toast.LENGTH_SHORT).show();
             return false;
         }
-
-    }
-
-    private List<AppItem> loadInstalledApps() {
-        List<AppItem> appItems = new ArrayList<>();
-        PackageManager pm = context.getPackageManager();
-
-        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> resolveInfos = pm.queryIntentActivities(mainIntent, 0);
-
-        Set<String> addedPackages = new HashSet<>();
-
-        for (ResolveInfo ri : resolveInfos) {
-            String packageName = ri.activityInfo.packageName;
-            if (!addedPackages.contains(packageName)) {
-                String appName = ri.loadLabel(pm).toString();
-                Drawable icon = ri.loadIcon(pm);
-                appItems.add(new AppItem(appName, packageName, icon));
-                addedPackages.add(packageName);
-            }
-        }
-
-        // Sort alphabetically
-        appItems.sort((o1, o2) -> o1.getAppName().compareToIgnoreCase(o2.getAppName()));
-
-        return appItems;
     }
 }

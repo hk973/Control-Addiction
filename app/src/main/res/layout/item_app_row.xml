@@ -2,8 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/app_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/app_name"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/app_name"
@@ -16,6 +25,7 @@
         android:id="@+id/pin_icon"
         android:layout_width="17dp"
         android:layout_height="17dp"
+        android:contentDescription="@string/app_name"
         android:src="@drawable/pin"
         android:visibility="gone"/>
 

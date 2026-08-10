@@ -53,6 +53,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.data.model.AppInfo;
+import com.genzopia.addiction.ui.common.AppListAdapter;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.button.MaterialButton;
 
@@ -69,7 +71,8 @@ public class MainFragment extends Fragment {
     private RecyclerView recyclerView;
     private EditText searchBar;
     private MaterialButton buttonSetTime;
-    private AppAdapter appAdapter;
+    private AppListAdapter appAdapter;
+    private FastScrollView fastScrollView;
     private ArrayList<String> selectedApps = new ArrayList<>();
     private boolean isTimeSet = false;
     int selectedDays = 0;
@@ -113,18 +116,18 @@ public class MainFragment extends Fragment {
         recyclerView.setVisibility(View.VISIBLE);
           aa = AuthenticationManager.getInstance();
 
-        AppListViewModel viewModel = new ViewModelProvider(requireActivity()).get(AppListViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(AppListViewModel.class);
         viewModel.getAppItemsLiveData().observe(getViewLifecycleOwner(), appItems -> {
             if (appItems != null) {
+                // setupRecyclerView already re-applies the pinned apps and their order.
                 setupRecyclerView(appItems);
-                refreshPinnedApps();
             }
         });
 
     }
-    void showPinnedAppOptions(AppItem_Dataclass appItem) {
+    void showPinnedAppOptions(AppInfo appItem) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(appItem.getName())
+        builder.setTitle(appItem.getLabel())
                 .setItems(new CharSequence[]{"Remove Pin", "Select"}, (dialog, which) -> {
                     switch (which) {
                         case 0: // Remove Pin
@@ -144,7 +147,7 @@ public class MainFragment extends Fragment {
                 .show();
     }
     public interface PinnedAppActionListener {
-        void showPinnedAppOptions(AppItem_Dataclass appItem);
+        void showPinnedAppOptions(AppInfo appItem);
     }
 
     private void toggleAppSelection(String packageName) {
@@ -153,15 +156,21 @@ public class MainFragment extends Fragment {
         } else {
             selectedApps.add(packageName);
         }
-        appAdapter.notifyDataSetChanged();
+        refreshSelectionHighlight();
     }
 
-    void showPinnedAppOptionsSafe(AppItem_Dataclass appItem) {
+    private void refreshSelectionHighlight() {
+        if (appAdapter != null && appAdapter.getItemCount() > 0) {
+            appAdapter.notifyItemRangeChanged(0, appAdapter.getItemCount());
+        }
+    }
+
+    void showPinnedAppOptionsSafe(AppInfo appItem) {
         Context context = getContext();
         if (context == null || !isAdded()) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Appname :"+appItem.getName()) // Cleaner title without "Appname:"
+        builder.setTitle("Appname :" + appItem.getLabel()) // Cleaner title without "Appname:"
                 .setItems(new CharSequence[]{"Remove Pin", "Select"}, (dialog, which) -> {
                     switch (which) {
                         case 0: // Remove Pin
@@ -176,7 +185,7 @@ public class MainFragment extends Fragment {
 
                             // Refresh UI
                             refreshPinnedApps();
-                            Toast.makeText(context, "Unpinned " + appItem.getName(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Unpinned " + appItem.getLabel(), Toast.LENGTH_SHORT).show();
                             break;
 
                         case 1: // Select
@@ -186,43 +195,51 @@ public class MainFragment extends Fragment {
                 }).show();
     }
 
-    private void setupRecyclerView(List<AppItem_Dataclass> appItems) {
-        Pair<List<AppItem_Dataclass>, Integer> processed = (Pair<List<AppItem_Dataclass>, Integer>) processAppList(appItems);
-        List<AppItem_Dataclass> processedList = processed.first;
+    private void setupRecyclerView(List<AppInfo> appItems) {
+        Pair<List<AppInfo>, Integer> processed = processAppList(appItems);
+        List<AppInfo> processedList = processed.first;
         int pinnedCount = processed.second;
+        List<String> pinnedPackages = new SharedPrefHelper(requireContext()).getPinnedApps();
 
         if (appAdapter == null) {
-            appAdapter = new AppAdapter(processedList, selectedApps, requireContext());
-            appAdapter.setPinnedCount(pinnedCount); // Set pinned count
+            AppListAdapter.Config config = new AppListAdapter.Config()
+                    .showPin(true)
+                    .selectable(selectedApps)
+                    .launchOnClick(true)
+                    .onLongClick(app -> {
+                        showPinnedAppOptions(app);
+                        return true;
+                    });
+            appAdapter = new AppListAdapter(requireContext(), config);
             recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
             recyclerView.setAdapter(appAdapter);
 
-            FastScrollView fastScrollView = requireView().findViewById(R.id.fastScrollView);
+            fastScrollView = requireView().findViewById(R.id.fastScrollView);
             fastScrollView.setRecyclerView(recyclerView);
-            appAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onChanged() {
+            appAdapter.setOnListCommittedListener(() -> {
+                if (fastScrollView != null) {
                     fastScrollView.setSections(appAdapter.getSections());
                 }
             });
-            fastScrollView.setSections(appAdapter.getSections());
-        } else {
-            appAdapter.updateData(processedList);
-            appAdapter.setPinnedCount(pinnedCount); // Update pinned count
         }
+
+        appAdapter.setPinnedApps(pinnedPackages);
+        appAdapter.setPinnedCount(pinnedCount);
+        appAdapter.submitAppList(processedList);
     }
 
-    private Pair<List<AppItem_Dataclass>, Integer> processAppList(List<AppItem_Dataclass> appItems) {
+    /** Pinned apps first (in the order the user pinned them), then everything else A-Z. */
+    private Pair<List<AppInfo>, Integer> processAppList(List<AppInfo> appItems) {
         SharedPrefHelper spHelper = new SharedPrefHelper(requireContext());
         List<String> pinnedPackageNames = spHelper.getPinnedApps();
 
         // Use LinkedHashMap to preserve order
-        Map<String, AppItem_Dataclass> appMap = new LinkedHashMap<>();
-        for (AppItem_Dataclass app : appItems) {
+        Map<String, AppInfo> appMap = new LinkedHashMap<>();
+        for (AppInfo app : appItems) {
             appMap.put(app.getPackageName(), app);
         }
 
-        List<AppItem_Dataclass> orderedPinned = new ArrayList<>();
+        List<AppInfo> orderedPinned = new ArrayList<>();
         // Maintain insertion order from SharedPreferences
         for (String packageName : pinnedPackageNames) {
             if (appMap.containsKey(packageName)) {
@@ -231,11 +248,10 @@ public class MainFragment extends Fragment {
         }
 
         // Get remaining apps
-        List<AppItem_Dataclass> otherApps = new ArrayList<>(appMap.values());
-        Collections.sort(otherApps, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+        List<AppInfo> otherApps = new ArrayList<>(appMap.values());
+        Collections.sort(otherApps, (a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
 
-        List<AppItem_Dataclass> combined = new ArrayList<>();
-        combined.addAll(orderedPinned);
+        List<AppInfo> combined = new ArrayList<>(orderedPinned);
         combined.addAll(otherApps);
 
         return new Pair<>(combined, orderedPinned.size());
@@ -334,17 +350,10 @@ public class MainFragment extends Fragment {
             appAdapter.setPinnedApps(pinnedPackageNames);
 
             // Get current list and reorder
-            List<AppItem_Dataclass> currentList = new ArrayList<>(appAdapter.appListFull);
-            Pair<List<AppItem_Dataclass>, Integer> processed = processAppList(currentList);
-
-            // Animate changes
-            applyListChangesWithAnimation(processed.first);
+            Pair<List<AppInfo>, Integer> processed = processAppList(appAdapter.getFullList());
+            appAdapter.setPinnedCount(processed.second);
+            appAdapter.submitAppList(processed.first);
         }
-    }
-    private void applyListChangesWithAnimation(List<AppItem_Dataclass> newList) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new AppDiffCallback(appAdapter.appList, newList));
-        appAdapter.appList = new ArrayList<>(newList);
-        diffResult.dispatchUpdatesTo(appAdapter);
     }
 
     // All original MainActivity2 methods below - unchanged except context access
@@ -699,26 +708,6 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void loadApps() {
-        PackageManager pm = requireActivity().getPackageManager();
-        List<ApplicationInfo> apps = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        List<AppItem_Dataclass> appItems = new ArrayList<>();
-
-        for (ApplicationInfo appInfo : apps) {
-            Intent launchIntent = pm.getLaunchIntentForPackage(appInfo.packageName);
-            if (launchIntent != null) {
-                String appName = pm.getApplicationLabel(appInfo).toString();
-                appItems.add(new AppItem_Dataclass(appName, appInfo.packageName));
-            }
-        }
-
-        // Add alphabetical sorting here
-        Collections.sort(appItems, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
-
-        appAdapter = new AppAdapter(appItems, selectedApps, requireContext());
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recyclerView.setAdapter(appAdapter);
-    }
     // Add these methods to MainFragment
     public boolean isTimeSet() {
         return isTimeSet;

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.genzopia.addiction.R;
@@ -19,11 +20,8 @@ public class BaseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPrefHelper = new SharedPrefHelper(getActivity());  // Use getActivity() to access the context
-
-        // Apply Gray Scale Effect to entire app if the preference is enabled
-        if (sharedPrefHelper.isGrayModeEnabled()) {
-            applyGrayScaleIfNeeded();
+        if (getContext() != null) {
+            sharedPrefHelper = new SharedPrefHelper(getContext());
         }
     }
 
@@ -33,11 +31,16 @@ public class BaseFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_base, container, false);  // Replace with your actual fragment layout
     }
 
-    private void applyGrayScaleIfNeeded() {
-        if (sharedPrefHelper != null && sharedPrefHelper.isGrayModeEnabled()) {
-            // Get the root view of the fragment's view hierarchy
-            View rootView = getView();  // Use getView() to get the current fragment's root view
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // The filter has to be applied here: in onCreate() getView() is still null,
+        // so gray mode silently never reached fragments.
+        applyGrayScaleIfNeeded(view);
+    }
 
+    private void applyGrayScaleIfNeeded(View rootView) {
+        if (sharedPrefHelper != null && sharedPrefHelper.isGrayModeEnabled()) {
             if (rootView != null) {
                 // Set the layer type to hardware to apply the color filter
                 rootView.setLayerType(View.LAYER_TYPE_HARDWARE, null);

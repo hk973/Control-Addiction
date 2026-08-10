@@ -58,11 +58,6 @@ public class TermsFragment extends BasePermissionFragment {
         SharedPrefHelper sharedPrefHelper = new SharedPrefHelper(requireContext());
         termsAccepted = sharedPrefHelper.isTermsAccepted();
 
-        if (termsAccepted) {
-            proceedButton.setEnabled(true);
-            updatePermissionGrantedUI();
-        }
-
         proceedButton.setOnClickListener(v -> {
             termsAccepted = true;
             // Save to shared preferences
@@ -70,10 +65,26 @@ public class TermsFragment extends BasePermissionFragment {
             updatePermissionGrantedUI();
         });
 
-        // Initially disable the proceed button
-        proceedButton.setEnabled(false);
+        // The button stays disabled until the checkbox is ticked. This must be decided
+        // after the listener is set: it used to be disabled again right after the
+        // "already accepted" branch had enabled it.
+        proceedButton.setEnabled(termsAccepted);
+        if (termsAccepted) {
+            updatePermissionGrantedUI();
+        }
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (webView != null) {
+            // A WebView keeps its own native resources and the fragment alive otherwise.
+            webView.stopLoading();
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroyView();
     }
 
     @Override
@@ -91,6 +102,8 @@ public class TermsFragment extends BasePermissionFragment {
     }
 
     private void updatePermissionGrantedUI() {
+        if (!isAdded() || statusImage == null || webView == null) return;
+
         statusImage.setImageResource(R.drawable.ic_check_circle);
         statusText.setText("Terms Accepted");
         statusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.green));
@@ -102,6 +115,8 @@ public class TermsFragment extends BasePermissionFragment {
     }
 
     private void updatePermissionNotGrantedUI() {
+        if (!isAdded() || statusImage == null || webView == null) return;
+
         statusImage.setImageResource(R.drawable.ic_pending);
         statusText.setText("Terms Review Required");
         statusText.setTextColor(ContextCompat.getColor(requireContext(), R.color.red));

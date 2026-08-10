@@ -1,6 +1,7 @@
 package com.genzopia.addiction.Launcher;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,20 +18,32 @@ import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryProductDetailsResult;
-import com.android.billingclient.api.SkuDetails;
-import com.android.billingclient.api.SkuDetailsParams;
 
 import java.util.List;
 
 public class BillingActivity extends AppCompatActivity {
 
+    private static final String TAG = "BillingActivity";
+    private static final String PRODUCT_ID = "unlock_discipline_lock_v2";
+    private static final int MAX_RECONNECT_ATTEMPTS = 3;
+
     private BillingClient billingClient;
     private ProductDetails targetProductDetails;
+    private int reconnectAttempts = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initBillingClient();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (billingClient != null) {
+            billingClient.endConnection();
+            billingClient = null;
+        }
+        super.onDestroy();
     }
 
     private void initBillingClient() {
@@ -46,22 +59,37 @@ public class BillingActivity extends AppCompatActivity {
                 })
                 .build();
 
+        connectBillingClient();
+    }
+
+    private void connectBillingClient() {
+        if (billingClient == null) return;
         billingClient.startConnection(new BillingClientStateListener() {
             @Override public void onBillingSetupFinished(@NonNull BillingResult br) {
+                if (isActivityGone()) return;
                 if (br.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    reconnectAttempts = 0;
                     queryProductDetails();
                 }
             }
             @Override public void onBillingServiceDisconnected() {
-                // retry logic if you want
+                // Bounded retry — an unbounded reconnect loop would spin forever offline.
+                if (isActivityGone()) return;
+                if (reconnectAttempts++ < MAX_RECONNECT_ATTEMPTS) {
+                    connectBillingClient();
+                } else {
+                    Log.w(TAG, "Billing service unavailable after " + MAX_RECONNECT_ATTEMPTS + " retries");
+                }
             }
         });
     }
 
     private void queryProductDetails() {
+        if (billingClient == null) return;
+
         List<QueryProductDetailsParams.Product> productList = List.of(
                 QueryProductDetailsParams.Product.newBuilder()
-                        .setProductId("unlock_discipline_lock_v2")
+                        .setProductId(PRODUCT_ID)
                         .setProductType(BillingClient.ProductType.INAPP)
                         .build()
         );
@@ -70,24 +98,48 @@ public class BillingActivity extends AppCompatActivity {
                 .setProductList(productList)
                 .build();
 
-        // ✅ Anonymous class avoids lambda type-inference ambiguity entirely
+        // Anonymous class avoids lambda type-inference ambiguity entirely
         billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
             @Override
             public void onProductDetailsResponse(@NonNull BillingResult billingResult,
                                                  @NonNull QueryProductDetailsResult result) {
+                if (isActivityGone()) return;
                 if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
                     for (ProductDetails details : result.getProductDetailsList()) {
-                        if ("unlock_discipline_lock_v2".equals(details.getProductId())) {
+                        if (PRODUCT_ID.equals(details.getProductId())) {
                             targetProductDetails = details;
                             break;
                         }
                     }
+                    launchPurchase();
                 }
             }
         });
     }
 
+    /** Starts the billing flow; never runs against a finishing activity. */
+    private void launchPurchase() {
+        if (isActivityGone() || targetProductDetails == null
+                || billingClient == null || !billingClient.isReady()) {
+            return;
+        }
+
+        BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(List.of(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                                .setProductDetails(targetProductDetails)
+                                .build()))
+                .build();
+
+        BillingResult result = billingClient.launchBillingFlow(this, flowParams);
+        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+            Toast.makeText(this, "Unable to start purchase. Try again later.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void handlePurchase(Purchase purchase) {
+        if (billingClient == null) return;
+
         ConsumeParams consumeParams = ConsumeParams.newBuilder()
                 .setPurchaseToken(purchase.getPurchaseToken())
                 .build();
@@ -99,13 +151,25 @@ public class BillingActivity extends AppCompatActivity {
                 prefHelper.saveTimeActivateStatus(false);
                 prefHelper.setDSAChallengeRemainingTime(0);
                 prefHelper.setDSAChallengeActive(false);
-                runOnUiThread(() -> Toast.makeText(this, "Unlocked successfully!", Toast.LENGTH_LONG).show());
+                showToast("Unlocked successfully!");
             } else {
-                runOnUiThread(() -> Toast.makeText(this, "Purchase failed. Try again.", Toast.LENGTH_SHORT).show());
+                showToast("Purchase failed. Try again.");
             }
 
-            finish(); // Close BillingActivity after purchase
+            if (!isActivityGone()) {
+                finish(); // Close BillingActivity after purchase
+            }
         });
     }
-}
 
+    private void showToast(String message) {
+        runOnUiThread(() -> {
+            if (isActivityGone()) return;
+            Toast.makeText(BillingActivity.this, message, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private boolean isActivityGone() {
+        return isFinishing() || isDestroyed();
+    }
+}

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import com.genzopia.addiction.Launcher.NotificationHelper;
+import com.genzopia.addiction.data.AppRepository;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MyApp extends Application {
@@ -13,6 +14,13 @@ public class MyApp extends Application {
         // Create the notification channel as early as possible so FCM messages
         // delivered while the app is killed or in background are never dropped.
         NotificationHelper.createChannel(this);
+
+        // Single source of truth for every app list. Registering the package receiver here
+        // is what makes a newly installed app show up in the drawer without a restart —
+        // the launcher process can stay alive for days, so a one-off load is not enough.
+        AppRepository repository = AppRepository.getInstance(this);
+        repository.registerPackageReceiver();
+        repository.refresh();
 
         // Subscribe to broadcast topic so all installs receive FCM notifications
         // from the Firebase console. Runs once per process start — Firebase SDK

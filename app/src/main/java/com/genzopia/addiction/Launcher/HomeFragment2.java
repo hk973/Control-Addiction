@@ -47,6 +47,15 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HomeFragment2 extends Fragment {
+
+    /** One shared client: building an OkHttpClient per request wastes threads and sockets. */
+    private static final OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
+            .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .build();
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private Handler handler;
     private Runnable updateRunnable;
     private TextView timerText;
@@ -85,6 +94,7 @@ public class HomeFragment2 extends Fragment {
                 fetchLeetcodeScore(new LeetcodeScoreCallback() {
                     @Override
                     public void onSuccess(int fetchedScore) {
+                        if (!isAdded() || getView() == null) return;
                         if (fetchedScore > initialScore) {
                             // ✅ Do something on improvement
                             Toast.makeText(getContext(), "Score improved! 🎉", Toast.LENGTH_SHORT).show();
@@ -104,6 +114,7 @@ public class HomeFragment2 extends Fragment {
 
                     @Override
                     public void onFailure(String errorMessage) {
+                        if (!isAdded() || getView() == null) return;
                         Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
                         leetcodeScoreText.setText("Error");
                     }
@@ -113,22 +124,28 @@ public class HomeFragment2 extends Fragment {
 
         // Check DSA challenge status
         checkDsaChallengeStatus();
-        ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
+        showShortcutIcon(view);
+    }
+
+    /** Paints the shortcut button with the icon of the assigned app, if it is still installed. */
+    private void showShortcutIcon(View view) {
+        Context context = getContext();
+        if (context == null) return;
+
+        ImageView shortcutButton = view.findViewById(R.id.cameraButton);
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0); // 0 = grayscale
-        cameraButton.setColorFilter(new ColorMatrixColorFilter(matrix));
-        SharedPrefHelper ss=new SharedPrefHelper(getContext());
-        String packagename = ss.getString(getContext(),"shortcut","");
-        PackageManager pmm = getContext().getPackageManager();
+        shortcutButton.setColorFilter(new ColorMatrixColorFilter(matrix));
 
-// Get app icon and label
+        String shortcutPackage = new SharedPrefHelper(context).getString(context, "shortcut", "");
+        if (shortcutPackage == null || shortcutPackage.isEmpty()) return;
+
         try {
-            ApplicationInfo appInfo = pmm.getApplicationInfo(packagename, 0);
-            Drawable appIcon = appInfo.loadIcon(pmm); // Returns Drawable
-            // Use in ImageView/TextView
-            cameraButton.setImageDrawable(appIcon);
+            PackageManager pm = context.getPackageManager();
+            shortcutButton.setImageDrawable(pm.getApplicationInfo(shortcutPackage, 0).loadIcon(pm));
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            // Shortcut target uninstalled — keep the default icon.
+            Log.d("HomeFragment2", "Shortcut app not installed: " + shortcutPackage);
         }
     }
 
@@ -151,11 +168,13 @@ public class HomeFragment2 extends Fragment {
             fetchLeetcodeScore(new LeetcodeScoreCallback() {
                 @Override
                 public void onSuccess(int fetchedScore) {
+                    if (!isAdded() || getView() == null) return;
                     leetcodeScoreText.setText("LeetCode Score: " + fetchedScore);
                 }
 
                 @Override
                 public void onFailure(String errorMessage) {
+                    if (!isAdded() || getView() == null) return;
                     leetcodeScoreText.setText("Fetching failed ...");
                 }
             });
@@ -163,25 +182,8 @@ public class HomeFragment2 extends Fragment {
     }
 
     private void setupChallengeActiveState() {
-        Context context = getContext();
-        SharedPrefHelper sp = new SharedPrefHelper(context);
-        long time = sp.getTimeLimitValue();
-        long startTime = sp.getStartTime();
-
-        ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
-        ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0);
-        cameraButton.setColorFilter(new ColorMatrixColorFilter(matrix));
-
-        String packageName = sp.getString(context, "shortcut", "");
-        PackageManager pm = context.getPackageManager();
-
-        try {
-            ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
-            Drawable appIcon = appInfo.loadIcon(pm);
-            cameraButton.setImageDrawable(appIcon);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        if (getView() != null) {
+            showShortcutIcon(getView());
         }
     }
 
@@ -193,12 +195,6 @@ public class HomeFragment2 extends Fragment {
             callback.onFailure("Username not set");
             return;
         }
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .build();
 
         String payload = "{"
                 + "\"query\":\"query getUserProfile($username: String!) { "
@@ -214,16 +210,17 @@ public class HomeFragment2 extends Fragment {
                 .post(body)
                 .build();
 
-        client.newCall(request).enqueue(new Callback() {
+        HTTP_CLIENT.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Unable to fetch data. Please check your internet connection."));
+                mainHandler.post(() -> callback.onFailure("Unable to fetch data. Please check your internet connection."));
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Server error"));
+                    response.close();
+                    mainHandler.post(() -> callback.onFailure("Server error"));
                     return;
                 }
 
@@ -247,8 +244,9 @@ public class HomeFragment2 extends Fragment {
                         }
                     }
 
-                    int finalScore = totalSolved/2;
-                    new Handler(Looper.getMainLooper()).post(() -> {
+                    // -1 means "no such user"; dividing first would turn it into a valid 0.
+                    final int finalScore = totalSolved < 0 ? -1 : totalSolved / 2;
+                    mainHandler.post(() -> {
                         if (finalScore >= 0) {
                             callback.onSuccess(finalScore);
                         } else {
@@ -258,24 +256,15 @@ public class HomeFragment2 extends Fragment {
 
                 } catch (Exception e) {
                     Log.e("LeetCode", "Parsing error", e);
-                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error parsing data"));
+                    mainHandler.post(() -> callback.onFailure("Error parsing data"));
+                } finally {
+                    response.close();
                 }
             }
         });
     }
 
 
-    private void updateScoreText(String text) {
-        new Handler(Looper.getMainLooper()).post(() ->
-                leetcodeScoreText.setText(text)
-        );
-    }
-
-    private void updateScoreText(int score) {
-        new Handler(Looper.getMainLooper()).post(() ->
-                leetcodeScoreText.setText("LeetCode Score: " + score)
-        );
-    }
 
     // Rest of the class remains the same (onResume, onPause, timer methods, etc.)
     @Override
@@ -288,7 +277,8 @@ public class HomeFragment2 extends Fragment {
     }
 
     private void startRealtimeUpdatesdsa() {
-        handler = new Handler();
+        stopRealtimeUpdates();
+        handler = new Handler(Looper.getMainLooper());
         updateRunnable = new Runnable() {
             @Override
             public void run() {
@@ -307,8 +297,21 @@ public class HomeFragment2 extends Fragment {
         stopRealtimeUpdates();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopRealtimeUpdates();
+        mainHandler.removeCallbacksAndMessages(null);
+        timerText = null;
+        leetcodeScoreText = null;
+        dsaInactiveLayout = null;
+        bottomBar = null;
+        syncButton = null;
+    }
+
     private void startRealtimeUpdates() {
-        handler = new Handler();
+        stopRealtimeUpdates();
+        handler = new Handler(Looper.getMainLooper());
         updateRunnable = new Runnable() {
             @Override
             public void run() {
@@ -326,11 +329,13 @@ public class HomeFragment2 extends Fragment {
     }
 
     private void updateCountdown() {
-        SharedPrefHelper sp = new SharedPrefHelper(requireContext());
-        long remaintime = sp.getRemainingTimeMillis();
+        // The ticker can outlive the view by one frame, so bail out instead of crashing.
+        if (getContext() == null || timerText == null) return;
+        long remaintime = new SharedPrefHelper(getContext()).getRemainingTimeMillis();
         timerText.setText(formatTime(remaintime / 1000));
     }
     private void updateCountdowndsa() {
+        if (timerText == null || spp == null) return;
         long now = System.currentTimeMillis();
         long endTime = spp.getDSAChallengeRemainingTime();
         long remainingMillis = endTime - now;
@@ -385,8 +390,16 @@ public class HomeFragment2 extends Fragment {
         ImageView phoneButton = requireView().findViewById(R.id.phoneButton);
         ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
 
-        phoneButton.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_DIAL)));
-        cameraButton.setOnClickListener(v -> new PopupSelectApp(getContext()).showlock(cameraButton));
+        phoneButton.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_DIAL));
+            } catch (android.content.ActivityNotFoundException e) {
+                Toast.makeText(requireContext(), "No dialer app found", Toast.LENGTH_SHORT).show();
+            }
+        });
+        cameraButton.setOnClickListener(v -> {
+            if (isAdded()) new PopupSelectApp(requireContext()).showlock(cameraButton);
+        });
 
 
     }

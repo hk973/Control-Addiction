@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -39,30 +40,32 @@ import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.data.AppRepository;
+import com.genzopia.addiction.data.model.AppInfo;
+import com.genzopia.addiction.ui.common.AppListAdapter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SelectedAppsFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private SelectedAppsAdapter adapter;
-    private PackageManager packageManager;
+    private AppListAdapter adapter;
     private SharedPrefHelper sharedPrefHelper;
     private EditText searchBar;
+    private AppRepository appRepository;
 
     // Billing
     private BillingClient billingClient;
     private ProductDetails targetProductDetails;
 
     // in‑memory lists
-    private final List<String> allPackages      = new ArrayList<>();
-    private final List<String> allAppNames      = new ArrayList<>();
+    private List<AppInfo> allApps = new ArrayList<>();
     private final List<String> selectedPackages = new ArrayList<>();
-    private final List<String> selectedNames    = new ArrayList<>();
 
     // time‑check if you need to redirect on expiry
-    private final Handler timeCheckHandler = new Handler();
+    private final Handler timeCheckHandler = new Handler(Looper.getMainLooper());
     private static final long CHECK_INTERVAL = 1_000;
 
     @Override
@@ -75,8 +78,8 @@ public class SelectedAppsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        packageManager   = requireActivity().getPackageManager();
         sharedPrefHelper = new SharedPrefHelper(requireContext());
+        appRepository = AppRepository.getInstance(requireContext());
 
         // 1) init billing & menu
         initBillingClient();
@@ -89,44 +92,25 @@ public class SelectedAppsFragment extends Fragment {
         // 3) load “selected” from prefs
         selectedPackages.clear();
         selectedPackages.addAll(sharedPrefHelper.getSelectedAppValue());
-        selectedNames.clear();
-        selectedNames.addAll(getAppNamesFromPackageNames(selectedPackages));
 
-        // 4) create adapter starting with selected apps
-        adapter = new SelectedAppsAdapter(
-                requireContext(),
-                selectedNames,
-                selectedPackages
-        );
+        // 4) create the shared adapter; launching follows the click-to-open preference
+        adapter = new AppListAdapter(requireContext(), new AppListAdapter.Config()
+                .launchOnClick(true)
+                .clickToOpenAware(true));
         recyclerView.setAdapter(adapter);
 
-        // 5) fetch all installed apps once, in background
-        new Thread(() -> {
-            Intent intent = new Intent(Intent.ACTION_MAIN, null);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(intent, 0);
-
-            allAppNames.clear();
-            allPackages.clear();
-
-            for (ResolveInfo resolveInfo : resolveInfos) {
-                ActivityInfo activityInfo = resolveInfo.activityInfo;
-                String packageName = activityInfo.packageName;
-                String appName = resolveInfo.loadLabel(packageManager).toString();
-
-                allPackages.add(packageName);
-                allAppNames.add(appName);
-            }
-
-            requireActivity().runOnUiThread(this::refreshList);
-        }).start();
-
+        // 5) the repository keeps the installed-app list up to date for us
+        appRepository.getApps().observe(getViewLifecycleOwner(), apps -> {
+            allApps = apps == null ? new ArrayList<>() : apps;
+            refreshList();
+        });
+        appRepository.refresh();
 
         // 6) hook up search bar
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.filter(s.toString());
+                adapter.getFilter().filter(s);
             }
             @Override public void afterTextChanged(Editable s) {}
         });
@@ -145,16 +129,30 @@ public class SelectedAppsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         timeCheckHandler.removeCallbacksAndMessages(null);
+        if (billingClient != null) {
+            try {
+                billingClient.endConnection();
+            } catch (Exception ignored) {
+                // Already disconnected.
+            }
+            billingClient = null;
+        }
     }
 
     /** Runnable that you already had for time‑expiry redirect */
     private final Runnable timeCheckRunnable = () -> {
-        boolean active = new SharedPrefHelper(requireContext()).getTimeActivateStatus();
+        // The fragment may already be detached when this fires, so nothing here may use require*().
+        Context ctx = getContext();
+        if (ctx == null || !isAdded()) return;
+
+        boolean active = new SharedPrefHelper(ctx).getTimeActivateStatus();
         if (!active) {
-            Intent it = new Intent(getContext(), MainContainerActivity.class);
+            Intent it = new Intent(ctx, MainContainerActivity.class);
             it.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(it);
-            requireActivity().finish();
+            if (getActivity() != null) {
+                getActivity().finish();
+            }
         } else {
             timeCheckHandler.postDelayed(this.timeCheckRunnable, CHECK_INTERVAL);
         }
@@ -165,21 +163,29 @@ public class SelectedAppsFragment extends Fragment {
      *  else             → show all installed
      */
     private void refreshList() {
-        long remaining = sharedPrefHelper.getDSAChallengeRemainingTime()-System.currentTimeMillis();
+        if (adapter == null || !isAdded()) return;
+
+        long remaining = sharedPrefHelper.getDSAChallengeRemainingTime() - System.currentTimeMillis();
+        List<AppInfo> visible;
+        ArrayList<String> allowed;
+
         if (remaining <= 0) {
-            if(sharedPrefHelper.isDSAChallengeActive()){
-                ArrayList<String> k=new ArrayList<>();
-                adapter.updateData(k,k);
-                sharedPrefHelper.set_selectedApps(k);
-            }else{
-            adapter.updateData(selectedNames, selectedPackages);
-            sharedPrefHelper.set_selectedApps((ArrayList<String>) selectedPackages);
+            if (sharedPrefHelper.isDSAChallengeActive()) {
+                // Challenge running with no earned time left: nothing is allowed.
+                visible = Collections.emptyList();
+                allowed = new ArrayList<>();
+            } else {
+                visible = appRepository.toAppInfos(selectedPackages);
+                allowed = new ArrayList<>(selectedPackages);
             }
         } else {
-            adapter.updateData(allAppNames, allPackages);
-            sharedPrefHelper.set_selectedApps((ArrayList<String>) allPackages);
-
+            // Earned reward time: every installed app is temporarily allowed.
+            visible = allApps;
+            allowed = new ArrayList<>(appRepository.getAllPackages());
         }
+
+        adapter.submitAppList(visible);
+        sharedPrefHelper.set_selectedApps(allowed);
     }
 
     //─── billing helpers ─────────────────────────────────────────────────────────
@@ -419,16 +425,4 @@ public class SelectedAppsFragment extends Fragment {
         return Math.max(min, Math.min(max, val));
     }
 
-    //─── helper to map packages → labels ────────────────────────────────────────
-
-    private List<String> getAppNamesFromPackageNames(List<String> pkgs) {
-        List<String> labels = new ArrayList<>();
-        for (String pkg : pkgs) {
-            try {
-                ApplicationInfo ai = packageManager.getApplicationInfo(pkg, 0);
-                labels.add(packageManager.getApplicationLabel(ai).toString());
-            } catch (PackageManager.NameNotFoundException ignored) {}
-        }
-        return labels;
-    }
 }

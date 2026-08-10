@@ -18,6 +18,8 @@ public class AppUpdateChecker implements DefaultLifecycleObserver {
 
     private final Activity activity;
     private boolean updateChecked = false;
+    /** Guards against a second IMMEDIATE flow while the Play dialog is already up. */
+    private boolean updateFlowStarted = false;
 
     public AppUpdateChecker(Activity activity) {
         this.activity = activity;
@@ -80,7 +82,12 @@ public class AppUpdateChecker implements DefaultLifecycleObserver {
     }
 
     private void startUpdateFlow(AppUpdateManager appUpdateManager, AppUpdateInfo appUpdateInfo) {
+        if (updateFlowStarted) {
+            Log.d(TAG, "Update flow already started, skipping");
+            return;
+        }
         if (isActivityValid()) {
+            updateFlowStarted = true;
             try {
                 Log.i(TAG, "Starting update flow...");
                 appUpdateManager.startUpdateFlowForResult(

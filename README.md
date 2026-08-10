@@ -18,12 +18,21 @@
 
 ## 📦 Project Structure (for Developers)
 
+📖 **Full map of the codebase: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — screen flow,
+package layout, the app-list data layer, every SharedPreferences key, the enforcement engine
+and the rules that must not be broken when refactoring (most importantly: **never rename a
+class declared in `AndroidManifest.xml`** — the default-launcher choice and the granted
+accessibility permission are keyed on the component name).
+
 | Component | Purpose |
 |----------|---------|
+| `data.AppRepository` | Single source of truth for the installed-app list; auto-refreshes on install/uninstall |
+| `ui.common.AppListAdapter` | The one adapter used by every app list (drawer, locked drawer, shortcut picker) |
 | `PopupActivity` | Displays a blocking dialog when a restricted app is opened |
 | `MainContainerActivity` | Custom launcher screen (replaces the default home screen) |
+| `NotificationBarDetectorService` | Accessibility service that detects and interrupts blocked apps |
 | `SharedPrefHelper` | Manages app blocking and timer preferences locally |
-| `BillingClient` | Handles in-app purchases like `unlock_discipline_lock_v2` |
+| `BillingActivity` | Handles in-app purchases like `unlock_discipline_lock_v2` |
 
 ---
 

@@ -48,11 +48,12 @@ public class LauncherPermissionFragment extends BasePermissionFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!isAdded()) return;
                 if (isMyAppDefaultLauncher()) {
                     // Fire your intent (example: launch MainActivity)
                     Intent intent = new Intent(getContext(), MainContainerActivity.class);
                     startActivity(intent);
-                    requireActivity().finish();
+                    if (getActivity() != null) getActivity().finish();
                 } else {
                     // Show toast
                     Toast.makeText(getContext(), "Please set this app as the default launcher", Toast.LENGTH_SHORT).show();
@@ -75,16 +76,32 @@ public class LauncherPermissionFragment extends BasePermissionFragment {
     }
 
     private void requestHomeLauncherPermission() {
-        Intent intent = new Intent(Settings.ACTION_HOME_SETTINGS);
-        startActivity(intent);
+        if (!isAdded()) return;
+        try {
+            startActivity(new Intent(Settings.ACTION_HOME_SETTINGS));
+        } catch (Exception e) {
+            // Not every ROM exposes the "default home app" screen directly.
+            try {
+                startActivity(new Intent(Settings.ACTION_SETTINGS));
+            } catch (Exception ignored) {
+                android.widget.Toast.makeText(requireContext(),
+                        "Please set this app as your home app in system settings",
+                        android.widget.Toast.LENGTH_LONG).show();
+            }
+        }
     }
     private boolean isMyAppDefaultLauncher() {
+        if (getContext() == null) return false;
+
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
-        ResolveInfo resolveInfo = requireContext().getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        String currentLauncherPackage = resolveInfo.activityInfo.packageName;
+        // resolveActivity() returns null while the system is still asking the user
+        // which home app to use, so it must be null-checked.
+        ResolveInfo resolveInfo = requireContext().getPackageManager()
+                .resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfo == null || resolveInfo.activityInfo == null) return false;
 
-        return currentLauncherPackage.equals(requireContext().getPackageName());
+        return requireContext().getPackageName().equals(resolveInfo.activityInfo.packageName);
     }
 
     @Override

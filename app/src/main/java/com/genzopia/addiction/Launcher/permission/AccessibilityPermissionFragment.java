@@ -1,6 +1,7 @@
 package com.genzopia.addiction.Launcher.permission;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -108,8 +109,16 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
         dialog.show();
     }
     private void openAccessibilitySettings() {
-        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY_PERMISSION);
+        if (!isAdded()) return;
+        try {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            startActivityForResult(intent, REQUEST_CODE_ACCESSIBILITY_PERMISSION);
+        } catch (Exception e) {
+            // Some OEM ROMs do not expose this settings screen.
+            android.widget.Toast.makeText(requireContext(),
+                    "Please enable Accessibility for this app in system settings",
+                    android.widget.Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -131,13 +140,17 @@ public class AccessibilityPermissionFragment extends BasePermissionFragment {
 
     @Override
     public boolean isPermissionGranted() {
-        String serviceId = getContext().getPackageName() + "/" + NotificationBarDetectorService.class.getCanonicalName();
+        Context context = getContext();
+        if (context == null) return false;
+
+        String serviceId = context.getPackageName() + "/" + NotificationBarDetectorService.class.getCanonicalName();
+
+        // Null on a fresh device where no service was ever enabled.
         String enabledServices = Settings.Secure.getString(
-                getContext().getContentResolver(),
+                context.getContentResolver(),
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         );
-
-        if (enabledServices == null) return false;
+        if (enabledServices == null || enabledServices.isEmpty()) return false;
 
         TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
         splitter.setString(enabledServices);

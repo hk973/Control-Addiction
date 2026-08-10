@@ -1,20 +1,22 @@
 package com.genzopia.addiction.Launcher;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.PowerManager;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -34,29 +36,30 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupStatusBar();
         setupShortcuts();
-       Context context=getContext();
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        String packageName = context.getPackageName();
+        showShortcutIcon(view);
+    }
 
-        ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
+    /** Paints the shortcut button with the icon of the app the user assigned, if any. */
+    private void showShortcutIcon(View view) {
+        Context context = getContext();
+        if (context == null) return;
+
+        ImageView shortcutButton = view.findViewById(R.id.cameraButton);
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0); // 0 = grayscale
-        cameraButton.setColorFilter(new ColorMatrixColorFilter(matrix));
-        SharedPrefHelper ss=new SharedPrefHelper(getContext());
-        String packagename = ss.getString(context,"shortcut","");
-        PackageManager pmm = context.getPackageManager();
+        shortcutButton.setColorFilter(new ColorMatrixColorFilter(matrix));
 
-// Get app icon and label
+        String shortcutPackage = new SharedPrefHelper(context).getString(context, "shortcut", "");
+        if (TextUtils.isEmpty(shortcutPackage)) return;
+
         try {
-            ApplicationInfo appInfo = pmm.getApplicationInfo(packagename, 0);
-            Drawable appIcon = appInfo.loadIcon(pmm); // Returns Drawable
-            // Use in ImageView/TextView
-            cameraButton.setImageDrawable(appIcon);
+            PackageManager pm = context.getPackageManager();
+            Drawable icon = pm.getApplicationInfo(shortcutPackage, 0).loadIcon(pm);
+            shortcutButton.setImageDrawable(icon);
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            // The shortcut target was uninstalled — keep the default icon.
+            Log.d("HomeFragment", "Shortcut app not installed: " + shortcutPackage);
         }
-
-
     }
 
 
@@ -80,14 +83,20 @@ public class HomeFragment extends Fragment {
         ImageView phoneButton = requireView().findViewById(R.id.phoneButton);
         ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
 
-        phoneButton.setOnClickListener(v -> startActivity(new Intent(Intent.ACTION_DIAL)));
-        cameraButton.setOnClickListener(v -> new PopupSelectApp(getContext()).show(cameraButton));
-        cameraButton.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                new PopupSelectApp(getContext()).show2( cameraButton);
-                return false;
+        phoneButton.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_DIAL));
+            } catch (ActivityNotFoundException e) {
+                // Tablets and some ROMs have no dialer at all.
+                Toast.makeText(requireContext(), "No dialer app found", Toast.LENGTH_SHORT).show();
             }
+        });
+        cameraButton.setOnClickListener(v -> {
+            if (isAdded()) new PopupSelectApp(requireContext()).show(cameraButton);
+        });
+        cameraButton.setOnLongClickListener(view -> {
+            if (isAdded()) new PopupSelectApp(requireContext()).show2(cameraButton);
+            return true;
         });
     }
 }
