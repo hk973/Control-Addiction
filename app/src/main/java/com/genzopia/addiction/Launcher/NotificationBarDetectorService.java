@@ -1,8 +1,6 @@
 package com.genzopia.addiction.Launcher;
 
 import android.accessibilityservice.AccessibilityService;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -53,14 +51,9 @@ public class NotificationBarDetectorService extends AccessibilityService {
             final String action = intent == null ? null : intent.getAction();
             if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 isScreenOn = true;
-                // Resume notification ticker — value is always accurate since it's
-                // derived from System.currentTimeMillis(), same as HomeFragment2
-                mainHandler.post(NotificationBarDetectorService.this::startTimerNotification);
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 isScreenOn = false;
                 stopPolling();
-                // Stop the ticker to save battery — notification will refresh on screen-on
-                mainHandler.post(NotificationBarDetectorService.this::stopTimerNotifTicker);
             }
         }
     };
@@ -109,7 +102,6 @@ public class NotificationBarDetectorService extends AccessibilityService {
                     prefHelper.saveStartTime(System.currentTimeMillis());
                     prefHelper.saveInitialDuration(durationSec);
                     prefHelper.saveTimeActivateStatus(true);
-                    startTimerNotification();
                 }
             }
 
@@ -274,77 +266,9 @@ public class NotificationBarDetectorService extends AccessibilityService {
         return instance;
     }
 
-    // ---- Timer notification ----
-    private Handler timerNotifHandler;
-    private Runnable timerNotifRunnable;
-
     /** Minimum gap between two blocking popups. */
     private static final long BLOCK_TRIGGER_THROTTLE_MS = 2000L;
     private volatile long lastBlockTriggerMs = 0L;
-
-    private void startTimerNotification() {
-        SharedPrefHelper sp = new SharedPrefHelper(this);
-        if (!sp.getTimeActivateStatus()) return;
-
-        // Stop any existing ticker before starting a new one
-        stopTimerNotifTicker();
-
-        NotificationHelper.createChannel(this);
-        Notification notif = NotificationHelper.buildTimerNotification(this, getFormattedRemaining());
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NotificationHelper.TIMER_NOTIF_ID, notif,
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
-        } else {
-            startForeground(NotificationHelper.TIMER_NOTIF_ID, notif);
-        }
-
-        timerNotifHandler = new Handler(Looper.getMainLooper());
-        timerNotifRunnable = new Runnable() {
-            @Override
-            public void run() {
-                SharedPrefHelper sp = new SharedPrefHelper(NotificationBarDetectorService.this);
-                if (sp.getTimeActivateStatus()) {
-                    NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    if (nm != null) {
-                        nm.notify(NotificationHelper.TIMER_NOTIF_ID,
-                                NotificationHelper.buildTimerNotification(
-                                        NotificationBarDetectorService.this,
-                                        getFormattedRemaining()));
-                    }
-                    timerNotifHandler.postDelayed(this, 1000);
-                } else {
-                    // Lock mode ended naturally — award session completion XP
-                    GamificationManager.onSessionCompleted(getApplicationContext());
-                    // Dismiss notification entirely
-                    stopTimerNotification();
-                }
-            }
-        };
-        timerNotifHandler.postDelayed(timerNotifRunnable, 1000);
-    }
-
-    /** Stops only the ticker — notification stays visible with last value. */
-    private void stopTimerNotifTicker() {
-        if (timerNotifHandler != null && timerNotifRunnable != null) {
-            timerNotifHandler.removeCallbacks(timerNotifRunnable);
-        }
-    }
-
-    /** Stops the ticker AND removes the notification (lock mode ended). */
-    private void stopTimerNotification() {
-        stopTimerNotifTicker();
-        stopForeground(true);
-    }
-
-    private String getFormattedRemaining() {
-        SharedPrefHelper sp = new SharedPrefHelper(this);
-        long remainMillis = sp.getRemainingTimeMillis();
-        long totalSecs = remainMillis / 1000;
-        long h = totalSecs / 3600;
-        long m = (totalSecs % 3600) / 60;
-        long s = totalSecs % 60;
-        return String.format("%02d:%02d:%02d", h, m, s);
-    }
 
     private void triggerBlockingPopup() {
         // The poll loop can detect the same screen many times in a row; starting the
@@ -391,11 +315,6 @@ public class NotificationBarDetectorService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         instance = this;
-        // NOTE: a process-wide default uncaught-exception handler used to be installed here
-        // to restart this service. It swallowed crashes and kept a dying process alive
-        // (reported as "Slow exit" ANRs). The system rebinds an accessibility service on
-        // its own, so the handler was removed.
-        startTimerNotification();
     }
 
     @Override
@@ -410,7 +329,6 @@ public class NotificationBarDetectorService extends AccessibilityService {
             isReceiverRegistered = false;
         }
         stopPolling();
-        stopTimerNotification();
         if (workerThread != null) {
             // quitSafely() does not block the caller, unlike quit() + join().
             workerThread.quitSafely();

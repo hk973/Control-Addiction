@@ -13,8 +13,6 @@
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- Required for AppUsageTracker — user must grant manually in Settings → Usage Access -->
     <uses-permission
@@ -127,7 +125,6 @@
         <service
             android:name=".Launcher.NotificationBarDetectorService"
             android:exported="true"
-            android:foregroundServiceType="specialUse"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -135,10 +132,6 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
-            <!-- Required by Play Store for FOREGROUND_SERVICE_SPECIAL_USE -->
-            <property
-                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="This service runs a persistent timer notification to track and enforce app usage time limits set by the user. It is an accessibility service that monitors which app is in the foreground and blocks restricted apps when the timer expires." />
         </service>
 
         <!-- Quick Settings Tile -->
