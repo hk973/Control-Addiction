@@ -11,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -18,6 +19,8 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+
+import androidx.core.content.ContextCompat;
 
 import com.genzopia.addiction.R;
 
@@ -29,24 +32,35 @@ public class NotificationBarDetectorService extends AccessibilityService {
     private volatile boolean mIsAuthenticating;
     private boolean isPollingAppInfo = false;
 
-    private Handler pollingHandler;
+    /** Interval of the anti-tamper node-tree scan. */
+    private static final long POLL_INTERVAL_MS = 400L;
+    /** Hard depth limit for the recursive node scan so a deep tree can never stall a thread. */
+    private static final int MAX_NODE_DEPTH = 12;
+
+    private HandlerThread workerThread;
+    private Handler workerHandler;
+    private Handler mainHandler;
     private Runnable pollingRunnable;
     private PowerManager powerManager;
-    private boolean isScreenOn = true;
+    private volatile boolean isScreenOn = true;
+    private boolean isReceiverRegistered = false;
 
     private final BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+            // Runs on the worker thread (see registerReceiver below), so the disk reads
+            // done here can never block the main thread while the broadcast is dispatched.
+            final String action = intent == null ? null : intent.getAction();
+            if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 isScreenOn = true;
                 // Resume notification ticker — value is always accurate since it's
                 // derived from System.currentTimeMillis(), same as HomeFragment2
-                startTimerNotification();
-            } else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                mainHandler.post(NotificationBarDetectorService.this::startTimerNotification);
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 isScreenOn = false;
                 stopPolling();
                 // Stop the ticker to save battery — notification will refresh on screen-on
-                stopTimerNotifTicker();
+                mainHandler.post(NotificationBarDetectorService.this::stopTimerNotifTicker);
             }
         }
     };
@@ -55,16 +69,29 @@ public class NotificationBarDetectorService extends AccessibilityService {
     public void onCreate() {
         super.onCreate();
 
-        pollingHandler = new Handler(Looper.getMainLooper());
+        mainHandler = new Handler(Looper.getMainLooper());
+        workerThread = new HandlerThread("BlockerWorker");
+        workerThread.start();
+        workerHandler = new Handler(workerThread.getLooper());
+
         powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        isScreenOn = powerManager.isInteractive();
+        isScreenOn = powerManager == null || powerManager.isInteractive();
 
         AuthenticationManager.getInstance().addListener(newState -> {
             mIsAuthenticating = (newState == Authentication.going);
         });
 
-        registerReceiver(screenReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
-        registerReceiver(screenReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+        // One filter for both protected system actions, delivered on the worker thread.
+        IntentFilter screenFilter = new IntentFilter();
+        screenFilter.addAction(Intent.ACTION_SCREEN_ON);
+        screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        try {
+            ContextCompat.registerReceiver(this, screenReceiver, screenFilter, null,
+                    workerHandler, ContextCompat.RECEIVER_NOT_EXPORTED);
+            isReceiverRegistered = true;
+        } catch (Exception e) {
+            Log.e("AccessibilityService", "Failed to register screen receiver", e);
+        }
     }
 
     @Override
@@ -89,9 +116,10 @@ public class NotificationBarDetectorService extends AccessibilityService {
             if ((eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
                     eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)) {
 
-                if (!isPollingAppInfo && isScreenOn) {
+                if (!isPollingAppInfo && isScreenOn && workerHandler != null) {
                     isPollingAppInfo = true;
 
+                    final String appName = getString(R.string.app_name);
                     pollingRunnable = new Runnable() {
                         @Override
                         public void run() {
@@ -100,17 +128,29 @@ public class NotificationBarDetectorService extends AccessibilityService {
                                 return;
                             }
 
-                            AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-                            if (rootNode != null && isAppInfoScreen(rootNode, getString(R.string.app_name))) {
-                                Log.d("BLOCKER", "User is in App Info");
-                                triggerBlockingPopup();
+                            // Walking the whole node tree is expensive, so it runs on the
+                            // worker thread instead of the main thread.
+                            AccessibilityNodeInfo rootNode = null;
+                            try {
+                                rootNode = getRootInActiveWindow();
+                                if (rootNode != null && isAppInfoScreen(rootNode, appName)) {
+                                    triggerBlockingPopup();
+                                }
+                            } catch (Exception e) {
+                                Log.e("AccessibilityService", "Node scan failed", e);
+                            } finally {
+                                if (rootNode != null) {
+                                    rootNode.recycle();
+                                }
                             }
 
-                            pollingHandler.postDelayed(this, 120);
+                            if (workerHandler != null) {
+                                workerHandler.postDelayed(this, POLL_INTERVAL_MS);
+                            }
                         }
                     };
 
-                    pollingHandler.post(pollingRunnable);
+                    workerHandler.post(pollingRunnable);
                 }
             }
 
@@ -121,7 +161,6 @@ public class NotificationBarDetectorService extends AccessibilityService {
 
     private void handleWindowChange(String pkg, String className, SharedPrefHelper prefHelper) {
         ArrayList<String> allowedApps = prefHelper.getSelectedAppValue();
-        Log.e("test99", pkg + className);
 
         if (allowedApps == null || allowedApps.contains(pkg)) return;
         if (className.equals(mLockClassName)) return;
@@ -140,14 +179,12 @@ public class NotificationBarDetectorService extends AccessibilityService {
 
         if (isPredefinedSystemApp(pkg)) {
             if (!prefHelper.appWithNoWarning().contains(pkg)) {
-                Log.e("test999", pkg + className);
                 triggerBlockingPopup();
             }
             return;
         }
 
         if (isValidApplication(pkg) && !prefHelper.appWithNoWarning().contains(pkg)) {
-            Log.e("test9999", pkg + className);
             triggerBlockingPopup();
         }
 
@@ -157,14 +194,14 @@ public class NotificationBarDetectorService extends AccessibilityService {
     }
 
     private boolean isAppInfoScreen(AccessibilityNodeInfo rootNode, String yourAppName) {
-        boolean foundDangerousAction = containsKeyword(rootNode, "uninstall", "force stop","clear data","clear cache","accessibility","talkback");
-        boolean foundAppName = containsKeyword(rootNode, yourAppName);
-        Log.e("testinfoscreen", "action=" + foundDangerousAction + " appname=" + foundAppName);
-        return foundAppName & foundDangerousAction;
+        // Short-circuit with && so the second, usually pointless tree walk is skipped.
+        return containsKeyword(rootNode, 0, "uninstall", "force stop", "clear data",
+                "clear cache", "accessibility", "talkback")
+                && containsKeyword(rootNode, 0, yourAppName);
     }
 
-    private boolean containsKeyword(AccessibilityNodeInfo node, String... keywords) {
-        if (node == null) return false;
+    private boolean containsKeyword(AccessibilityNodeInfo node, int depth, String... keywords) {
+        if (node == null || depth > MAX_NODE_DEPTH) return false;
 
         CharSequence text = node.getText();
         if (text != null) {
@@ -176,9 +213,17 @@ public class NotificationBarDetectorService extends AccessibilityService {
             }
         }
 
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (containsKeyword(node.getChild(i), keywords)) {
-                return true;
+        int childCount = node.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            AccessibilityNodeInfo child = node.getChild(i);
+            if (child == null) continue;
+            try {
+                if (containsKeyword(child, depth + 1, keywords)) {
+                    return true;
+                }
+            } finally {
+                // Nodes obtained from getChild() must be released or the service leaks them.
+                child.recycle();
             }
         }
 
@@ -217,6 +262,10 @@ public class NotificationBarDetectorService extends AccessibilityService {
     // ---- Timer notification ----
     private Handler timerNotifHandler;
     private Runnable timerNotifRunnable;
+
+    /** Minimum gap between two blocking popups. */
+    private static final long BLOCK_TRIGGER_THROTTLE_MS = 2000L;
+    private volatile long lastBlockTriggerMs = 0L;
 
     private void startTimerNotification() {
         SharedPrefHelper sp = new SharedPrefHelper(this);
@@ -276,12 +325,18 @@ public class NotificationBarDetectorService extends AccessibilityService {
     }
 
     private void triggerBlockingPopup() {
-        new Handler(Looper.getMainLooper()).post(() -> {
+        // The poll loop can detect the same screen many times in a row; starting the
+        // overlay + activity on every hit floods the window manager and ends up as an
+        // "Input dispatching timed out (No focused window)" ANR.
+        long now = System.currentTimeMillis();
+        if (now - lastBlockTriggerMs < BLOCK_TRIGGER_THROTTLE_MS) return;
+        lastBlockTriggerMs = now;
+
+        Handler handler = mainHandler != null ? mainHandler : new Handler(Looper.getMainLooper());
+        handler.post(() -> {
             if (Settings.canDrawOverlays(this)) {
                 try {
-                    Intent intent = new Intent(this, OverlayService.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startService(intent);
+                    startService(new Intent(this, OverlayService.class));
                 } catch (Exception e) {
                     Log.e("PopupTriggerError", "Failed to show overlay: " + e.getMessage(), e);
                 }
@@ -289,15 +344,19 @@ public class NotificationBarDetectorService extends AccessibilityService {
                 // No overlay permission — silently skip
                 Log.w("PopupTrigger", "Overlay permission not granted. Skipping popup.");
             }
-        });
-        startActivity(new Intent(this, PopupActivity.class)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 
+            try {
+                startActivity(new Intent(this, PopupActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            } catch (Exception e) {
+                Log.e("PopupTriggerError", "Failed to show popup activity", e);
+            }
+        });
     }
 
     private void stopPolling() {
-        if (pollingHandler != null && pollingRunnable != null) {
-            pollingHandler.removeCallbacks(pollingRunnable);
+        if (workerHandler != null && pollingRunnable != null) {
+            workerHandler.removeCallbacks(pollingRunnable);
         }
         isPollingAppInfo = false;
     }
@@ -307,20 +366,32 @@ public class NotificationBarDetectorService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         instance = this;
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            Log.e("AccessibilityCrash", "CRASH: " + Log.getStackTraceString(throwable));
-            Intent intent = new Intent(this, NotificationBarDetectorService.class);
-            startService(intent);
-        });
+        // NOTE: a process-wide default uncaught-exception handler used to be installed here
+        // to restart this service. It swallowed crashes and kept a dying process alive
+        // (reported as "Slow exit" ANRs). The system rebinds an accessibility service on
+        // its own, so the handler was removed.
         startTimerNotification();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(screenReceiver);
+        if (isReceiverRegistered) {
+            try {
+                unregisterReceiver(screenReceiver);
+            } catch (IllegalArgumentException ignored) {
+                // Already unregistered.
+            }
+            isReceiverRegistered = false;
+        }
         stopPolling();
         stopTimerNotification();
+        if (workerThread != null) {
+            // quitSafely() does not block the caller, unlike quit() + join().
+            workerThread.quitSafely();
+            workerThread = null;
+            workerHandler = null;
+        }
         instance = null;
         Log.d("accessibilty_test", "Service DESTROYED");
     }

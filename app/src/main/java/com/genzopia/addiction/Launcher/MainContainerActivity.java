@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
@@ -49,6 +50,19 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     public static final String ACTION_FORCE_UPDATE = "com.genzopia.addiction.ACTION_FORCE_UPDATE";
 
     private ForceUpdateReceiver forceUpdateReceiver;
+
+    /**
+     * Single shared background executor for the short counter/review lookup.
+     * It uses a daemon thread so it never keeps the process alive during shutdown —
+     * a non-daemon thread created on every onStart() made the main thread wait for it
+     * while exiting, which was reported as a "Slow exit" ANR.
+     */
+    private static final ExecutorService BACKGROUND_EXECUTOR =
+            Executors.newSingleThreadExecutor(runnable -> {
+                Thread t = new Thread(runnable, "MainContainer-bg");
+                t.setDaemon(true);
+                return t;
+            });
 
 
     @Override
@@ -254,18 +268,31 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     protected void onStart() {
         super.onStart();
 
-        // Register receiver for FCM force_update messages (Requirement 3.1)
-        forceUpdateReceiver = new ForceUpdateReceiver();
-        IntentFilter filter = new IntentFilter(ACTION_FORCE_UPDATE);
-        registerReceiver(forceUpdateReceiver, filter);
+        // Register receiver for FCM force_update messages (Requirement 3.1).
+        // The action is app-private, so the receiver MUST be registered as
+        // RECEIVER_NOT_EXPORTED — starting with Android 14 (API 34) registering an
+        // unexported-by-default receiver without an explicit flag throws SecurityException.
+        try {
+            forceUpdateReceiver = new ForceUpdateReceiver();
+            IntentFilter filter = new IntentFilter(ACTION_FORCE_UPDATE);
+            ContextCompat.registerReceiver(this, forceUpdateReceiver, filter,
+                    ContextCompat.RECEIVER_NOT_EXPORTED);
+        } catch (Exception e) {
+            // Never let receiver registration take the launcher down — without the
+            // receiver we simply lose the push-triggered update check.
+            forceUpdateReceiver = null;
+            Log.e("MainContainerActivity", "Failed to register force-update receiver", e);
+        }
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            CounterManager cm = new CounterManager();
-            int counte = cm.increment(MainContainerActivity.this);
-            boolean reviewShown = cm.getReview(MainContainerActivity.this);
-            Log.e("test555", String.valueOf(counte));
-            runOnUiThread(() -> handleCounterResult(counte, reviewShown));
+        BACKGROUND_EXECUTOR.execute(() -> {
+            try {
+                CounterManager cm = new CounterManager();
+                int counte = cm.increment(MainContainerActivity.this);
+                boolean reviewShown = cm.getReview(MainContainerActivity.this);
+                runOnUiThread(() -> handleCounterResult(counte, reviewShown));
+            } catch (Exception e) {
+                Log.e("MainContainerActivity", "Counter update failed", e);
+            }
         });
     }
 
@@ -273,7 +300,11 @@ public class MainContainerActivity extends BaseActivity implements MainFragment.
     protected void onStop() {
         super.onStop();
         if (forceUpdateReceiver != null) {
-            unregisterReceiver(forceUpdateReceiver);
+            try {
+                unregisterReceiver(forceUpdateReceiver);
+            } catch (IllegalArgumentException ignored) {
+                // Receiver was never registered — nothing to do.
+            }
             forceUpdateReceiver = null;
         }
     }

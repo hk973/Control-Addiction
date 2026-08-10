@@ -1,9 +1,11 @@
 package com.genzopia.addiction.Launcher;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Icon;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.Tile;
@@ -34,6 +36,8 @@ public class MyTileService extends TileService {
         String iconPath = prefs.getString(KEY_TILE_ICON, null);
 
         Tile tile = getQsTile();
+        // getQsTile() returns null when the tile is no longer bound.
+        if (tile == null) return;
         tile.setLabel(tileName);
         tile.setState(savedState);
 
@@ -62,30 +66,27 @@ public class MyTileService extends TileService {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putInt(KEY_TILE_STATE, Tile.STATE_ACTIVE).apply();
 
-        // Start async operation
-        new Thread(() -> {
-            try {
+        // Do the work right away and reset the tile with a delayed post instead of
+        // sleeping on a worker thread — the sleep kept the tile service "executing"
+        // for 2s and was reported as "Executing service MyTileService" ANR.
+        try {
+            start_mode();
+        } catch (Exception e) {
+            Log.e("MyTileService", "start_mode failed", e);
+        }
 
-                start_mode();
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            Tile updatedTile = getQsTile();
+            if (updatedTile != null) {
+                // Set tile to inactive state
+                updatedTile.setState(Tile.STATE_INACTIVE);
+                updatedTile.updateTile();
+
+                // Save inactive state
+                SharedPreferences prefs1 = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                prefs1.edit().putInt(KEY_TILE_STATE, Tile.STATE_INACTIVE).apply();
             }
-
-            // Update UI on main thread
-            new Handler(Looper.getMainLooper()).post(() -> {
-                Tile updatedTile = getQsTile();
-                if (updatedTile != null) {
-                    // Set tile to inactive state
-                    updatedTile.setState(Tile.STATE_INACTIVE);
-                    updatedTile.updateTile();
-
-                    // Save inactive state
-                    SharedPreferences prefs1 = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                    prefs1.edit().putInt(KEY_TILE_STATE, Tile.STATE_INACTIVE).apply();
-                }
-            });
-        }).start();
+        }, 2000);
     }
     // Method to save data to SharedPreferences
     public  void savePreferences_mode(Context context,
@@ -123,9 +124,29 @@ public class MyTileService extends TileService {
         // Start activity with the retrieved values
         Intent intent = new Intent(this, MainContainerActivity2.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        launchFromTile(intent);
         }else{
 
+        }
+    }
+
+    /**
+     * Launches an activity from the tile. A plain startActivity() is blocked by the
+     * background-activity-launch restrictions, and startActivityAndCollapse(Intent) throws
+     * UnsupportedOperationException on Android 14+, so a PendingIntent is used there.
+     */
+    private void launchFromTile(Intent intent) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                PendingIntent pendingIntent = PendingIntent.getActivity(
+                        this, 0, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                startActivityAndCollapse(pendingIntent);
+            } else {
+                startActivityAndCollapse(intent);
+            }
+        } catch (Exception e) {
+            Log.e("MyTileService", "Unable to launch activity from tile", e);
         }
     }
 

@@ -8,6 +8,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.*;
 import android.widget.Button;
 import android.widget.Toast;
@@ -63,7 +64,15 @@ public class OverlayService extends Service {
         params.x = 0;
         params.y = 0;
 
-        windowManager.addView(overlayView, params);
+        try {
+            windowManager.addView(overlayView, params);
+        } catch (Exception e) {
+            // Can throw if the window token is bad or the view is already added.
+            Log.e("OverlayService", "Unable to add overlay view", e);
+            overlayView = null;
+            stopSelf();
+            return;
+        }
 
         // Block back button
         overlayView.setFocusableInTouchMode(true);
@@ -97,8 +106,13 @@ public class OverlayService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (overlayView != null) {
-            windowManager.removeView(overlayView);
+        if (overlayView != null && windowManager != null) {
+            try {
+                windowManager.removeViewImmediate(overlayView);
+            } catch (Exception e) {
+                Log.e("OverlayService", "Unable to remove overlay view", e);
+            }
+            overlayView = null;
         }
     }
 

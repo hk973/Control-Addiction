@@ -131,6 +131,9 @@ public class DataPayloadHandler {
         @Override
         public void onForceUpdate(Context context) {
             Intent intent = new Intent(ACTION_FORCE_UPDATE);
+            // Restrict delivery to this app so the receiver can stay unexported
+            // (required since Android 14 / API 34).
+            intent.setPackage(context.getPackageName());
             context.sendBroadcast(intent);
             Log.d(TAG, "Sent ACTION_FORCE_UPDATE broadcast.");
         }

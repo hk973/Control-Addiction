@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "354513385719",
+    "project_id": "control-addiction",
+    "storage_bucket": "control-addiction.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354513385719:android:c41aaba19603e351b6bbf2",
+        "android_client_info": {
+          "package_name": "com.genzopia.addiction"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6wO9-SA0_e5SRiAUdiqouLPyAAo-Z904"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
