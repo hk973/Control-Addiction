@@ -1,32 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center_vertical"
+    android:layout_height="56dp"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp"
+    android:background="?attr/selectableItemBackground">
 
+    <!-- App icon -->
     <ImageView
         android:id="@+id/app_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/app_name"
-        android:visibility="gone"/>
+        android:contentDescription="App icon" />
 
+    <!-- Pin indicator -->
+    <ImageView
+        android:id="@+id/pin_icon"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/pin"
+        android:visibility="gone"
+        android:contentDescription="Pinned" />
+
+    <!-- App name -->
     <TextView
         android:id="@+id/app_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textSize="16sp"/>
+        android:layout_marginStart="12dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="15sp"
+        android:textColor="@color/text_primary" />
 
-    <ImageView
-        android:id="@+id/pin_icon"
-        android:layout_width="17dp"
-        android:layout_height="17dp"
-        android:contentDescription="@string/app_name"
-        android:src="@drawable/pin"
-        android:visibility="gone"/>
+    <!-- Usage time badge (optional) -->
+    <TextView
+        android:id="@+id/app_usage_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:textSize="11sp"
+        android:textColor="@color/text_muted"
+        android:visibility="gone" />
 
 </LinearLayout>

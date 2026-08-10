@@ -24,7 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.genzopia.addiction.Launcher.FastScrollView;
 import com.genzopia.addiction.Launcher.SharedPrefHelper;
 import com.genzopia.addiction.R;
+import com.genzopia.addiction.data.AppUsageTracker;
 import com.genzopia.addiction.data.model.AppInfo;
+
+import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,6 +121,14 @@ public class AppListAdapter extends ListAdapter<AppInfo, AppListAdapter.AppViewH
     private CharSequence currentQuery = "";
     private int pinnedCount = 0;
     private Runnable listCommittedListener;
+    /** Optional cache of {packageName → minutesUsedToday}. Populated by MainFragment. */
+    private Map<String, Long> usageCache = Collections.emptyMap();
+
+    /** Provide today's usage map so each row can show a time badge. */
+    public void setUsageCache(Map<String, Long> cache) {
+        this.usageCache = cache != null ? cache : Collections.emptyMap();
+        if (getItemCount() > 0) notifyItemRangeChanged(0, getItemCount());
+    }
 
     public AppListAdapter(Context context, Config config) {
         super(DIFF_CALLBACK);
@@ -183,6 +194,20 @@ public class AppListAdapter extends ListAdapter<AppInfo, AppListAdapter.AppViewH
 
         boolean pinned = config.showPin && pinnedApps.contains(app.getPackageName());
         holder.pinIcon.setVisibility(pinned ? View.VISIBLE : View.GONE);
+
+        // Show usage time badge if data is available
+        if (holder.usageTime != null) {
+            Long minutes = usageCache.get(app.getPackageName());
+            if (minutes != null && minutes > 0) {
+                String label = minutes >= 60
+                        ? (minutes / 60) + "h " + (minutes % 60) + "m"
+                        : minutes + "m";
+                holder.usageTime.setText(label);
+                holder.usageTime.setVisibility(View.VISIBLE);
+            } else {
+                holder.usageTime.setVisibility(View.GONE);
+            }
+        }
 
         holder.itemView.setOnClickListener(null);
         holder.itemView.setOnLongClickListener(null);
@@ -339,15 +364,17 @@ public class AppListAdapter extends ListAdapter<AppInfo, AppListAdapter.AppViewH
         final ImageView appIcon;
         final TextView appName;
         final ImageView pinIcon;
+        final TextView usageTime;
 
         AppViewHolder(@NonNull View itemView) {
             super(itemView);
-            appIcon = itemView.findViewById(R.id.app_icon);
-            appName = itemView.findViewById(R.id.app_name);
-            pinIcon = itemView.findViewById(R.id.pin_icon);
+            appIcon   = itemView.findViewById(R.id.app_icon);
+            appName   = itemView.findViewById(R.id.app_name);
+            pinIcon   = itemView.findViewById(R.id.pin_icon);
+            usageTime = itemView.findViewById(R.id.app_usage_time); // may be null in older layouts
 
             ColorMatrix matrix = new ColorMatrix();
-            matrix.setSaturation(0); // 0 = grayscale
+            matrix.setSaturation(0);
             pinIcon.setColorFilter(new ColorMatrixColorFilter(matrix));
         }
     }

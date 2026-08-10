@@ -98,6 +98,21 @@ public class NotificationBarDetectorService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         try {
             SharedPrefHelper prefHelper = new SharedPrefHelper(this);
+
+            // ── Scheduled blocking check ───────────────────────────────────
+            if (!prefHelper.getTimeActivateStatus()
+                    && ScheduledBlockingManager.shouldBeActiveNow(this)) {
+                ScheduledBlockingManager.ScheduleEntry active =
+                        ScheduledBlockingManager.getActiveSchedule(this);
+                if (active != null && active.durationMinutes > 0) {
+                    long durationSec = active.durationMinutes * 60L;
+                    prefHelper.saveStartTime(System.currentTimeMillis());
+                    prefHelper.saveInitialDuration(durationSec);
+                    prefHelper.saveTimeActivateStatus(true);
+                    startTimerNotification();
+                }
+            }
+
             if (!prefHelper.getTimeActivateStatus()) return;
 
             final String pkg = String.valueOf(event.getPackageName());
@@ -113,23 +128,25 @@ public class NotificationBarDetectorService extends AccessibilityService {
                 handleWindowChange(pkg, className, prefHelper);
             }
 
-            if ((eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
-                    eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED)) {
+            // Restart the anti-tamper poll on every window/content change —
+            // previously isPollingAppInfo was never reset so polling stopped after first cycle.
+            if (eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
+                    eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
 
-                if (!isPollingAppInfo && isScreenOn && workerHandler != null) {
+                if (isScreenOn && workerHandler != null) {
+                    // Cancel any pending poll and start a fresh one for this window.
+                    stopPolling();
                     isPollingAppInfo = true;
 
                     final String appName = getString(R.string.app_name);
                     pollingRunnable = new Runnable() {
                         @Override
                         public void run() {
-                            if (!isScreenOn) {
+                            if (!isScreenOn || !prefHelper.getTimeActivateStatus()) {
                                 isPollingAppInfo = false;
                                 return;
                             }
 
-                            // Walking the whole node tree is expensive, so it runs on the
-                            // worker thread instead of the main thread.
                             AccessibilityNodeInfo rootNode = null;
                             try {
                                 rootNode = getRootInActiveWindow();
@@ -139,9 +156,7 @@ public class NotificationBarDetectorService extends AccessibilityService {
                             } catch (Exception e) {
                                 Log.e("AccessibilityService", "Node scan failed", e);
                             } finally {
-                                if (rootNode != null) {
-                                    rootNode.recycle();
-                                }
+                                if (rootNode != null) rootNode.recycle();
                             }
 
                             if (workerHandler != null) {
@@ -149,7 +164,6 @@ public class NotificationBarDetectorService extends AccessibilityService {
                             }
                         }
                     };
-
                     workerHandler.post(pollingRunnable);
                 }
             }
@@ -163,7 +177,12 @@ public class NotificationBarDetectorService extends AccessibilityService {
         ArrayList<String> allowedApps = prefHelper.getSelectedAppValue();
 
         if (allowedApps == null || allowedApps.contains(pkg)) return;
-        if (className.equals(mLockClassName)) return;
+
+        // Only skip once for the exact authenticated class, then clear it
+        if (className.equals(mLockClassName)) {
+            mLockClassName = null;
+            return;
+        }
 
         String classNameLower = className.toLowerCase();
         if (className.contains("com.android.settings.password.ConfirmDeviceCredentialActivity") ||
@@ -187,10 +206,6 @@ public class NotificationBarDetectorService extends AccessibilityService {
         if (isValidApplication(pkg) && !prefHelper.appWithNoWarning().contains(pkg)) {
             triggerBlockingPopup();
         }
-
-//        if (className.contains("RecentsActivity")) {
-//            performGlobalAction(GLOBAL_ACTION_HOME);
-//        }
     }
 
     private boolean isAppInfoScreen(AccessibilityNodeInfo rootNode, String yourAppName) {
@@ -276,7 +291,12 @@ public class NotificationBarDetectorService extends AccessibilityService {
 
         NotificationHelper.createChannel(this);
         Notification notif = NotificationHelper.buildTimerNotification(this, getFormattedRemaining());
-        startForeground(NotificationHelper.TIMER_NOTIF_ID, notif);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(NotificationHelper.TIMER_NOTIF_ID, notif,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else {
+            startForeground(NotificationHelper.TIMER_NOTIF_ID, notif);
+        }
 
         timerNotifHandler = new Handler(Looper.getMainLooper());
         timerNotifRunnable = new Runnable() {
@@ -293,7 +313,9 @@ public class NotificationBarDetectorService extends AccessibilityService {
                     }
                     timerNotifHandler.postDelayed(this, 1000);
                 } else {
-                    // Lock mode ended — dismiss notification entirely
+                    // Lock mode ended naturally — award session completion XP
+                    GamificationManager.onSessionCompleted(getApplicationContext());
+                    // Dismiss notification entirely
                     stopTimerNotification();
                 }
             }
@@ -331,6 +353,9 @@ public class NotificationBarDetectorService extends AccessibilityService {
         long now = System.currentTimeMillis();
         if (now - lastBlockTriggerMs < BLOCK_TRIGGER_THROTTLE_MS) return;
         lastBlockTriggerMs = now;
+
+        // Award XP / update streak for every block event
+        GamificationManager.onAppBlocked(getApplicationContext());
 
         Handler handler = mainHandler != null ? mainHandler : new Handler(Looper.getMainLooper());
         handler.post(() -> {

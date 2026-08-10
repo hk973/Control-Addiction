@@ -4,91 +4,103 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/black">
+    android:background="@color/dark_bg">
 
-    <!-- Title with Search Bar -->
-    <com.google.android.material.appbar.AppBarLayout
+    <!-- Title toolbar -->
+    <LinearLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp"
+        android:background="@color/dark_bg">
 
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Select Apps"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/pin"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/pin"
+            android:contentDescription="Pin"
+            android:clickable="true"
+            android:focusable="true"
+            app:tint="@color/purple_accent" />
+
+        <ImageView
+            android:id="@+id/infoButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_info"
+            android:contentDescription="How to use"
+            android:clickable="true"
+            android:focusable="true"
+            app:tint="@color/text_secondary" />
+
+        <ImageView
+            android:id="@+id/settingsButton"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_nav_settings"
+            android:contentDescription="Settings"
+            android:clickable="true"
+            android:focusable="true"
+            app:tint="@color/text_secondary" />
+    </LinearLayout>
+
+    <!-- Search bar -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:boxStrokeColor="@color/divider_color"
+        app:boxBackgroundColor="@color/dark_card"
+        app:hintTextColor="@color/text_muted">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchBar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:hint="Search apps..."
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_muted"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:drawablePadding="8dp"
+            android:backgroundTint="@color/dark_card" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            android:fitsSystemWindows="true"
-            android:padding="16dp"
-            android:focusableInTouchMode="true">
+    <!-- All Apps label -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="All Apps"
+        android:textSize="12sp"
+        android:textColor="@color/text_muted"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="4dp" />
 
-            <!-- Inside the LinearLayout in AppBarLayout -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="16dp">
-
-                <TextView
-                    android:id="@+id/titleTextView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Select Apps"
-                    
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"/>
-                <ImageView
-                    android:padding="4dp"
-                    android:layout_margin="5dp"
-                    android:layout_marginVertical="5dp"
-                    android:id="@+id/pin"
-                    android:layout_width="30dp"
-                    android:layout_marginRight="5dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/pin"
-                    android:clickable="true"
-                    android:focusable="true"/>
-                <ImageView
-                    android:id="@+id/settingsButton"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ic_setting_dark"
-                    android:clickable="true"
-                    android:focusable="true"/>
-            </LinearLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/searchBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:hint="Search Apps"
-                    android:drawableStart="@android:drawable/ic_menu_search"
-                    android:drawablePadding="8dp"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- RecyclerView with black background -->
-    <!-- Updated FrameLayout with fast scroll -->
+    <!-- List + fast scroll -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/black"
         android:descendantFocusability="beforeDescendants">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -96,16 +108,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:padding="8dp"
-            android:background="@color/black"
-            android:scrollbarStyle="outsideOverlay"/>
+            android:background="@color/dark_bg"
+            android:paddingLeft="8dp"
+            android:paddingRight="36dp"
+            android:scrollbarStyle="outsideOverlay" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <com.genzopia.addiction.Launcher.FastScrollView
             android:id="@+id/fastScrollView"
@@ -114,27 +127,26 @@
             android:layout_gravity="end"
             android:padding="8dp"
             android:background="@drawable/fastscroll_bg"
-            android:elevation="8dp"/>
-
+            android:elevation="8dp" />
     </FrameLayout>
 
-
-    <!-- Bottom Action Button with black background -->
+    <!-- Next button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#00000000"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@color/dark_bg">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonSetTime"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#FF5722"
+            android:layout_height="52dp"
+            android:text="Lock Apps"
             android:textColor="@color/white"
-            android:text="Set Time"
-            android:padding="12dp"
             android:textSize="16sp"
-            app:cornerRadius="8dp"/>
+            android:textStyle="bold"
+            app:backgroundTint="@color/purple_primary"
+            app:cornerRadius="16dp" />
     </LinearLayout>
+
 </LinearLayout>

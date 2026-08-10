@@ -2,34 +2,56 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- ── Dark Purple Theme ──────────────────────────────────────────── -->
+    <color name="dark_bg">#0D0D1A</color>
+    <color name="dark_surface">#12122A</color>
+    <color name="dark_card">#1A1A35</color>
+    <color name="dark_card_elevated">#20203D</color>
+    <color name="purple_primary">#7C3AED</color>
+    <color name="purple_light">#9B59F5</color>
+    <color name="purple_accent">#A855F7</color>
+    <color name="purple_dim">#3D2070</color>
+    <color name="purple_progress">#7C3AED</color>
+    <color name="purple_fab">#7C3AED</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#BBBBCC</color>
+    <color name="text_muted">#6B6B8A</color>
+    <color name="nav_selected">#A855F7</color>
+    <color name="nav_unselected">#555580</color>
+    <color name="divider_color">#2A2A4A</color>
+    <color name="star_yellow">#F59E0B</color>
+    <color name="fire_orange">#F97316</color>
+
+    <!-- Legacy colours kept for backward compat -->
     <color name="background_selected">#ADD8E6</color>
     <color name="background_unselected_light">#FFFFFF</color>
     <color name="background_unselected_dark">#000000</color>
     <color name="background_selected_dark">#121212</color>
     <color name="button">#696969</color>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#7C3AED</color>
+    <color name="colorPrimaryDark">#5B21B6</color>
+    <color name="colorAccent">#A855F7</color>
     <color name="colorGray">#BDBDBD</color>
     <color name="green">#4CAF50</color>
     <color name="red">#F44336</color>
     <color name="blue">#2196F3</color>
-    <color name="fast_scroll_highlight">#64B5F6</color>
-    <color name="notification_panel_background">#222222</color>
-    <color name="quick_settings_tile_background">#333333</color>
-    <color name="quick_settings_tile_background_active">#666666</color>
-    <color name="slider_track_background">#444444</color>
-    <color name="slider_progress">#FFFFFF</color>
-    <color name="slider_thumb">#FFFFFF</color>
+    <color name="fast_scroll_highlight">#A855F7</color>
+    <color name="notification_panel_background">#12122A</color>
+    <color name="quick_settings_tile_background">#1A1A35</color>
+    <color name="quick_settings_tile_background_active">#7C3AED</color>
+    <color name="slider_track_background">#2A2A4A</color>
+    <color name="slider_progress">#7C3AED</color>
+    <color name="slider_thumb">#A855F7</color>
     <color name="tile_text">#FFFFFF</color>
     <color name="icon_color">#FFFFFF</color>
     <color name="light_bg">#FFF7F5</color>
-    <color name="text_color">#333333</color>
-    <color name="primary_500">#FF5722</color>
-    <color name="secondary_500">#FFC107</color>
-    <color name="cardBackground">#2A2A2A</color>
-    <color name="colorPrimaryLight">#403F4E</color>
+    <color name="text_color">#FFFFFF</color>
+    <color name="primary_500">#7C3AED</color>
+    <color name="secondary_500">#F59E0B</color>
+    <color name="cardBackground">#1A1A35</color>
+    <color name="colorPrimaryLight">#3D2070</color>
     <color name="success_color">#4CAF50</color>
-    <color name="disabled_text">#A0A0A0</color>
+    <color name="disabled_text">#6B6B8A</color>
 
 </resources>

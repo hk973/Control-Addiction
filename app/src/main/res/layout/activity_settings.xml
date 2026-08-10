@@ -1,388 +1,418 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/dark_bg">
 
+    <!-- Toolbar -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
 
-        <!-- App Bar -->
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back"
+            android:clickable="true"
+            android:focusable="true"
+            app:tint="@color/text_primary" />
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/settingsAppBar"
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Settings"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="4dp">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
-            <LinearLayout
+            <!-- App Opening Method -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/dark_card">
 
-                <ImageView
-                    android:id="@+id/backButton"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_back"
-                    android:contentDescription="Back"
-                    android:clickable="true"
-                    android:focusable="true"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Settings"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:layout_marginStart="16dp"/>
-            </LinearLayout>
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <!-- App Opening Method Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="App Opening Method"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <RadioGroup
-                    android:id="@+id/openMethodGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-
-                    <RadioButton
-                        android:id="@+id/clickOption"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Single Click" />
-
-                    <RadioButton
-                        android:id="@+id/holdOption"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Long Press (Hold)" />
-                </RadioGroup>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Reward"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
                 <LinearLayout
-                    android:id="@+id/rewards"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <ImageView
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:src="@drawable/celibration"/>
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="10dp"
-                        android:layout_gravity="center"
-                        android:text="Rewards and Coupons"
+                        android:text="App Opening Method"
+                        android:textSize="15sp"
                         android:textStyle="bold"
-                        />
+                        android:textColor="@color/text_primary" />
+
+                    <RadioGroup
+                        android:id="@+id/openMethodGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp">
+
+                        <RadioButton
+                            android:id="@+id/clickOption"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Single Click"
+                            android:textColor="@color/text_secondary"
+                            android:buttonTint="@color/purple_primary" />
+
+                        <RadioButton
+                            android:id="@+id/holdOption"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Long Press (Hold)"
+                            android:textColor="@color/text_secondary"
+                            android:buttonTint="@color/purple_primary" />
+                    </RadioGroup>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Reward + Stats -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/dark_card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Reward"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_primary" />
+
+                    <LinearLayout
+                        android:id="@+id/rewards"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/celibration" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="10dp"
+                            android:layout_gravity="center_vertical"
+                            android:text="Rewards and Coupons"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_secondary" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_back"
+                            android:rotation="180"
+                            app:tint="@color/text_muted" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="@color/divider_color" />
+
+                    <LinearLayout
+                        android:id="@+id/stats_dashboard_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:orientation="horizontal"
+                        android:padding="4dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:text="📊  Stats &amp; Gamification"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/text_secondary" />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_back"
+                            android:rotation="180"
+                            app:tint="@color/text_muted" />
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- App Theme -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/dark_card">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="App Theme"
+                        android:textStyle="bold"
+                        android:textSize="15sp"
+                        android:textColor="@color/text_primary" />
+
+                    <RadioGroup
+                        android:id="@+id/themeselection_grp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp">
+
+                        <RadioButton
+                            android:id="@+id/grayd_opt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Follow System Theme"
+                            android:textColor="@color/text_secondary"
+                            android:buttonTint="@color/purple_primary" />
+
+                        <RadioButton
+                            android:id="@+id/darkmode_opt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Dark Mode"
+                            android:textColor="@color/text_secondary"
+                            android:buttonTint="@color/purple_primary" />
+
+                        <RadioButton
+                            android:id="@+id/lightmode_opt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Light Mode"
+                            android:textColor="@color/text_secondary"
+                            android:buttonTint="@color/purple_primary" />
+
+                        <RadioButton
+                            android:id="@+id/gray_opt"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Gray Mode"
+                            android:textColor="@color/text_secondary"
+                            android:buttonTint="@color/purple_primary" />
+                    </RadioGroup>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- FAQ Section -->
+            <LinearLayout
+                android:id="@+id/dropdown_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp">
+
+                <TextView
+                    android:id="@+id/dropdown_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Most Common FAQ's"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <LinearLayout
+                    android:id="@+id/dropdown_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingHorizontal="16dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/dark_card">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+                            <TextView android:id="@+id/faq_question_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="How do I use the Control Addiction app?" android:textStyle="bold" android:textColor="@color/text_primary" android:clickable="true" android:background="?attr/selectableItemBackground" android:padding="4dp" />
+                            <TextView android:id="@+id/faq_answer_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Grant all required permissions, set as default launcher, long-press an app and tap Set Time." android:visibility="gone" android:padding="4dp" android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/dark_card">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+                            <TextView android:id="@+id/faq_question_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="How does the 'Mode' feature work?" android:textStyle="bold" android:textColor="@color/text_primary" android:clickable="true" android:background="?attr/selectableItemBackground" android:padding="4dp" />
+                            <TextView android:id="@+id/faq_answer_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Long-press an app, select Set Time, tap Set as Mode, add the tile to quick settings." android:visibility="gone" android:padding="4dp" android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/dark_card">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+                            <TextView android:id="@+id/faq_question_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="What if I need a locked app during the lock period?" android:textStyle="bold" android:textColor="@color/text_primary" android:clickable="true" android:background="?attr/selectableItemBackground" android:padding="4dp" />
+                            <TextView android:id="@+id/faq_answer_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="A small fee is required to unlock before the timer ends. This reinforces discipline." android:visibility="gone" android:padding="4dp" android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/dark_card">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+                            <TextView android:id="@+id/faq_question_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Why does the app use Accessibility service?" android:textStyle="bold" android:textColor="@color/text_primary" android:clickable="true" android:background="?attr/selectableItemBackground" android:padding="4dp" />
+                            <TextView android:id="@+id/faq_answer_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="To detect and limit access to restricted apps. No personal data is collected." android:visibility="gone" android:padding="4dp" android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/dark_card">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+                            <TextView android:id="@+id/faq_question_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="How can I contact the developer?" android:textStyle="bold" android:textColor="@color/text_primary" android:clickable="true" android:background="?attr/selectableItemBackground" android:padding="4dp" />
+                            <TextView android:id="@+id/faq_answer_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="📧 genzopia@gmail.com\n📞 +91 87670 82265" android:visibility="gone" android:padding="4dp" android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- App Theme Selection Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="App Theme"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
-
-                <RadioGroup
-                    android:id="@+id/themeselection_grp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp">
-
-                    <RadioButton
-                        android:id="@+id/grayd_opt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Follow System Theme"/>
-
-                    <RadioButton
-                        android:id="@+id/darkmode_opt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Dark Mode"/>
-
-                    <RadioButton
-                        android:id="@+id/lightmode_opt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Light Mode"/>
-
-                    <RadioButton
-                        android:id="@+id/gray_opt"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Gray Mode"/>
-                </RadioGroup>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Expandable FAQ Section -->
-        <LinearLayout
-            android:id="@+id/dropdown_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Header -->
-            <TextView
-                android:id="@+id/dropdown_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Most Common FAQ's"
-                android:padding="16dp"
-
-                android:background="?attr/selectableItemBackground"
-                android:textStyle="bold" />
-
-            <!-- FAQ Content -->
-            <LinearLayout
-                android:id="@+id/dropdown_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone"
-                android:padding="16dp">
-
-                <!-- FAQ 1 -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/faq_question_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="How do I use the Control Addiction app?"
-                            android:textStyle="bold"
-                            android:clickable="true"
-                            android:background="?attr/selectableItemBackground"
-                            android:padding="8dp" />
-
-                        <TextView
-                            android:id="@+id/faq_answer_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="To get started with Control Addiction:\n\n• Grant all the required permissions for the app to function properly.\n• Set Control Addiction as your default home launcher.\n• Long-press the app you want to manage and tap on Set Time.\n• Once you've selected the usage time, the app will be locked and inaccessible until the timer runs out."
-                            android:visibility="gone"
-                            android:padding="8dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- FAQ 2 -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/faq_question_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="How does the 'Mode' feature work in the app?"
-                            android:textStyle="bold"
-                            android:clickable="true"
-                            android:background="?attr/selectableItemBackground"
-                            android:padding="8dp" />
-
-                        <TextView
-                            android:id="@+id/faq_answer_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="To use the Mode feature:\n\n• Allow all necessary permissions and set the app as your default launcher.\n• Long-press the app you want to use in a focused session and select Set Time.\n• Tap on Set as Mode.\n• Add the Control Addiction tile to your quick settings.\n• Tap this tile to automatically lock the app for the time chosen earlier."
-                            android:visibility="gone"
-                            android:padding="8dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- FAQ 3 -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/faq_question_3"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="What if I need to access a locked app during the lock period?"
-                            android:textStyle="bold"
-                            android:clickable="true"
-                            android:background="?attr/selectableItemBackground"
-                            android:padding="8dp" />
-
-                        <TextView
-                            android:id="@+id/faq_answer_3"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="To discourage impulsive usage, accessing a locked app before the timer ends requires a small fee. This fee helps reinforce discipline and supports the app’s mission. The amount is usually around $0.80, but may vary slightly each day."
-                            android:visibility="gone"
-                            android:padding="8dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- FAQ 4 -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/faq_question_4"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Why does Control Addiction use the Accessibility feature?"
-                            android:textStyle="bold"
-                            android:padding="8dp"
-                            android:background="?attr/selectableItemBackground"
-                            android:clickable="true" />
-
-                        <TextView
-                            android:id="@+id/faq_answer_4"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Control Addiction uses Android’s Accessibility Service to monitor and limit access to selected apps. This is necessary to ensure the app can detect when you open restricted apps and apply the lock properly. We do not collect or share any personal or sensitive data via the accessibility service."
-                            android:visibility="gone"
-                            android:padding="8dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- FAQ 5 -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    app:cardCornerRadius="8dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/faq_question_5"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="How can I contact the developer?"
-                            android:textStyle="bold"
-                            android:padding="8dp"
-                            android:background="?attr/selectableItemBackground"
-                            android:clickable="true" />
-
-                        <TextView
-                            android:id="@+id/faq_answer_5"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="If you have questions, suggestions, or need support, feel free to reach out:
-📧 Email: genzopia@gmail.com
-📞 Phone: +91 87670 82265"
-                            android:visibility="gone"
-                            android:padding="8dp" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-
-
-            </LinearLayout>
         </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom nav -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@drawable/bg_bottom_nav"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:id="@+id/nav_home"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_home" android:contentDescription="Home" app:tint="@color/nav_unselected" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Home" android:textSize="10sp" android:textColor="@color/nav_unselected" android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_stats"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_stats" android:contentDescription="Stats" app:tint="@color/nav_unselected" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Stats" android:textSize="10sp" android:textColor="@color/nav_unselected" android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/nav_settings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <ImageView android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/ic_nav_settings" android:contentDescription="Settings" app:tint="@color/nav_selected" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Settings" android:textSize="10sp" android:textColor="@color/nav_selected" android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <View android:layout_width="56dp" android:layout_height="match_parent" />
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>

@@ -91,6 +91,7 @@ public class MainFragment extends Fragment {
     public void onResume() {
         super.onResume();
         checksp();
+        loadUsageDataAsync();
     }
 
     @Override
@@ -258,46 +259,45 @@ public class MainFragment extends Fragment {
     }
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
-        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isSystemDarkMode = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
-
-        int statusBarColor = isSystemDarkMode ?
-                ContextCompat.getColor(requireContext(), R.color.black) :
-                ContextCompat.getColor(requireContext(), R.color.white);
-
-        window.setStatusBarColor(statusBarColor);
-
-        WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(
-                window, window.getDecorView());
-        windowInsetsController.setAppearanceLightStatusBars(!isSystemDarkMode);
+        window.setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.dark_bg));
+        new WindowInsetsControllerCompat(window, window.getDecorView())
+                .setAppearanceLightStatusBars(false);
     }
     private void initializeViews() {
         ImageView settingsButton = requireView().findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(v ->
                 startActivity(new Intent(requireActivity(), SettingsActivity.class)));
+
+        // Long-press the settings icon → Strict Lock Setup
+        settingsButton.setOnLongClickListener(v -> {
+            startActivity(new Intent(requireActivity(), StrictLockSetupActivity.class));
+            return true;
+        });
         int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         ImageView pinButton = requireView().findViewById(R.id.pin);
         pinButton.setOnClickListener(v -> handlePinButtonClick());
 
-
-        switch (currentNightMode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                // Light mode
-              settingsButton.setImageResource(R.drawable.ic_setting_dark);
-                break;
-
-            case Configuration.UI_MODE_NIGHT_YES:
-               //dark mode
-                settingsButton.setImageResource(R.drawable.ic_settings);
-                break;
-
-            case Configuration.UI_MODE_NIGHT_UNDEFINED:
-                // Undefined mode
-                Log.d("ThemeCheck", "Theme is undefined");
-                break;
+        ImageView infoButton = requireView().findViewById(R.id.infoButton);
+        if (infoButton != null) {
+            infoButton.setOnClickListener(v -> showHowToUseDialog());
         }
 
-        AppBarLayout appBarLayout = requireView().findViewById(R.id.appBarLayout);
+
+        settingsButton.setImageResource(R.drawable.ic_nav_settings);
+
+        // Legacy switch kept for reference but always dark now
+        /*
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                settingsButton.setImageResource(R.drawable.ic_setting_dark);
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                settingsButton.setImageResource(R.drawable.ic_nav_settings);
+                break;
+        }
+        */
+
+        View appBarLayout = requireView().findViewById(R.id.appBarLayout);
         TextView titleTextView = requireView().findViewById(R.id.titleTextView);
         progressBar = requireView().findViewById(R.id.progressBar);
         recyclerView = requireView().findViewById(R.id.recyclerView);
@@ -327,8 +327,20 @@ public class MainFragment extends Fragment {
     }
 
 
-    private void handlePinButtonClick() {
-        if (selectedApps.isEmpty()) {
+    private void showHowToUseDialog() {
+        new android.app.AlertDialog.Builder(requireContext())
+            .setTitle("How to use")
+            .setMessage(
+                "1️⃣  Long press any app in the list to select it.\n\n" +
+                "2️⃣  Selected apps will be ALLOWED — everything else gets blocked.\n\n" +
+                "3️⃣  Tap \"Lock Apps\" to set a time limit and start your focus session.\n\n" +
+                "💡  Tip: Pin your most-used allowed apps to the top using the 📌 button."
+            )
+            .setPositiveButton("Got it", null)
+            .show();
+    }
+
+    private void handlePinButtonClick() {        if (selectedApps.isEmpty()) {
             Toast.makeText(requireContext(), "Select apps to pin", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -383,8 +395,10 @@ public class MainFragment extends Fragment {
         Button buttonMode = dialogView.findViewById(R.id.buttonMode);
         CardView card15Min = dialogView.findViewById(R.id.card15Min);
         CardView card30Min = dialogView.findViewById(R.id.card30Min);
-        CardView coding_challenge = dialogView.findViewById(R.id.card1Hour);
+        CardView card1Hour = dialogView.findViewById(R.id.card1Hour);
         CardView card3Hours = dialogView.findViewById(R.id.card3Hours);
+        CardView cardCodingChallenge = dialogView.findViewById(R.id.cardCodingChallenge);
+        CardView card30DaysChallenge = dialogView.findViewById(R.id.card30DaysChallenge);
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
         ImageView imageView_fire=dialogView.findViewById(R.id.imageView_fire);
         @SuppressLint({"MissingInflatedId", "LocalSuppress"})
@@ -393,21 +407,17 @@ public class MainFragment extends Fragment {
         SharedPrefHelper ss=new SharedPrefHelper(getContext());
          if(ss.isGrayModeEnabled()) {
              buttonSet.setBackgroundColor(Color.parseColor("#686868"));
-             // Set progress color (#FF5722 - Orange)
              difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#353535")));
-             // Set thumb color
              difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#686868")));
              ColorMatrix matrix = new ColorMatrix();
-             matrix.setSaturation(0); // 0 means grayscale
+             matrix.setSaturation(0);
              ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
              imageView_fire.setColorFilter(filter);
              imageView_fire_coding.setColorFilter(filter);
          }else{
-             buttonSet.setBackgroundColor(Color.parseColor("#FF5722"));
-             // Set progress color (#FF5722 - Orange)
-             difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
-             // Set thumb color
-             difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#FF5722")));
+             buttonSet.setBackgroundColor(Color.parseColor("#7C3AED"));
+             difficultySlider.setProgressTintList(ColorStateList.valueOf(Color.parseColor("#7C3AED")));
+             difficultySlider.setThumbTintList(ColorStateList.valueOf(Color.parseColor("#A855F7")));
          }
         Glide.with(this)
                 .asGif()
@@ -430,25 +440,29 @@ public class MainFragment extends Fragment {
 
         // Set picker ranges
         daysPicker.setMinValue(0);
-        daysPicker.setMaxValue(30); // Max 30 days
+        daysPicker.setMaxValue(30);
         hoursPicker.setMinValue(0);
-        hoursPicker.setMaxValue(23); // Max 23 hours
+        hoursPicker.setMaxValue(23);
         minutesPicker.setMinValue(0);
-        minutesPicker.setMaxValue(59); // Max 59 minutes
-        // Set click listeners for preset times
-        card15Min.setOnClickListener(v -> setTimeValues(1, 0, 0, daysPicker, hoursPicker, minutesPicker));
-        card30Min.setOnClickListener(v -> setTimeValues(0, 0, 30, daysPicker, hoursPicker, minutesPicker));
-        coding_challenge.setOnClickListener(v -> {
-            // do some thing in ooding challenge
-            coding_challenge();
+        minutesPicker.setMaxValue(59);
 
-        });
-        card3Hours.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                challeng();
-            }
-        });
+        // Create dialog first so back button can reference it
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        AlertDialog dialog = builder.setView(dialogView).create();
+
+        // Back button
+        View backBtn = dialogView.findViewById(R.id.backBtn);
+        if (backBtn != null) backBtn.setOnClickListener(v -> dialog.dismiss());
+
+        // Preset time chips
+        card15Min.setOnClickListener(v -> setTimeValues(0, 0, 15, daysPicker, hoursPicker, minutesPicker));
+        card30Min.setOnClickListener(v -> setTimeValues(0, 0, 30, daysPicker, hoursPicker, minutesPicker));
+        card1Hour.setOnClickListener(v -> setTimeValues(0, 1, 0, daysPicker, hoursPicker, minutesPicker));
+        card3Hours.setOnClickListener(v -> setTimeValues(0, 2, 0, daysPicker, hoursPicker, minutesPicker));
+
+        // Challenge cards
+        if (cardCodingChallenge != null) cardCodingChallenge.setOnClickListener(v -> coding_challenge());
+        if (card30DaysChallenge != null) card30DaysChallenge.setOnClickListener(v -> challeng());
 
 
 
@@ -524,9 +538,6 @@ public class MainFragment extends Fragment {
         };
 
         difficultySlider.setOnSeekBarChangeListener(seekBarChangeListener);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        AlertDialog dialog = builder.setView(dialogView).create();
 
         buttonSet.setOnClickListener(v -> {
             selectedDays = daysPicker.getValue();
@@ -674,29 +685,14 @@ public class MainFragment extends Fragment {
         minutesPicker.setValue(minutes);
     }
 
-    private void applyTheme(AppBarLayout appBarLayout, TextView titleTextView,
+    private void applyTheme(View appBarLayout, TextView titleTextView,
                             RecyclerView recyclerView, View buttonContainer) {
-        boolean isDarkMode = (getResources().getConfiguration().uiMode &
-                Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-
-        if (isDarkMode) {
-            int darkColor = ContextCompat.getColor(requireContext(), android.R.color.black);
-            int textColor = ContextCompat.getColor(requireContext(), android.R.color.white);
-
-            appBarLayout.setBackgroundColor(darkColor);
-            recyclerView.setBackgroundColor(darkColor);
-            buttonContainer.setBackgroundColor(darkColor);
-            titleTextView.setTextColor(textColor);
-
-        } else {
-            int lightColor = ContextCompat.getColor(requireContext(), android.R.color.white);
-            int textColor = ContextCompat.getColor(requireContext(), android.R.color.black);
-
-            appBarLayout.setBackgroundColor(lightColor);
-            recyclerView.setBackgroundColor(lightColor);
-            buttonContainer.setBackgroundColor(lightColor);
-            titleTextView.setTextColor(textColor);
-        }
+        int darkBg = ContextCompat.getColor(requireContext(), R.color.dark_bg);
+        int textColor = ContextCompat.getColor(requireContext(), R.color.text_primary);
+        appBarLayout.setBackgroundColor(darkBg);
+        recyclerView.setBackgroundColor(darkBg);
+        buttonContainer.setBackgroundColor(darkBg);
+        titleTextView.setTextColor(textColor);
     }
 
     private void checksp() {
@@ -719,7 +715,7 @@ public class MainFragment extends Fragment {
         selectedHours = 0;
         selectedMinutes = 0;
         if (buttonSetTime != null) {
-            buttonSetTime.setText("Set Time");
+            buttonSetTime.setText("Lock Apps");
         }
     }
 
@@ -838,6 +834,40 @@ public class MainFragment extends Fragment {
     private void coding_challenge() {
         DSAChallengeDialog dialog = new DSAChallengeDialog(this);
         dialog.show();
+    }
+
+    /**
+     * Loads today's per-app screen time on a background thread and pushes the
+     * result to the adapter so every row shows a time badge (e.g. "1h 23m").
+     * No-op when the PACKAGE_USAGE_STATS permission has not been granted yet.
+     */
+    private void loadUsageDataAsync() {
+        if (!isAdded()) return;
+        android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        new Thread(() -> {
+            java.util.Map<String, Long> cache =
+                    com.genzopia.addiction.data.AppUsageTracker
+                            .getCachedUsageMinutes(requireContext());
+            // If cache is stale / empty, do a fresh query (requires permission)
+            if (cache.isEmpty()
+                    && com.genzopia.addiction.data.AppUsageTracker
+                            .hasPermission(requireContext())) {
+                java.util.List<com.genzopia.addiction.data.AppUsageTracker.AppUsageStat> stats =
+                        com.genzopia.addiction.data.AppUsageTracker
+                                .getTodayUsage(requireContext());
+                java.util.HashMap<String, Long> fresh = new java.util.HashMap<>();
+                for (com.genzopia.addiction.data.AppUsageTracker.AppUsageStat s : stats) {
+                    fresh.put(s.packageName, s.totalTimeMs / 60_000L);
+                }
+                cache = fresh;
+            }
+            final java.util.Map<String, Long> finalCache = cache;
+            mainHandler.post(() -> {
+                if (isAdded() && appAdapter != null) {
+                    appAdapter.setUsageCache(finalCache);
+                }
+            });
+        }).start();
     }
 
 

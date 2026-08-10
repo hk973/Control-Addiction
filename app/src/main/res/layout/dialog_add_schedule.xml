@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Label -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Label"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/schedule_label_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="e.g. Deep Work Morning"
+        android:inputType="text"
+        android:maxLines="1" />
+
+    <!-- Days -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Active Days"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/schedule_days_selected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="8dp"
+        android:text="Tap to select days…"
+        android:textColor="?attr/colorPrimary" />
+
+    <!-- Start time -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Start Time"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/schedule_start_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="09:00"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- End time -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="End Time"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/schedule_end_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="12:00"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Duration -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Focus Duration (minutes)"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/schedule_duration_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="60"
+        android:inputType="number"
+        android:maxLines="1" />
+</LinearLayout>

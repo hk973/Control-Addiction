@@ -493,8 +493,85 @@ public class SharedPrefHelper {
        prefs.edit().putBoolean("is_timmer_zero",b).apply();
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // Gamification keys  (GamificationManager.KEY_* constants mirror these)
+    // ──────────────────────────────────────────────────────────────────────────
 
+    public long getGamXP() {
+        return prefs.getLong(GamificationManager.KEY_XP, 0);
+    }
 
+    public int getGamLevel() {
+        return prefs.getInt(GamificationManager.KEY_LEVEL, 1);
+    }
+
+    public int getGamStreak() {
+        return prefs.getInt(GamificationManager.KEY_STREAK, 0);
+    }
+
+    public int getGamSessions() {
+        return prefs.getInt(GamificationManager.KEY_SESSIONS, 0);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Strict lock mode keys  (StrictLockModeManager constants mirror these)
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public int getStrictMode() {
+        return prefs.getInt(StrictLockModeManager.KEY_MODE, StrictLockModeManager.MODE_NORMAL);
+    }
+
+    public void setStrictMode(int mode) {
+        prefs.edit().putInt(StrictLockModeManager.KEY_MODE, mode).apply();
+    }
+
+    public String getStrictPin() {
+        return prefs.getString(StrictLockModeManager.KEY_PIN, "");
+    }
+
+    public void setStrictPin(String pin) {
+        prefs.edit().putString(StrictLockModeManager.KEY_PIN, pin).apply();
+    }
+
+    public int getStrictDelaySec() {
+        return prefs.getInt(StrictLockModeManager.KEY_DELAY_SEC,
+                StrictLockModeManager.DEFAULT_DELAY_SEC);
+    }
+
+    public void setStrictDelaySec(int seconds) {
+        prefs.edit().putInt(StrictLockModeManager.KEY_DELAY_SEC, seconds).apply();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Scheduled blocking keys  (ScheduledBlockingManager constant mirrors this)
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public String getScheduleEntriesJson() {
+        return prefs.getString(ScheduledBlockingManager.KEY_SCHEDULES, null);
+    }
+
+    public void setScheduleEntriesJson(String json) {
+        prefs.edit().putString(ScheduledBlockingManager.KEY_SCHEDULES, json).apply();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Usage tracking  (AppUsageTracker constants mirror these)
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public String getUsageDailyJson() {
+        return prefs.getString("usage_daily_json", null);
+    }
+
+    public void setUsageDailyJson(String json, long epochDay) {
+        prefs.edit()
+                .putString("usage_daily_json", json)
+                .putLong("usage_date", epochDay)
+                .apply();
+    }
+
+    public long getUsageDate() {
+        return prefs.getLong("usage_date", -1);
+    }
 }
 
 

@@ -76,6 +76,7 @@ public class HomeFragment2 extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         setupStatusBar();
         setupShortcuts();
+        setupBottomNav(view);
 
         // Initialize views
         timerText = view.findViewById(R.id.textView_time);
@@ -370,20 +371,34 @@ public class HomeFragment2 extends Fragment {
         return String.format("Time Remaining: %02d:%02d:%02d", hours, minutes, seconds);
     }
 
+    private void setupBottomNav(View view) {
+        LinearLayout navStats = view.findViewById(R.id.nav_stats);
+        LinearLayout navSettings = view.findViewById(R.id.nav_settings);
+        if (navStats != null) {
+            navStats.setOnClickListener(v -> {
+                if (!isAdded()) return;
+                Intent intent = new Intent(requireContext(), StatsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(0, 0);
+            });
+        }
+        if (navSettings != null) {
+            navSettings.setOnClickListener(v -> {
+                if (!isAdded()) return;
+                Intent intent = new Intent(requireContext(), SettingsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(0, 0);
+            });
+        }
+    }
+
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
-        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isSystemDarkMode = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
-
-        int statusBarColor = isSystemDarkMode ?
-                ContextCompat.getColor(requireContext(), R.color.black) :
-                ContextCompat.getColor(requireContext(), R.color.white);
-
-        window.setStatusBarColor(statusBarColor);
-
-        WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(
-                window, window.getDecorView());
-        windowInsetsController.setAppearanceLightStatusBars(!isSystemDarkMode);
+        window.setStatusBarColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.dark_bg));
+        new androidx.core.view.WindowInsetsControllerCompat(window, window.getDecorView())
+                .setAppearanceLightStatusBars(false);
     }
 
     private void setupShortcuts() {

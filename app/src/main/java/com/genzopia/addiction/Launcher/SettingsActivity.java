@@ -62,6 +62,33 @@ public class SettingsActivity extends BaseActivity {
             }
         });
 
+        // Stats Dashboard
+        LinearLayout statsLayout = findViewById(R.id.stats_dashboard_row);
+        if (statsLayout != null) {
+            statsLayout.setOnClickListener(v ->
+                    startActivity(new Intent(this, StatsActivity.class)));
+        }
+
+        // Bottom nav
+        LinearLayout navHome = findViewById(R.id.nav_home);
+        LinearLayout navStats = findViewById(R.id.nav_stats);
+        if (navHome != null) {
+            navHome.setOnClickListener(v -> {
+                Intent intent = new Intent(this, MainContainerActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
+        if (navStats != null) {
+            navStats.setOnClickListener(v -> {
+                Intent intent = new Intent(this, StatsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+                overridePendingTransition(0, 0);
+            });
+        }
+
         // Theme selection views
         RadioGroup themeSelectionGroup = findViewById(R.id.themeselection_grp);
         RadioButton darkModeOption = findViewById(R.id.darkmode_opt);

@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,8 +28,10 @@ import androidx.fragment.app.Fragment;
 import com.genzopia.addiction.R;
 
 public class HomeFragment extends Fragment {
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_home, container, false);
     }
 
@@ -37,7 +41,70 @@ public class HomeFragment extends Fragment {
         setupStatusBar();
         setupShortcuts();
         showShortcutIcon(view);
+        setupBottomNav(view);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    // ─── Bottom nav wiring ───────────────────────────────────────────────────
+
+    private void setupBottomNav(View view) {
+        LinearLayout navStats = view.findViewById(R.id.nav_stats);
+        LinearLayout navSettings = view.findViewById(R.id.nav_settings);
+        if (navStats != null) {
+            navStats.setOnClickListener(v -> {
+                if (isAdded()) {
+                    Intent intent = new Intent(requireContext(), StatsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    requireActivity().overridePendingTransition(0, 0);
+                }
+            });
+        }
+        if (navSettings != null) {
+            navSettings.setOnClickListener(v -> {
+                if (isAdded()) {
+                    Intent intent = new Intent(requireContext(), SettingsActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    requireActivity().overridePendingTransition(0, 0);
+                }
+            });
+        }
+    }
+
+    // ─── Gamification bar ────────────────────────────────────────────────────
+
+    /** Updates the streak / level labels and wires the Stats button. */
+    private void refreshGamBar(View root) {
+        Context ctx = getContext();
+        if (ctx == null) return;
+
+        TextView streakTv = root.findViewById(R.id.gam_streak_text);
+        TextView levelTv  = root.findViewById(R.id.gam_level_text);
+        ImageView statsBtn = root.findViewById(R.id.gam_stats_btn);
+
+        if (streakTv != null) {
+            int streak = GamificationManager.getStreak(ctx);
+            streakTv.setText(streak + " day" + (streak == 1 ? "" : "s"));
+        }
+        if (levelTv != null) {
+            int level = GamificationManager.getLevel(ctx);
+            levelTv.setText("Lvl " + level);
+        }
+        if (statsBtn != null) {
+            statsBtn.setOnClickListener(v -> {
+                if (isAdded()) {
+                    startActivity(new Intent(requireContext(), StatsActivity.class));
+                }
+            });
+        }
+    }
+
+    // ─── Shortcut icon ───────────────────────────────────────────────────────
 
     /** Paints the shortcut button with the icon of the app the user assigned, if any. */
     private void showShortcutIcon(View view) {
@@ -46,7 +113,7 @@ public class HomeFragment extends Fragment {
 
         ImageView shortcutButton = view.findViewById(R.id.cameraButton);
         ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0); // 0 = grayscale
+        matrix.setSaturation(0);
         shortcutButton.setColorFilter(new ColorMatrixColorFilter(matrix));
 
         String shortcutPackage = new SharedPrefHelper(context).getString(context, "shortcut", "");
@@ -57,43 +124,37 @@ public class HomeFragment extends Fragment {
             Drawable icon = pm.getApplicationInfo(shortcutPackage, 0).loadIcon(pm);
             shortcutButton.setImageDrawable(icon);
         } catch (PackageManager.NameNotFoundException e) {
-            // The shortcut target was uninstalled — keep the default icon.
             Log.d("HomeFragment", "Shortcut app not installed: " + shortcutPackage);
         }
     }
 
+    // ─── Status bar ──────────────────────────────────────────────────────────
 
     private void setupStatusBar() {
         Window window = requireActivity().getWindow();
-        int nightModeFlags = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isSystemDarkMode = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
-
-        int statusBarColor = isSystemDarkMode ?
-                ContextCompat.getColor(requireContext(), R.color.black) :
-                ContextCompat.getColor(requireContext(), R.color.white);
-
-        window.setStatusBarColor(statusBarColor);
-
-        WindowInsetsControllerCompat windowInsetsController = new WindowInsetsControllerCompat(
-                window, window.getDecorView());
-        windowInsetsController.setAppearanceLightStatusBars(!isSystemDarkMode);
+        window.setStatusBarColor(ContextCompat.getColor(requireContext(), R.color.dark_bg));
+        new WindowInsetsControllerCompat(window, window.getDecorView())
+                .setAppearanceLightStatusBars(false);
     }
 
+    // ─── Bottom shortcuts ────────────────────────────────────────────────────
+
     private void setupShortcuts() {
-        ImageView phoneButton = requireView().findViewById(R.id.phoneButton);
+        ImageView phoneButton  = requireView().findViewById(R.id.phoneButton);
         ImageView cameraButton = requireView().findViewById(R.id.cameraButton);
 
         phoneButton.setOnClickListener(v -> {
             try {
                 startActivity(new Intent(Intent.ACTION_DIAL));
             } catch (ActivityNotFoundException e) {
-                // Tablets and some ROMs have no dialer at all.
                 Toast.makeText(requireContext(), "No dialer app found", Toast.LENGTH_SHORT).show();
             }
         });
+
         cameraButton.setOnClickListener(v -> {
             if (isAdded()) new PopupSelectApp(requireContext()).show(cameraButton);
         });
+
         cameraButton.setOnLongClickListener(view -> {
             if (isAdded()) new PopupSelectApp(requireContext()).show2(cameraButton);
             return true;
