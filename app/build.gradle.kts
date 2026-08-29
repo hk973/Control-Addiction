@@ -13,8 +13,8 @@ android {
         applicationId = "com.genzopia.addiction"
         minSdk = 24
         targetSdk = 36
-        versionCode = 26
-        versionName = "26"
+        versionCode = 27
+        versionName = "27"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,10 +43,6 @@ android {
     buildFeatures {
         viewBinding = true
         compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
     }
 
     testOptions {
